@@ -1,0 +1,87 @@
+<article>
+    <header>
+        <h3>Analysis Result</h3>
+    </header>
+
+    <!-- Pretty-printed type -->
+    <h4>Session Type</h4>
+    <pre><code>{{ pretty }}</code></pre>
+
+    <!-- Metrics -->
+    <h4>State Space</h4>
+    <table>
+        <tbody>
+            <tr><td>States</td><td>{{ num_states }}</td></tr>
+            <tr><td>Transitions</td><td>{{ num_transitions }}</td></tr>
+            <tr><td>SCCs (after quotienting)</td><td>{{ num_sccs }}</td></tr>
+        </tbody>
+    </table>
+
+    <!-- Lattice verdict -->
+    <h4>Lattice Check</h4>
+    {% if result.is_lattice %}
+    <p class="verdict verdict-pass">&#x2713; The state space IS a lattice</p>
+    {% else %}
+    <p class="verdict verdict-fail">&#x2717; The state space is NOT a lattice</p>
+    {% endif %}
+
+    <table>
+        <tbody>
+            <tr>
+                <td>Top reachable</td>
+                <td>{% if result.has_top %}<span class="check-pass">&#x2713;</span>{% else %}<span class="check-fail">&#x2717;</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Bottom reachable</td>
+                <td>{% if result.has_bottom %}<span class="check-pass">&#x2713;</span>{% else %}<span class="check-fail">&#x2717;</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>All meets exist</td>
+                <td>{% if result.all_meets_exist %}<span class="check-pass">&#x2713;</span>{% else %}<span class="check-fail">&#x2717;</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>All joins exist</td>
+                <td>{% if result.all_joins_exist %}<span class="check-pass">&#x2713;</span>{% else %}<span class="check-fail">&#x2717;</span>{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if result.counterexample %}
+    <p class="verdict verdict-fail">
+        Counterexample: states {{ result.counterexample[0] }} and {{ result.counterexample[1] }}
+        have {{ "no meet" if result.counterexample[2] == "no_meet" else "no join" }}
+    </p>
+    {% endif %}
+
+    <!-- Termination -->
+    <h4>Termination</h4>
+    {% if term_result.is_terminating %}
+    <p class="verdict verdict-pass">&#x2713; All recursive branches terminate</p>
+    {% else %}
+    <p class="verdict verdict-fail">
+        &#x2717; Non-terminating variables: {{ term_result.non_terminating_vars | join(", ") }}
+    </p>
+    {% endif %}
+
+    <!-- WF-Par -->
+    {% if wf_result.errors %}
+    <h4>WF-Par Violations</h4>
+    <ul>
+        {% for err in wf_result.errors %}
+        <li class="check-fail">{{ err }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- Hasse diagram -->
+    <h4>Hasse Diagram</h4>
+    <div class="svg-container">
+        {{ svg_html | safe }}
+    </div>
+
+    <!-- DOT source (collapsible) -->
+    <details>
+        <summary>DOT source</summary>
+        <pre><code>{{ dot_source }}</code></pre>
+    </details>
+</article>

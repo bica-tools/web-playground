@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reticulate — Session Type Analyzer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body>
+<main class="container">
+    <header>
+        <h1>Reticulate</h1>
+        <p>Session types as algebraic reticulates &mdash; parse, build state space, check lattice properties, and visualize Hasse diagrams.</p>
+    </header>
+
+    <form hx-post="/analyze" hx-target="#results" hx-swap="innerHTML" hx-indicator="#spinner">
+        <label for="type_string">
+            Session type
+            <textarea id="type_string" name="type_string" rows="3"
+                      placeholder='e.g. rec X . &amp;{read: X, done: end}'
+                      required></textarea>
+        </label>
+
+        <div class="input-row">
+            <label for="benchmark">
+                Load benchmark
+                <select id="benchmark" onchange="loadBenchmark(this)">
+                    <option value="">-- Select a benchmark --</option>
+                    {% for b in benchmarks %}
+                    <option value="{{ b.type_string }}" title="{{ b.description }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button type="submit" class="analyze-btn">Analyze</button>
+        </div>
+    </form>
+
+    <div id="spinner" class="htmx-indicator">
+        <span aria-busy="true">Analyzing&hellip;</span>
+    </div>
+
+    <section id="results"></section>
+
+    <footer>
+        <small>
+            <strong>Reticulate</strong> &mdash; PhD research by Alexandre Zua Caldeira (LASIGE/FCUL).
+            Supervisor: Prof. Vasco T. Vasconcelos.
+        </small>
+    </footer>
+</main>
+
+<script>
+function loadBenchmark(select) {
+    if (select.value) {
+        document.getElementById('type_string').value = select.value;
+    }
+}
+</script>
+</body>
+</html>

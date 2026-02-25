@@ -1,0 +1,99 @@
+/* Reticulate web demo — custom styles (on top of Pico CSS) */
+
+/* Layout */
+.input-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.input-row label {
+    flex: 1;
+}
+
+.analyze-btn {
+    flex-shrink: 0;
+    margin-bottom: var(--pico-spacing);
+}
+
+/* Textarea */
+#type_string {
+    font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace;
+    font-size: 0.95rem;
+}
+
+/* Verdict badges */
+.verdict {
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.verdict-pass {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.verdict-fail {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.check-pass {
+    color: #166534;
+    font-weight: 700;
+}
+
+.check-fail {
+    color: #991b1b;
+    font-weight: 700;
+}
+
+/* SVG container */
+.svg-container {
+    overflow-x: auto;
+    max-width: 100%;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.svg-container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Error card */
+.error-card {
+    border-left: 4px solid #dc2626;
+}
+
+/* HTMX loading indicator */
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    display: inline-block;
+}
+
+/* Code blocks */
+pre code {
+    font-family: "Fira Code", "Cascadia Code", "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+}
+
+/* Footer */
+footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pico-muted-border-color);
+    text-align: center;
+}
+
+/* Tables: clean look */
+table {
+    max-width: 400px;
+}
