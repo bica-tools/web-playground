@@ -12,6 +12,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY reticulate/ /app/reticulate/
 COPY web/ /app/web/
 
+# Copy paper PDFs into the static directory for serving.
+# These files exist locally at build time but are gitignored.
+COPY papers/reticulate-tool/main.pdf /app/web/static/papers/reticulate-tool.pdf
+COPY papers/presentation/slides.pdf /app/web/static/papers/slides.pdf
+COPY papers/definitions/definitions.pdf /app/web/static/papers/definitions.pdf
+
 ENV PYTHONPATH="/app/reticulate:${PYTHONPATH}"
 
 EXPOSE 8000

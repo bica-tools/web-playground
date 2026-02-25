@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Reticulate{% endblock %} — Session Types as Algebraic Reticulates</title>
+    <meta name="description" content="{% block meta_description %}Reticulate: a theory and toolchain for session types on objects, where state spaces form lattices (reticulates).{% endblock %}">
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}Reticulate — Session Types as Algebraic Reticulates{% endblock %}">
+    <meta property="og:description" content="A theory and toolchain for session types on objects, built around the insight that session-type state spaces form lattices.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bica.zuacaldeira.com{% block og_path %}/{% endblock %}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="container nav-inner">
+            <a href="/" class="nav-brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><line x1="16" y1="4" x2="6" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="4" x2="26" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="4" r="3" fill="currentColor"/><circle cx="6" cy="16" r="3" fill="currentColor"/><circle cx="26" cy="16" r="3" fill="currentColor"/><circle cx="16" cy="28" r="3" fill="currentColor"/></svg> Reticulate</a>
+            <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.parentElement.classList.toggle('open')">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="/" {% if active_page == "home" %}class="active"{% endif %}>Home</a></li>
+                <li><a href="/tool" {% if active_page == "tool" %}class="active"{% endif %}>Tool</a></li>
+                <li><a href="/theory" {% if active_page == "theory" %}class="active"{% endif %}>Theory</a></li>
+                <li><a href="/benchmarks" {% if active_page == "benchmarks" %}class="active"{% endif %}>Benchmarks</a></li>
+                <li><a href="/publications" {% if active_page == "publications" %}class="active"{% endif %}>Publications</a></li>
+                <li><a href="/about" {% if active_page == "about" %}class="active"{% endif %}>About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>
+                <strong>Reticulate</strong> &mdash; Session Types as Algebraic Reticulates<br>
+                PhD research by Alexandre Zua Caldeira &middot; LASIGE/FCUL, University of Lisbon<br>
+                Supervisor: Prof. Vasco T. Vasconcelos
+            </p>
+            <p class="footer-links">
+                <a href="/tool">Try the Tool</a> &middot;
+                <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub</a> &middot;
+                <a href="https://www.lasige.pt" target="_blank" rel="noopener">LASIGE</a>
+            </p>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

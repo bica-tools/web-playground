@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Publications{% endblock %}
+{% block meta_description %}Publications, papers, and presentations on session types as algebraic reticulates.{% endblock %}
+{% block og_title %}Reticulate — Publications{% endblock %}
+{% block og_path %}/publications{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Publications</h1>
+        <p>Papers, slides, and formal definitions from the Reticulate project.</p>
+    </header>
+
+    <section class="publications-list">
+        <!-- Reticulate tool paper -->
+        <article class="publication-entry">
+            <h3>Reticulate: A Lattice-Theoretic Toolkit for Session Types <span class="badge badge-draft">Draft</span></h3>
+            <p class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</p>
+            <p class="pub-venue">Tool paper &mdash; LASIGE/FCUL, University of Lisbon</p>
+            <p class="pub-abstract">
+                We present Reticulate, a Python library and web tool that constructs state spaces
+                from session type definitions, verifies lattice properties, and visualizes Hasse
+                diagrams. The tool supports all standard session type constructors including the
+                novel parallel constructor, and has been validated on 17 benchmark protocols
+                drawn from real-world systems.
+            </p>
+            <div class="pub-links">
+                <a href="/static/papers/reticulate-tool.pdf" role="button" class="outline pub-btn">PDF</a>
+            </div>
+        </article>
+
+        <!-- Slides -->
+        <article class="publication-entry">
+            <h3>Session Types as Algebraic Reticulates &mdash; Presentation <span class="badge badge-draft">Draft</span></h3>
+            <p class="pub-authors">Alexandre Zua Caldeira</p>
+            <p class="pub-venue">Research presentation &mdash; LASIGE/FCUL</p>
+            <p class="pub-abstract">
+                Slides presenting the core thesis: session-type state spaces form lattices,
+                with the parallel constructor inducing product lattice structure.
+                Covers the theory, the reticulate tool, and the BICA Reborn vision.
+            </p>
+            <div class="pub-links">
+                <a href="/static/papers/slides.pdf" role="button" class="outline pub-btn">Slides (PDF)</a>
+            </div>
+        </article>
+
+        <!-- Definitions -->
+        <article class="publication-entry">
+            <h3>Formal Definitions <span class="badge badge-draft">Draft</span></h3>
+            <p class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</p>
+            <p class="pub-venue">Working document &mdash; LASIGE/FCUL</p>
+            <p class="pub-abstract">
+                Formal definitions of session types, state-space construction, lattice properties,
+                the parallel constructor, termination conditions, and the morphism hierarchy.
+                Reference document for the implementation.
+            </p>
+            <div class="pub-links">
+                <a href="/static/papers/definitions.pdf" role="button" class="outline pub-btn">PDF</a>
+            </div>
+        </article>
+    </section>
+
+    <section>
+        <h2>BibTeX</h2>
+        <pre><code>@misc{caldeira2025reticulate,
+  author       = {Caldeira, Alexandre Zua and Vasconcelos, Vasco T.},
+  title        = {Reticulate: A Lattice-Theoretic Toolkit for Session Types},
+  year         = {2025},
+  institution  = {LASIGE, FCUL, University of Lisbon},
+  note         = {PhD research --- session types as algebraic reticulates}
+}</code></pre>
+    </section>
+{% endblock %}

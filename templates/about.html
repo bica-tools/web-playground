@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+{% block meta_description %}About the Reticulate project: author, supervisor, and institution.{% endblock %}
+{% block og_title %}Reticulate — About{% endblock %}
+{% block og_path %}/about{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>About</h1>
+        <p>The people and institutions behind the Reticulate project.</p>
+    </header>
+
+    <!-- Author -->
+    <section class="about-section">
+        <h2>Author</h2>
+        <article class="person-card">
+            <h3>Alexandre Zua Caldeira</h3>
+            <p class="person-role">PhD Researcher</p>
+            <p>
+                PhD student at the Faculty of Sciences, University of Lisbon (FCUL),
+                affiliated with LASIGE (Large-Scale Informatics Systems Laboratory).
+                Research focus: session types, type theory, and programming language design.
+            </p>
+            <p>
+                The Reticulate project is Alexandre's doctoral research, developing the theory
+                and toolchain for session types as algebraic reticulates under the supervision
+                of Prof. Vasco T. Vasconcelos.
+            </p>
+            <div class="person-links">
+                <a href="https://www.zuacaldeira.com" target="_blank" rel="noopener">Website</a>
+                <a href="https://github.com/alcides" target="_blank" rel="noopener">GitHub</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- Supervisor -->
+    <section class="about-section">
+        <h2>Supervisor</h2>
+        <article class="person-card">
+            <h3>Prof. Vasco T. Vasconcelos</h3>
+            <p class="person-role">Full Professor, FCUL</p>
+            <p>
+                Vasco T. Vasconcelos is a Full Professor at the Department of Informatics,
+                Faculty of Sciences, University of Lisbon. He is a leading researcher in
+                session types, with foundational contributions to the theory of behavioural
+                types for concurrent and distributed systems.
+            </p>
+            <p>
+                His work includes the original BICA project (2009), which pioneered
+                annotation-based session type checking for Java objects &mdash; the direct
+                predecessor to BICA Reborn.
+            </p>
+            <div class="person-links">
+                <a href="https://www.di.fc.ul.pt/~vv/" target="_blank" rel="noopener">Homepage</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- Institution -->
+    <section class="about-section">
+        <h2>Institution</h2>
+        <article class="institution-card">
+            <h3>LASIGE &mdash; University of Lisbon</h3>
+            <p>
+                <strong>LASIGE</strong> (Large-Scale Informatics Systems Laboratory) is a research
+                unit of the Faculty of Sciences, University of Lisbon (FCUL). Rated "Excellent"
+                by the Portuguese Foundation for Science and Technology (FCT), LASIGE conducts
+                research in areas including dependable and secure computing, data and systems
+                intelligence, and software engineering.
+            </p>
+            <p>
+                The Reticulate project is developed within LASIGE's software engineering and
+                programming languages research line.
+            </p>
+            <div class="person-links">
+                <a href="https://www.lasige.pt" target="_blank" rel="noopener">LASIGE</a>
+                <a href="https://ciencias.ulisboa.pt" target="_blank" rel="noopener">FCUL</a>
+                <a href="https://www.ulisboa.pt" target="_blank" rel="noopener">University of Lisbon</a>
+            </div>
+        </article>
+    </section>
+
+    <!-- Project -->
+    <section class="about-section">
+        <h2>The Project</h2>
+        <p>
+            <strong>Reticulate</strong> is a research project with three pillars:
+        </p>
+        <ol>
+            <li>
+                <strong>Theory</strong> &mdash; Proving that session-type state spaces are lattices;
+                developing the morphism hierarchy (isomorphism, embedding, projection, Galois connection);
+                connecting to bisimulation and abstract interpretation.
+            </li>
+            <li>
+                <strong>Reticulate (tool)</strong> &mdash; A Python library and web tool that constructs
+                state spaces from session type definitions, checks lattice properties, computes
+                morphisms, and visualizes Hasse diagrams.
+            </li>
+            <li>
+                <strong>BICA Reborn</strong> &mdash; A Java annotation-based session type checker for
+                objects, successor to the original BICA (2009). The key novelty is the
+                <code>&parallel;</code> (parallel) constructor for concurrent access, which forces
+                lattice structure.
+            </li>
+        </ol>
+    </section>
+
+    <!-- Contact -->
+    <section class="about-section">
+        <h2>Contact</h2>
+        <p>
+            For questions about the research or collaboration inquiries, please
+            reach out via the institutional channels listed above or through the
+            <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub repository</a>.
+        </p>
+    </section>
+{% endblock %}

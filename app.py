@@ -2,13 +2,22 @@
 
 Provides an interactive web interface for analyzing session types:
 parse, build state space, check lattice, and render Hasse diagrams.
+
+Also serves the bica.zuacaldeira.com research website with theory pages,
+benchmark gallery, publications, and author information.
 """
 
 from __future__ import annotations
 
+import base64
+import logging
 import re
 import sys
+import urllib.parse
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 # Ensure reticulate is importable from the project root.
 _project_root = Path(__file__).resolve().parent.parent
@@ -37,15 +46,31 @@ from reticulate import (
 sys.path.insert(0, str(_reticulate_root / "tests"))
 from benchmarks.protocols import BENCHMARKS
 
+logger = logging.getLogger("reticulate.web")
+
 # ---------------------------------------------------------------------------
-# App setup
+# Benchmark cache
 # ---------------------------------------------------------------------------
 
-app = FastAPI(title="Reticulate — Session Type Analyzer")
 
-_web_dir = Path(__file__).resolve().parent
-app.mount("/static", StaticFiles(directory=str(_web_dir / "static")), name="static")
-templates = Jinja2Templates(directory=str(_web_dir / "templates"))
+@dataclass(frozen=True)
+class BenchmarkCacheEntry:
+    """Pre-rendered benchmark result."""
+
+    name: str
+    description: str
+    type_string: str
+    pretty_str: str
+    num_states: int
+    num_transitions: int
+    num_sccs: int
+    is_lattice: bool
+    uses_parallel: bool
+    svg_html: str
+    tool_url: str
+
+
+_benchmark_cache: list[BenchmarkCacheEntry] = []
 
 # Maximum states before we refuse to render (safety guard).
 _MAX_STATES = 10_000
@@ -66,6 +91,66 @@ def _render_svg(dot: str) -> str:
     return _XML_PREAMBLE_RE.sub("", svg_str)
 
 
+def _prerender_benchmarks() -> list[BenchmarkCacheEntry]:
+    """Run the full pipeline on all benchmarks and cache results."""
+    entries: list[BenchmarkCacheEntry] = []
+    for b in BENCHMARKS:
+        try:
+            ast = parse(b.type_string)
+            pretty_str = pretty(ast)
+            ss = build_statespace(ast)
+            result: LatticeResult = check_lattice(ss)
+            dot_str = dot_source(ss, result)
+            svg_html = _render_svg(dot_str)
+        except Exception as exc:
+            logger.warning("Failed to pre-render benchmark %s: %s", b.name, exc)
+            continue
+
+        tool_url = "/tool?type=" + urllib.parse.quote(b.type_string, safe="")
+        entries.append(
+            BenchmarkCacheEntry(
+                name=b.name,
+                description=b.description,
+                type_string=b.type_string,
+                pretty_str=pretty_str,
+                num_states=len(ss.states),
+                num_transitions=len(ss.transitions),
+                num_sccs=result.num_scc,
+                is_lattice=result.is_lattice,
+                uses_parallel=b.uses_parallel,
+                svg_html=svg_html,
+                tool_url=tool_url,
+            )
+        )
+    return entries
+
+
+# ---------------------------------------------------------------------------
+# Lifespan
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa: ARG001
+    """Pre-render benchmarks at startup."""
+    global _benchmark_cache
+    logger.info("Pre-rendering %d benchmarks...", len(BENCHMARKS))
+    _benchmark_cache = _prerender_benchmarks()
+    logger.info("Cached %d benchmark results.", len(_benchmark_cache))
+    yield
+
+
+# ---------------------------------------------------------------------------
+# App setup
+# ---------------------------------------------------------------------------
+
+app = FastAPI(title="Reticulate — Session Type Analyzer", lifespan=lifespan)
+
+_web_dir = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=str(_web_dir / "static")), name="static")
+templates = Jinja2Templates(directory=str(_web_dir / "templates"))
+
+
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
@@ -73,10 +158,39 @@ def _render_svg(dot: str) -> str:
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    """Render the main page with the input form and benchmark dropdown."""
+    """Landing page with hero, abstract, featured diagram, and stats."""
+    # Pick a featured benchmark for the landing page diagram
+    featured = _benchmark_cache[0] if _benchmark_cache else None
+    # Encode SVG as a data URI for CSS background-image
+    hero_bg_uri = ""
+    if featured:
+        b64 = base64.b64encode(featured.svg_html.encode("utf-8")).decode("ascii")
+        hero_bg_uri = f"data:image/svg+xml;base64,{b64}"
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "benchmarks": BENCHMARKS},
+        {
+            "request": request,
+            "active_page": "home",
+            "featured": featured,
+            "hero_bg_uri": hero_bg_uri,
+            "num_benchmarks": len(_benchmark_cache),
+            "total_states": sum(b.num_states for b in _benchmark_cache),
+            "all_lattice": all(b.is_lattice for b in _benchmark_cache),
+        },
+    )
+
+
+@app.get("/tool", response_class=HTMLResponse)
+async def tool(request: Request, type: str | None = None) -> HTMLResponse:
+    """Interactive analyzer page."""
+    return templates.TemplateResponse(
+        "tool.html",
+        {
+            "request": request,
+            "active_page": "tool",
+            "benchmarks": BENCHMARKS,
+            "prefill": type or "",
+        },
     )
 
 
@@ -152,4 +266,44 @@ async def analyze(request: Request, type_string: str = Form(...)) -> HTMLRespons
             "svg_html": svg_html,
             "dot_source": dot_str,
         },
+    )
+
+
+@app.get("/theory", response_class=HTMLResponse)
+async def theory(request: Request) -> HTMLResponse:
+    """Theory overview page."""
+    return templates.TemplateResponse(
+        "theory.html",
+        {"request": request, "active_page": "theory"},
+    )
+
+
+@app.get("/benchmarks", response_class=HTMLResponse)
+async def benchmarks(request: Request) -> HTMLResponse:
+    """Benchmark gallery with pre-rendered SVGs."""
+    return templates.TemplateResponse(
+        "benchmarks.html",
+        {
+            "request": request,
+            "active_page": "benchmarks",
+            "benchmarks": _benchmark_cache,
+        },
+    )
+
+
+@app.get("/publications", response_class=HTMLResponse)
+async def publications(request: Request) -> HTMLResponse:
+    """Publications page."""
+    return templates.TemplateResponse(
+        "publications.html",
+        {"request": request, "active_page": "publications"},
+    )
+
+
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request) -> HTMLResponse:
+    """About page."""
+    return templates.TemplateResponse(
+        "about.html",
+        {"request": request, "active_page": "about"},
     )

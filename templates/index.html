@@ -1,63 +1,128 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reticulate — Session Type Analyzer</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-</head>
-<body>
-<main class="container">
-    <header>
-        <h1>Reticulate</h1>
-        <p>Session types as algebraic reticulates &mdash; parse, build state space, check lattice properties, and visualize Hasse diagrams.</p>
-    </header>
+{% extends "base.html" %}
 
-    <form hx-post="/analyze" hx-target="#results" hx-swap="innerHTML" hx-indicator="#spinner">
-        <label for="type_string">
-            Session type
-            <textarea id="type_string" name="type_string" rows="3"
-                      placeholder='e.g. rec X . &amp;{read: X, done: end}'
-                      required></textarea>
-        </label>
+{% block title %}Home{% endblock %}
+{% block meta_description %}Reticulate: a theory and toolchain proving that session-type state spaces form lattices. Interactive analyzer, 17 verified benchmarks, and formal theory.{% endblock %}
 
-        <div class="input-row">
-            <label for="benchmark">
-                Load benchmark
-                <select id="benchmark" onchange="loadBenchmark(this)">
-                    <option value="">-- Select a benchmark --</option>
-                    {% for b in benchmarks %}
-                    <option value="{{ b.type_string }}" title="{{ b.description }}">{{ b.name }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-
-            <button type="submit" class="analyze-btn">Analyze</button>
+{% block content %}
+    <!-- Hero -->
+    <section class="hero" {% if hero_bg_uri %}style="background-image: url('{{ hero_bg_uri }}');"{% endif %}>
+        <h1>Session Types as<br>Algebraic Reticulates</h1>
+        <p class="hero-subtitle">
+            A theory and toolchain for session types on objects, built around the
+            insight that session-type state spaces form <strong>lattices</strong>.
+        </p>
+        <div class="hero-actions">
+            <a href="/tool" role="button">Try the Analyzer</a>
+            <a href="/theory" role="button" class="outline">Read the Theory</a>
         </div>
-    </form>
+    </section>
 
-    <div id="spinner" class="htmx-indicator">
-        <span aria-busy="true">Analyzing&hellip;</span>
-    </div>
+    <!-- Stats -->
+    <section class="stats-row">
+        <div class="stat-card">
+            <span class="stat-number">{{ num_benchmarks }}</span>
+            <span class="stat-label">Verified Benchmarks</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">8</span>
+            <span class="stat-label">Analysis Modules</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ total_states }}</span>
+            <span class="stat-label">Total States Analyzed</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{% if all_lattice %}&check;{% else %}&cross;{% endif %}</span>
+            <span class="stat-label">All Benchmarks Are Lattices</span>
+        </div>
+    </section>
 
-    <section id="results"></section>
+    <!-- Abstract -->
+    <section class="home-section">
+        <h2>The Reticulate Thesis</h2>
+        <p>
+            Session types describe communication protocols on objects &mdash; the legal
+            sequences of method calls, branches, and selections. We prove that the state
+            space of any well-formed session type, ordered by reachability, forms a
+            <strong>lattice</strong> (which we call a <em>reticulate</em>).
+        </p>
+        <p>
+            The key insight comes from the <strong>parallel constructor</strong>
+            (<code>&parallel;</code>), which models concurrent access to a shared object.
+            When two execution paths run in parallel, their combined state space is the
+            <strong>product lattice</strong> of the individual spaces &mdash; and products
+            of lattices are lattices. This makes lattice structure <em>necessary</em>
+            rather than merely nice.
+        </p>
+        <p>
+            Building on this foundation, we develop a <strong>morphism hierarchy</strong>
+            (isomorphism, embedding, projection, Galois connection) between session-type
+            state spaces, connecting to classical results in bisimulation and abstract
+            interpretation.
+        </p>
+    </section>
 
-    <footer>
-        <small>
-            <strong>Reticulate</strong> &mdash; PhD research by Alexandre Zua Caldeira (LASIGE/FCUL).
-            Supervisor: Prof. Vasco T. Vasconcelos.
-        </small>
-    </footer>
-</main>
+    <!-- Featured diagram -->
+    {% if featured %}
+    <section class="home-section">
+        <h2>Featured: {{ featured.name }}</h2>
+        <p>{{ featured.description }}</p>
+        <pre><code>{{ featured.pretty_str }}</code></pre>
+        <div class="featured-metrics">
+            <span>{{ featured.num_states }} states</span>
+            <span>{{ featured.num_transitions }} transitions</span>
+            <span>{{ featured.num_sccs }} SCCs</span>
+            {% if featured.is_lattice %}
+            <span class="verdict verdict-pass">&check; Lattice</span>
+            {% else %}
+            <span class="verdict verdict-fail">&cross; Not a lattice</span>
+            {% endif %}
+        </div>
+        <div class="svg-container featured-diagram">
+            {{ featured.svg_html | safe }}
+        </div>
+        <p><a href="{{ featured.tool_url }}">Analyze this type interactively &rarr;</a></p>
+    </section>
+    {% endif %}
 
-<script>
-function loadBenchmark(select) {
-    if (select.value) {
-        document.getElementById('type_string').value = select.value;
-    }
-}
-</script>
-</body>
-</html>
+    <!-- Three pillars -->
+    <section class="home-section">
+        <h2>Three Pillars</h2>
+        <div class="pillars-grid">
+            <article class="pillar-card">
+                <h3>Theory</h3>
+                <p>
+                    Prove that session-type state spaces are lattices.
+                    Develop the morphism hierarchy and connect to bisimulation.
+                </p>
+                <a href="/theory">Explore the theory &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>Reticulate</h3>
+                <p>
+                    Python library that constructs state spaces from session type
+                    definitions, checks lattice properties, and verifies protocols.
+                </p>
+                <a href="/tool">Try the tool &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>BICA Reborn</h3>
+                <p>
+                    Java annotation-based session type checker for objects. Successor
+                    to the original BICA (2009), with the novel <code>&parallel;</code> constructor.
+                </p>
+                <a href="/publications">Read the papers &rarr;</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Benchmarks preview -->
+    <section class="home-section">
+        <h2>Benchmarks</h2>
+        <p>
+            {{ num_benchmarks }} real-world and classic protocols verified as lattices &mdash;
+            from SMTP and OAuth to AI agent protocols (MCP, A2A).
+        </p>
+        <a href="/benchmarks" role="button" class="outline">View All Benchmarks &rarr;</a>
+    </section>
+{% endblock %}
