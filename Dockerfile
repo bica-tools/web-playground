@@ -19,6 +19,7 @@ COPY papers/presentation/slides.pdf /app/web/static/papers/slides.pdf
 COPY papers/definitions/definitions.pdf /app/web/static/papers/definitions.pdf
 
 ENV PYTHONPATH="/app/reticulate:${PYTHONPATH}"
+ENV SITE_PASSWORD=""
 
 EXPOSE 8000
 

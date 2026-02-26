@@ -10,8 +10,12 @@ benchmark gallery, publications, and author information.
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
 import logging
+import os
 import re
+import secrets
 import sys
 import urllib.parse
 from contextlib import asynccontextmanager
@@ -26,9 +30,10 @@ if str(_reticulate_root) not in sys.path:
     sys.path.insert(0, str(_reticulate_root))
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from reticulate import (
     LatticeResult,
@@ -150,10 +155,72 @@ _web_dir = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=str(_web_dir / "static")), name="static")
 templates = Jinja2Templates(directory=str(_web_dir / "templates"))
 
+# ---------------------------------------------------------------------------
+# Password gate
+# ---------------------------------------------------------------------------
+
+SITE_PASSWORD: str = os.environ.get("SITE_PASSWORD", "reticulate")
+SESSION_SECRET: str = os.environ.get("SESSION_SECRET", secrets.token_hex(32))
+_SESSION_TOKEN: str = hmac.new(
+    SESSION_SECRET.encode(), SITE_PASSWORD.encode(), hashlib.sha256
+).hexdigest()
+_COOKIE_MAX_AGE: int = 30 * 24 * 60 * 60  # 30 days
+
+
+class _AuthMiddleware(BaseHTTPMiddleware):
+    """Redirect unauthenticated visitors to /login."""
+
+    async def dispatch(self, request: Request, call_next):  # type: ignore[override]
+        path = request.url.path
+        # Allow login page and static assets through without auth
+        if path == "/login" or path.startswith("/static"):
+            return await call_next(request)
+        token = request.cookies.get("session_token")
+        if token != _SESSION_TOKEN:
+            return RedirectResponse(url="/login", status_code=302)
+        return await call_next(request)
+
+
+app.add_middleware(_AuthMiddleware)
+
 
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request) -> HTMLResponse:
+    """Login page."""
+    error = request.query_params.get("error")
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request, "error": error, "hide_nav": True},
+    )
+
+
+@app.post("/login")
+async def login_submit(password: str = Form(...)):
+    """Validate password and set session cookie."""
+    if password == SITE_PASSWORD:
+        response = RedirectResponse(url="/", status_code=302)
+        response.set_cookie(
+            "session_token",
+            _SESSION_TOKEN,
+            httponly=True,
+            samesite="lax",
+            max_age=_COOKIE_MAX_AGE,
+        )
+        return response
+    return RedirectResponse(url="/login?error=1", status_code=302)
+
+
+@app.get("/logout")
+async def logout():
+    """Clear session cookie and redirect to login."""
+    response = RedirectResponse(url="/login", status_code=302)
+    response.delete_cookie("session_token")
+    return response
 
 
 @app.get("/", response_class=HTMLResponse)
