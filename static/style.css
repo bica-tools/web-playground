@@ -706,3 +706,35 @@ table {
         align-items: center;
     }
 }
+
+/* ── FAQ ──────────────────────────────────────────────────────── */
+
+.theory-section details {
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: 8px;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.theory-section details summary {
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.05rem;
+}
+
+.theory-section details summary::before {
+    content: "\25B6";
+    display: inline-block;
+    margin-right: 0.6rem;
+    transition: transform 0.2s;
+    font-size: 0.8rem;
+}
+
+.theory-section details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.faq-answer {
+    padding: 0 1.25rem 1rem;
+}

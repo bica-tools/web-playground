@@ -385,6 +385,15 @@ async def publications(request: Request) -> HTMLResponse:
     )
 
 
+@app.get("/faq", response_class=HTMLResponse)
+async def faq(request: Request) -> HTMLResponse:
+    """FAQ page."""
+    return templates.TemplateResponse(
+        "faq.html",
+        {"request": request, "active_page": "faq"},
+    )
+
+
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request) -> HTMLResponse:
     """About page."""

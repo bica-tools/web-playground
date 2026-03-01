@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ{% endblock %}
+{% block meta_description %}Frequently asked questions about session types, lattices, reticulates, and the Reticulate toolchain.{% endblock %}
+{% block og_title %}Reticulate — FAQ{% endblock %}
+{% block og_path %}/faq{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>FAQ</h1>
+        <p>Frequently asked questions about session types and reticulates.</p>
+    </header>
+
+    <section class="theory-section">
+        <details open>
+            <summary><strong>What is a meet in a session type?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    In a session type's state space, the <strong>meet</strong> of two states
+                    s&#x2081; and s&#x2082; is the state s&#x2081; &and; s&#x2082; that is the
+                    <strong>greatest lower bound</strong> &mdash; the most advanced state reachable
+                    from both s&#x2081; and s&#x2082;.
+                </p>
+                <p>
+                    It represents the latest point where two execution paths <strong>converge</strong>:
+                    the most advanced common "future" of both states.
+                </p>
+                <p>
+                    For states in different branches of a choice (<code>&amp;</code> or <code>+</code>),
+                    the meet is always the <strong>terminal state</strong> q&#x22A5;, since the only
+                    place both branches eventually reach is the end of the protocol.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        In <code>&amp;{m: a.end, n: b.end}</code>, after choosing <code>m</code>
+                        you are in state q&#x2081;; after <code>n</code>, in state q&#x2082;.
+                        These branches are disjoint &mdash; their meet is q&#x22A5; (the terminal state),
+                        the only state reachable from both.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
+        &nbsp;
+        <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
+    </section>
+{% endblock %}
