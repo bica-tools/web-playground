@@ -13,6 +13,45 @@
 
     <section class="theory-section">
         <details open>
+            <summary><strong>What is a session type?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>session type</strong> describes the communication protocol governing
+                    interaction with an object &mdash; the legal sequences of method calls, branches,
+                    and selections a client may perform.
+                </p>
+                <p>
+                    Unlike a flat interface where any method can be called at any time, a session type
+                    makes the object's type <em>evolve</em> as methods are called: after
+                    <code>open</code>, you can <code>read</code>; after <code>read</code> returns
+                    <code>eof</code>, you must <code>close</code>. The type enforces protocol
+                    compliance <strong>statically</strong> (at compile time), preventing errors like
+                    reading a closed file or closing a file twice.
+                </p>
+                <p>
+                    Session types are built from constructors:
+                    <strong>branch</strong> (<code>&amp;</code>),
+                    <strong>selection</strong> (<code>+</code>),
+                    <strong>parallel</strong> (<code>&parallel;</code>),
+                    <strong>recursion</strong> (<code>rec X . S</code>),
+                    <strong>sequencing</strong> (<code>.</code>), and
+                    <strong>termination</strong> (<code>end</code>).
+                </p>
+                <div class="theory-example">
+                    <h4>Example: File Object</h4>
+                    <pre><code>open . rec X . &amp;{read: +{data: X, eof: close . end}}</code></pre>
+                    <p>
+                        Open the file, then repeatedly read: on <code>data</code>, loop back;
+                        on <code>eof</code>, close and terminate. The type guarantees
+                        <code>close</code> is called exactly once.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a meet in a session type?</strong></summary>
             <div class="faq-answer">
                 <p>
