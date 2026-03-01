@@ -471,6 +471,56 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a morphism between session types?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>morphism</strong> between two session type state spaces is a
+                    function <code>f : L(S&#x2081;) &rarr; L(S&#x2082;)</code> that preserves
+                    the ordering structure. If s&#x2081; &ge; s&#x2082; in the source, then
+                    f(s&#x2081;) &ge; f(s&#x2082;) in the target &mdash; the map respects the
+                    reachability relation.
+                </p>
+                <p>
+                    Reticulate classifies morphisms into a <strong>hierarchy</strong> of
+                    increasing strength:
+                </p>
+                <ol>
+                    <li>
+                        <strong>Homomorphism</strong> &mdash; order-preserving: if
+                        a &ge; b then f(a) &ge; f(b). The weakest useful notion.
+                    </li>
+                    <li>
+                        <strong>Projection</strong> &mdash; order-preserving and
+                        <strong>surjective</strong>: every state in the target is hit.
+                        The source "covers" the target protocol.
+                    </li>
+                    <li>
+                        <strong>Embedding</strong> &mdash; order-preserving and
+                        <strong>order-reflecting</strong> (injective on the ordering):
+                        f(a) &ge; f(b) implies a &ge; b. The source "sits inside" the target
+                        faithfully.
+                    </li>
+                    <li>
+                        <strong>Isomorphism</strong> &mdash; bijective embedding. The two
+                        state spaces are structurally identical.
+                    </li>
+                </ol>
+                <p>
+                    Additionally, a <strong>Galois connection</strong> is an adjoint pair
+                    (&alpha;, &gamma;) where &alpha;(x) &le; y iff x &le; &gamma;(y),
+                    capturing an "approximation" relationship between protocols.
+                </p>
+                <p>
+                    Morphisms let you answer questions like: "Is protocol A a refinement of
+                    protocol B?" or "Can a client built for protocol A safely interact with
+                    an object following protocol B?"
+                </p>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is top absorption?</strong></summary>
             <div class="faq-answer">
                 <p>
