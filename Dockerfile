@@ -13,11 +13,14 @@ COPY reticulate/ /app/reticulate/
 COPY web/ /app/web/
 
 # Copy paper PDFs into the static directory for serving.
-# These files exist locally but are gitignored; the glob trick (pd[f])
-# silently skips missing files so CI builds succeed without PDFs.
-COPY papers/reticulate-tool/main.pd[f] /app/web/static/papers/reticulate-tool.pdf
-COPY papers/presentation/slides.pd[f] /app/web/static/papers/slides.pdf
-COPY papers/definitions/definitions.pd[f] /app/web/static/papers/definitions.pdf
+# These files exist locally but are gitignored, so the directories may
+# not exist in CI. Use a shell conditional to skip missing files.
+COPY papers/ /tmp/papers/
+RUN mkdir -p /app/web/static/papers && \
+    cp /tmp/papers/reticulate-tool/main.pdf /app/web/static/papers/reticulate-tool.pdf 2>/dev/null || true && \
+    cp /tmp/papers/presentation/slides.pdf /app/web/static/papers/slides.pdf 2>/dev/null || true && \
+    cp /tmp/papers/definitions/definitions.pdf /app/web/static/papers/definitions.pdf 2>/dev/null || true && \
+    rm -rf /tmp/papers
 
 ENV PYTHONPATH="/app/reticulate:${PYTHONPATH}"
 ENV SITE_PASSWORD=""
