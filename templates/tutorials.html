@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Tutorials{% endblock %}
+{% block meta_description %}Step-by-step tutorials for using BICA Reborn's @Session annotation processor to typecheck object usage at compile time.{% endblock %}
+{% block og_title %}Reticulate — Tutorials{% endblock %}
+{% block og_path %}/tutorials{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Tutorials</h1>
+        <p>Step-by-step guides for session types in practice.</p>
+    </header>
+
+    <!-- Tutorial index -->
+    <section class="theory-section">
+        <h2>Available Tutorials</h2>
+        <ol>
+            <li><a href="#tutorial-session-annotation">Typechecking Object Usage with <code>@Session</code></a></li>
+        </ol>
+    </section>
+
+    <!-- Tutorial 1 -->
+    <section class="theory-section" id="tutorial-session-annotation">
+        <h2>Tutorial 1: Typechecking Object Usage with <code>@Session</code></h2>
+
+        <p>
+            BICA Reborn is a Java annotation processor that enforces communication protocols
+            at <strong>compile time</strong>. You annotate a class with <code>@Session</code>,
+            write the protocol as a session type string, and the compiler checks that every
+            client uses the object correctly &mdash; no extra tools needed.
+        </p>
+        <p>
+            In this tutorial you will annotate a <code>FileHandle</code> class, write correct
+            and incorrect client code, add concurrency annotations, and generate JUnit 5 tests
+            automatically.
+        </p>
+
+        <!-- Step 1 -->
+        <div class="tutorial-step">
+            <h3>Step 1: Add the Dependency</h3>
+            <p>Add BICA Reborn to your Maven project as an annotation processor:</p>
+            <div class="theory-example">
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.bica&lt;/groupId&gt;
+    &lt;artifactId&gt;bica-reborn&lt;/artifactId&gt;
+    &lt;version&gt;0.1.0&lt;/version&gt;
+    &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+            </div>
+            <p>
+                The <code>&lt;scope&gt;provided&lt;/scope&gt;</code> is correct because the
+                annotations use <code>SOURCE</code> retention &mdash; they are only needed
+                during compilation, not at runtime.
+            </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="tutorial-step">
+            <h3>Step 2: Annotate Your Class</h3>
+            <p>
+                Declare the protocol as a session type string on the class. This tells the
+                compiler what sequences of method calls are legal.
+            </p>
+            <div class="theory-example">
+                <h4>FileHandle.java</h4>
+<pre><code>import com.bica.reborn.annotation.Session;
+
+@Session("open . &amp;{read: close . end, write: close . end}")
+public class FileHandle {
+    // ...
+}</code></pre>
+            </div>
+            <p>
+                This type says: first call <code>open</code>, then choose either
+                <code>read</code> or <code>write</code> (branch), then call <code>close</code>,
+                then the protocol ends. No other call sequences are allowed.
+            </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="tutorial-step">
+            <h3>Step 3: Implement the Protocol</h3>
+            <p>
+                Implement the class with a state machine that enforces the protocol at runtime.
+                The annotation processor validates the <em>static</em> call sequences; the
+                runtime guards catch dynamic violations (e.g., from reflection).
+            </p>
+            <div class="theory-example">
+                <h4>FileHandle.java (full)</h4>
+<pre><code>import com.bica.reborn.annotation.Session;
+
+@Session("open . &amp;{read: close . end, write: close . end}")
+public class FileHandle {
+    private enum State { INITIAL, OPENED, PENDING_CLOSE, CLOSED }
+    private State state = State.INITIAL;
+
+    public void open() {
+        requireState(State.INITIAL);
+        state = State.OPENED;
+    }
+
+    public void read() {
+        requireState(State.OPENED);
+        state = State.PENDING_CLOSE;
+    }
+
+    public void write() {
+        requireState(State.OPENED);
+        state = State.PENDING_CLOSE;
+    }
+
+    public void close() {
+        requireState(State.PENDING_CLOSE);
+        state = State.CLOSED;
+    }
+
+    private void requireState(State expected) {
+        if (state != expected)
+            throw new IllegalStateException(
+                "Expected " + expected + ", got " + state);
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="tutorial-step">
+            <h3>Step 4: Write Correct Client Code</h3>
+            <p>
+                A client that follows the protocol compiles without errors. The annotation
+                processor traces the call sequence through the state space and verifies that
+                it forms a valid path from top (initial) to bottom (end).
+            </p>
+            <div class="theory-example">
+                <h4>Client.java</h4>
+<pre><code>public class Client {
+    void use() {
+        FileHandle f = new FileHandle();
+        f.open();
+        f.read();
+        f.close();
+        // Compiles — follows protocol: open → read → close → end
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="tutorial-step">
+            <h3>Step 5: See Compile-Time Errors</h3>
+            <p>
+                A client that violates the protocol gets a <strong>compiler error</strong>.
+                No need to run the program to discover the bug.
+            </p>
+            <div class="theory-example">
+                <h4>BadClient.java</h4>
+<pre><code>public class BadClient {
+    void use() {
+        FileHandle f = new FileHandle();
+        f.read();   // ERROR: 'read' not enabled in state 0 (enabled: [open])
+        f.close();
+    }
+}</code></pre>
+            </div>
+            <p>
+                The error message tells you exactly which methods are available in the current
+                state. Here, state 0 is the initial state where only <code>open</code> is
+                enabled &mdash; calling <code>read</code> before <code>open</code> is a
+                protocol violation.
+            </p>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="tutorial-step">
+            <h3>Step 6: Add Concurrency Annotations</h3>
+            <p>
+                When your session type uses the <code>&parallel;</code> (parallel) constructor,
+                methods in concurrent branches need concurrency annotations to ensure thread
+                safety. BICA provides three:
+            </p>
+            <ul>
+                <li><code>@Shared</code> &mdash; safe for concurrent access (e.g., immutable reads)</li>
+                <li><code>@ReadOnly</code> &mdash; read-only access, compatible with other readers</li>
+                <li><code>@Exclusive</code> &mdash; exclusive access, incompatible with any concurrent call</li>
+            </ul>
+            <div class="theory-example">
+                <h4>SharedFile.java &mdash; invalid</h4>
+<pre><code>import com.bica.reborn.annotation.*;
+
+@Session("(read . end || write . end)")
+public class SharedFile {
+    @ReadOnly
+    public void read() { /* ... */ }
+
+    @Exclusive
+    public void write() { /* ... */ }
+    // ERROR: read (READ_ONLY) and write (EXCLUSIVE) in parallel — not compatible
+}</code></pre>
+            </div>
+            <p>
+                The processor detects that <code>read</code> and <code>write</code> run
+                concurrently but have incompatible concurrency levels. Fix: either make both
+                <code>@Shared</code>, restructure the protocol to sequence them, or use
+                synchronization.
+            </p>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="tutorial-step">
+            <h3>Step 7: Generate Tests Automatically</h3>
+            <p>
+                BICA can generate JUnit 5 test suites from a session type. The generated tests
+                cover three categories:
+            </p>
+            <ul>
+                <li><strong>Valid paths</strong> &mdash; every top-to-bottom path through the protocol</li>
+                <li><strong>Violations</strong> &mdash; calling a disabled method at each reachable state</li>
+                <li><strong>Incomplete prefixes</strong> &mdash; stopping before reaching <code>end</code></li>
+            </ul>
+            <div class="theory-example">
+                <h4>CLI usage</h4>
+<pre><code>java -jar bica.jar --test-gen --class-name FileHandle \
+    "open . &amp;{read: close . end, write: close . end}"</code></pre>
+            </div>
+            <p>
+                This outputs a complete JUnit 5 test class. You can also generate tests from the
+                <a href="/tool">interactive tool</a> by entering a class name.
+            </p>
+        </div>
+
+        <!-- Going further -->
+        <div class="tutorial-step">
+            <h3>Going Further</h3>
+            <ul>
+                <li><a href="/tool">Try the interactive analyzer</a> &mdash; paste any session type and see its state space, lattice properties, and generated tests</li>
+                <li><a href="/theory">Read the theory</a> &mdash; understand why state spaces form lattices and how the parallel constructor works</li>
+                <li><a href="/benchmarks">Browse the benchmarks</a> &mdash; 34 real-world protocols from SMTP to Raft consensus</li>
+                <li><a href="/faq">Check the FAQ</a> &mdash; common questions about session types, lattices, and morphisms</li>
+            </ul>
+        </div>
+    </section>
+{% endblock %}

@@ -354,6 +354,15 @@ async def analyze(
     )
 
 
+@app.get("/tutorials", response_class=HTMLResponse)
+async def tutorials(request: Request) -> HTMLResponse:
+    """Tutorials page."""
+    return templates.TemplateResponse(
+        "tutorials.html",
+        {"request": request, "active_page": "tutorials"},
+    )
+
+
 @app.get("/theory", response_class=HTMLResponse)
 async def theory(request: Request) -> HTMLResponse:
     """Theory overview page."""

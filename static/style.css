@@ -738,3 +738,16 @@ table {
 .faq-answer {
     padding: 0 1.25rem 1rem;
 }
+
+/* ── Tutorials ───────────────────────────────────────────────── */
+
+.tutorial-step {
+    margin: 1.5rem 0;
+    padding-left: 1.25rem;
+    border-left: 4px solid var(--pico-primary);
+}
+
+.tutorial-step h3 {
+    margin-top: 0;
+    color: var(--pico-primary);
+}
