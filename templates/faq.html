@@ -44,6 +44,37 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>What is a join in a session type?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    The <strong>join</strong> of two states s&#x2081; and s&#x2082; is the state
+                    s&#x2081; &or; s&#x2082; that is the <strong>least upper bound</strong> &mdash;
+                    the earliest state from which both s&#x2081; and s&#x2082; can be reached.
+                </p>
+                <p>
+                    It represents the latest point before two execution paths <strong>diverge</strong>:
+                    the most advanced common "past" of both states.
+                </p>
+                <p>
+                    For states in different branches of a choice (<code>&amp;</code> or <code>+</code>),
+                    the join is always the <strong>initial state</strong> q&#x22A4;, since the only
+                    state that can reach into both branches is the entry point of the choice.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        In <code>&amp;{m: a.end, n: b.end}</code>, states q&#x2081; (after <code>m</code>)
+                        and q&#x2082; (after <code>n</code>) are in disjoint branches. The only state
+                        that reaches both is q&#x2080; (the initial state) &mdash; so
+                        q&#x2081; &or; q&#x2082; = q&#x2080; = q&#x22A4;.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
