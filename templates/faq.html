@@ -397,6 +397,47 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a Hasse diagram?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>Hasse diagram</strong> is the standard way to draw a
+                    <strong>partially ordered set</strong> (poset). It shows elements as nodes
+                    and draws an edge from <code>a</code> down to <code>b</code> only when
+                    <code>a</code> covers <code>b</code> &mdash; meaning <code>a &gt; b</code>
+                    with nothing in between.
+                </p>
+                <p>
+                    By omitting <strong>transitive edges</strong> (if a &gt; b &gt; c, don't
+                    draw a &rarr; c), the diagram stays clean and readable. The full ordering
+                    can always be recovered: <code>a &ge; b</code> iff there is a
+                    <strong>downward path</strong> from <code>a</code> to <code>b</code>.
+                </p>
+                <p>
+                    In Reticulate, the Hasse diagram of a session type's state space is the
+                    primary visualization. The <strong>top</strong> (initial state, q&#x22A4;)
+                    sits at the top of the diagram, the <strong>bottom</strong> (terminal state,
+                    q&#x22A5;) at the bottom, and transitions are drawn as labeled edges flowing
+                    downward. Edges are labeled with method names or selection labels.
+                </p>
+                <p>
+                    The tool colours the top node <strong>blue</strong>, the bottom node
+                    <strong>red</strong>, and highlights lattice counterexamples (missing meets
+                    or joins) when they exist. SCC-collapsed nodes are shown as grouped clusters.
+                </p>
+                <div class="theory-example">
+                    <h4>Try it</h4>
+                    <p>
+                        Enter any session type in the
+                        <a href="/tool">Interactive Analyzer</a> to see its Hasse diagram
+                        rendered automatically.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is an SCC quotient?</strong></summary>
             <div class="faq-answer">
                 <p>
