@@ -84,4 +84,12 @@
         <summary>DOT source</summary>
         <pre><code>{{ dot_source }}</code></pre>
     </details>
+
+    {% if test_source %}
+    <!-- Generated JUnit 5 tests (collapsible) -->
+    <details>
+        <summary>Generated JUnit 5 Tests ({{ class_name }})</summary>
+        <pre><code>{{ test_source }}</code></pre>
+    </details>
+    {% endif %}
 </article>

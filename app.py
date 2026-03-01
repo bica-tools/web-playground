@@ -38,11 +38,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from reticulate import (
     LatticeResult,
     ParseError,
+    TestGenConfig,
     build_statespace,
     check_lattice,
     check_termination,
     check_wf_parallel,
     dot_source,
+    generate_test_source,
     parse,
     pretty,
 )
@@ -262,9 +264,14 @@ async def tool(request: Request, type: str | None = None) -> HTMLResponse:
 
 
 @app.post("/analyze", response_class=HTMLResponse)
-async def analyze(request: Request, type_string: str = Form(...)) -> HTMLResponse:
+async def analyze(
+    request: Request,
+    type_string: str = Form(...),
+    class_name: str = Form(""),
+) -> HTMLResponse:
     """Run the full reticulate pipeline and return an HTMX fragment."""
     type_string = type_string.strip()
+    class_name = class_name.strip()
     if not type_string:
         return templates.TemplateResponse(
             "fragments/error.html",
@@ -319,6 +326,15 @@ async def analyze(request: Request, type_string: str = Form(...)) -> HTMLRespons
     except Exception:
         svg_html = "<p>Could not render diagram (graphviz not available).</p>"
 
+    # 6. Test generation (if class name provided)
+    test_source = ""
+    if class_name:
+        try:
+            cfg = TestGenConfig(class_name, max_revisits=2, max_paths=100)
+            test_source = generate_test_source(ss, cfg, pretty_str)
+        except Exception:
+            test_source = ""
+
     return templates.TemplateResponse(
         "fragments/result.html",
         {
@@ -332,6 +348,8 @@ async def analyze(request: Request, type_string: str = Form(...)) -> HTMLRespons
             "wf_result": wf_result,
             "svg_html": svg_html,
             "dot_source": dot_str,
+            "test_source": test_source,
+            "class_name": class_name,
         },
     )
 
