@@ -218,6 +218,50 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>What is WF-Par?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong>WF-Par</strong> is the well-formedness condition for the parallel
+                    constructor <code>S&#x2081; &parallel; S&#x2082;</code>. It requires four things:
+                </p>
+                <ol>
+                    <li>
+                        Both branches are <strong>terminating</strong> &mdash; every maximal path
+                        reaches <code>end</code>, so the branches always synchronise at a common
+                        terminal state.
+                    </li>
+                    <li>
+                        Both branches are individually <strong>well-formed</strong>.
+                    </li>
+                    <li>
+                        <strong>Variable-disjoint</strong> &mdash; no recursion variable bound in one
+                        branch is free in the other, keeping the branches independent.
+                    </li>
+                    <li>
+                        <strong>No nested <code>&parallel;</code></strong> &mdash; neither branch
+                        contains another parallel constructor.
+                    </li>
+                </ol>
+                <p>
+                    These conditions are <strong>sufficient for lattice structure</strong> (a corollary
+                    of the Reticulate Theorem) and make the product construction well-defined. They
+                    are checked by the <code>check_wf_parallel()</code> function in both Reticulate
+                    and BICA Reborn.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>(rec X . &amp;{a: X}) || (b . end)</code> violates WF-Par: the left
+                        branch is <strong>not terminating</strong> (it loops forever with no exit
+                        path to <code>end</code>).
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
