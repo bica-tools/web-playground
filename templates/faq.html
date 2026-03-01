@@ -121,6 +121,45 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is sequencing in session types?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong>Sequencing</strong> (<code>m . S</code>) is the simplest session type
+                    constructor &mdash; it says "call method <code>m</code>, then continue with
+                    protocol <code>S</code>". It chains method calls into a strict order.
+                </p>
+                <p>
+                    In the state space, sequencing adds a <strong>new state above</strong> the
+                    sub-protocol's state space, connected by a single transition labeled
+                    <code>m</code>. Formally, if <code>L(S)</code> has initial state q&#x22A4;,
+                    then <code>L(m . S)</code> introduces a fresh state q that becomes the new
+                    q&#x22A4;, with a transition q &xrarr; q&#x22A4;(S) labeled <code>m</code>.
+                </p>
+                <p>
+                    For the lattice proof, sequencing is the easiest case: adding a new maximum
+                    to a bounded lattice always yields a bounded lattice &mdash; the new state
+                    is above everything, so it is trivially the join of any pair involving itself,
+                    and all existing meets and joins are unchanged.
+                </p>
+                <p>
+                    Syntactically, <code>m . S</code> is <strong>sugar</strong> for a single-arm
+                    branch: <code>&amp;{m: S}</code>. The parser desugars it automatically.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>open . read . close . end</code> creates a 4-state chain:
+                        q&#x2080; &xrarr; q&#x2081; &xrarr; q&#x2082; &xrarr; q&#x2083;,
+                        where q&#x2080; = q&#x22A4; and q&#x2083; = q&#x22A5;. Every chain
+                        is trivially a lattice.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a bounded lattice?</strong></summary>
             <div class="faq-answer">
                 <p>
