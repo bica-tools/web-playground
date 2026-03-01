@@ -160,6 +160,48 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is recursion in session types?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong>Recursion</strong> (<code>rec X . S</code>) allows a session type to
+                    loop back to an earlier protocol stage. The variable <code>X</code> marks the
+                    loop point, and any occurrence of <code>X</code> inside <code>S</code> means
+                    "go back to the beginning of the <code>rec</code>".
+                </p>
+                <p>
+                    In the state space, recursion creates <strong>back-edges</strong> &mdash;
+                    transitions from deeper states back to the entry state of the recursive body.
+                    This makes some states <strong>mutually reachable</strong>, forming cycles
+                    in the transition graph.
+                </p>
+                <p>
+                    These cycles break antisymmetry (if s&#x2081; &ge; s&#x2082; and
+                    s&#x2082; &ge; s&#x2081;, we need s&#x2081; = s&#x2082; for a partial order).
+                    The solution is the <strong>SCC quotient</strong>: collapse every cycle into
+                    a single equivalence class. The <strong>Top Absorption Lemma</strong> then
+                    guarantees the quotient is still a bounded lattice.
+                </p>
+                <p>
+                    For well-formedness, recursive types used inside <code>&parallel;</code> must
+                    be <strong>terminating</strong> &mdash; every maximal path must have an exit
+                    to <code>end</code>, not just loop forever.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>rec X . &amp;{next: X, stop: end}</code> &mdash; repeatedly call
+                        <code>next</code> to loop, or <code>stop</code> to terminate. The
+                        back-edge from <code>next</code> to the entry creates a cycle; the SCC
+                        quotient collapses it into a 2-element chain:
+                        [loop] &gt; [end].
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a bounded lattice?</strong></summary>
             <div class="faq-answer">
                 <p>
