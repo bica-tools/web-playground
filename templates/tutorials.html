@@ -39,12 +39,23 @@
         <!-- Step 1 -->
         <div class="tutorial-step">
             <h3>Step 1: Add the Dependency</h3>
-            <p>Add BICA Reborn to your Maven project as an annotation processor:</p>
+            <p>
+                BICA Reborn is not yet published to Maven Central. Clone the repository and
+                install it to your local Maven cache first:
+            </p>
             <div class="theory-example">
+                <h4>Install locally</h4>
+<pre><code>git clone https://github.com/alcides/bica-reborn.git
+cd bica-reborn
+mvn install</code></pre>
+            </div>
+            <p>Then add the dependency to your project:</p>
+            <div class="theory-example">
+                <h4>pom.xml</h4>
 <pre><code>&lt;dependency&gt;
     &lt;groupId&gt;com.bica&lt;/groupId&gt;
     &lt;artifactId&gt;bica-reborn&lt;/artifactId&gt;
-    &lt;version&gt;0.1.0&lt;/version&gt;
+    &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
     &lt;scope&gt;provided&lt;/scope&gt;
 &lt;/dependency&gt;</code></pre>
             </div>
