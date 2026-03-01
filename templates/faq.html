@@ -83,6 +83,34 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a bounded lattice?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>bounded lattice</strong> is a partially ordered set (poset) where:
+                </p>
+                <ol>
+                    <li>Every pair of elements has a <strong>meet</strong> (greatest lower bound, &and;)</li>
+                    <li>Every pair of elements has a <strong>join</strong> (least upper bound, &or;)</li>
+                    <li>There is a <strong>top</strong> element &top; (greater than or equal to everything)</li>
+                    <li>There is a <strong>bottom</strong> element &bot; (less than or equal to everything)</li>
+                </ol>
+                <p>
+                    In the context of session types: the <strong>top</strong> is the initial state,
+                    the <strong>bottom</strong> is the terminal state, the <strong>meet</strong> of
+                    two states is where their execution paths converge, and the <strong>join</strong>
+                    is where they diverge.
+                </p>
+                <p>
+                    The "bounded" part matters &mdash; it guarantees the protocol has a well-defined
+                    <strong>entry point</strong> (&top;) and <strong>exit point</strong> (&bot;),
+                    which is exactly what well-formedness ensures.
+                </p>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a meet in a session type?</strong></summary>
             <div class="faq-answer">
                 <p>
