@@ -83,6 +83,44 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is branch and selection?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong>Branch</strong> (<code>&amp;{m&#x2081;: S&#x2081;, &hellip;, m&#x2099;: S&#x2099;}</code>)
+                    and <strong>selection</strong> (<code>+{l&#x2081;: S&#x2081;, &hellip;, l&#x2099;: S&#x2099;}</code>)
+                    are the two <strong>choice constructors</strong>.
+                </p>
+                <p>
+                    Branch is <strong>external choice</strong> &mdash; the client (environment) decides
+                    which method to call. Selection is <strong>internal choice</strong> &mdash; the
+                    object (server) decides the outcome, and the client must handle all possibilities.
+                </p>
+                <p>
+                    Despite this type-theoretic duality, they produce <strong>identical state-space
+                    structure</strong>: a fresh initial state fans out to each sub-state-space, and all
+                    sub-state-spaces share a common terminal state. The initial state is the
+                    <strong>join</strong> of all cross-branch states; the terminal is their
+                    <strong>meet</strong>.
+                </p>
+                <p>
+                    This is why the lattice proof treats them uniformly as
+                    <code>C{a&#x2081;: S&#x2081;, &hellip;, a&#x2099;: S&#x2099;}</code>.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>&amp;{read: end, write: end}</code> &mdash; the client chooses to
+                        read or write.<br>
+                        <code>+{OK: end, ERROR: end}</code> &mdash; the server returns OK or ERROR,
+                        the client must handle both.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a bounded lattice?</strong></summary>
             <div class="faq-answer">
                 <p>
