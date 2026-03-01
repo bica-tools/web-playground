@@ -145,6 +145,39 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>What is an SCC quotient?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    An <strong>SCC quotient</strong> collapses every <strong>strongly connected
+                    component</strong> (a maximal set of mutually reachable states) into a single
+                    node, turning a cyclic graph into a <strong>DAG</strong> (directed acyclic graph).
+                </p>
+                <p>
+                    In session types, cycles arise from <strong>recursion</strong> &mdash;
+                    <code>rec X . S</code> creates back-edges that make some states mutually
+                    reachable. The quotient merges those cyclic states into one equivalence class,
+                    restoring the <strong>antisymmetry</strong> needed for a partial order.
+                </p>
+                <p>
+                    The <strong>Reticulate Theorem</strong> works on this quotient: it is the SCC
+                    quotient that forms a bounded lattice, not the raw state space (which is only
+                    a <strong>preorder</strong> due to cycles).
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        The file object <code>open . rec X . &amp;{read: +{data: X, eof: close . end}}</code>
+                        has states q&#x2081; (read) and q&#x2082; (select) forming a cycle via
+                        <code>data</code>. The SCC quotient collapses {q&#x2081;, q&#x2082;} into
+                        a single node, yielding a 4-element chain &mdash; trivially a lattice.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
