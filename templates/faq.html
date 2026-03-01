@@ -471,6 +471,56 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is termination in session types?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A session type is <strong>terminating</strong> if every maximal execution
+                    path eventually reaches <code>end</code>. There is no way to get stuck in
+                    an infinite loop with no exit.
+                </p>
+                <p>
+                    This is <strong>not</strong> the same as forbidding recursion &mdash;
+                    recursive types can be terminating as long as every recursive loop has at
+                    least one branch that leads to <code>end</code>. The check is decidable:
+                    for each <code>rec X . S</code>, verify that the body <code>S</code> has an
+                    exit path that does not go through <code>X</code>.
+                </p>
+                <p>
+                    Termination matters in two places:
+                </p>
+                <ul>
+                    <li>
+                        <strong>WF-Par</strong> requires both branches of
+                        <code>S&#x2081; &parallel; S&#x2082;</code> to be terminating, ensuring
+                        the concurrent branches always synchronise at a common terminal state.
+                    </li>
+                    <li>
+                        <strong>State-space finiteness</strong> &mdash; a non-terminating type
+                        inside a parallel can produce an infinite product, which defeats
+                        analysis.
+                    </li>
+                </ul>
+                <p>
+                    Outside of parallel, non-terminating types like
+                    <code>rec X . a . X</code> are perfectly valid &mdash; they model servers
+                    or event loops that run forever. The SCC quotient handles the resulting
+                    cycles.
+                </p>
+                <div class="theory-example">
+                    <h4>Examples</h4>
+                    <p>
+                        <code>rec X . &amp;{next: X, stop: end}</code> &mdash;
+                        <strong>terminating</strong>: the <code>stop</code> branch exits.<br>
+                        <code>rec X . a . X</code> &mdash; <strong>not terminating</strong>:
+                        every path loops back to <code>X</code> with no exit.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a morphism between session types?</strong></summary>
             <div class="faq-answer">
                 <p>
