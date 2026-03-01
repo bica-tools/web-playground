@@ -121,6 +121,40 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is the end constructor?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong><code>end</code></strong> is the termination constructor &mdash; it
+                    means the protocol is <strong>finished</strong> and no more method calls are
+                    permitted on the object.
+                </p>
+                <p>
+                    Its state space is the simplest possible: a single state with no transitions.
+                    That single state is simultaneously the initial state q&#x22A4; and the
+                    terminal state q&#x22A5;. A one-element set is trivially a bounded lattice,
+                    making <code>end</code> the <strong>base case</strong> of the Reticulate
+                    Theorem's induction.
+                </p>
+                <p>
+                    Every well-formed session type must eventually reach <code>end</code> along
+                    every maximal path &mdash; this is the <strong>termination</strong> property
+                    required by WF-Par for parallel branches, and it ensures the state space
+                    always has a well-defined bottom element.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>close . end</code> &mdash; call <code>close</code>, then the
+                        protocol terminates. After <code>end</code>, any further method call
+                        is a <strong>protocol violation</strong>.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is sequencing in session types?</strong></summary>
             <div class="faq-answer">
                 <p>
