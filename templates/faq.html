@@ -262,6 +262,46 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>Why do session type state spaces form lattices?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    Because every session type constructor <strong>preserves lattice structure</strong>,
+                    and the proof goes by <strong>structural induction</strong>:
+                </p>
+                <ol>
+                    <li>
+                        <strong><code>end</code></strong> is a one-element lattice (trivially).
+                    </li>
+                    <li>
+                        <strong>Sequencing</strong> (<code>m . S</code>) adds a new maximum &mdash;
+                        still a lattice.
+                    </li>
+                    <li>
+                        <strong>Branch and selection</strong> create a fresh top (the join of
+                        cross-branch states) and share a common bottom (the meet), producing a
+                        diamond-like structure where every pair has meets and joins.
+                    </li>
+                    <li>
+                        <strong>Recursion</strong> creates cycles, but the SCC quotient absorbs
+                        them into the top via <strong>top absorption</strong> &mdash; still a lattice.
+                    </li>
+                    <li>
+                        <strong>Parallel</strong> takes the product of two lattices, which is always
+                        a lattice with componentwise meets and joins.
+                    </li>
+                </ol>
+                <p>
+                    Since every constructor preserves the property and the base case has it,
+                    <strong>every well-formed session type has it</strong>. The lattice structure
+                    is not imposed &mdash; it is an inevitable consequence of how protocols are built
+                    from these constructors.
+                </p>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
