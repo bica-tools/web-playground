@@ -471,6 +471,52 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a protocol violation?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>protocol violation</strong> occurs when a client calls a method
+                    that is <strong>not permitted</strong> in the object's current protocol
+                    state. The method may exist on the object, but the session type says
+                    "not now".
+                </p>
+                <p>
+                    In the state space, a violation means attempting a transition label that has
+                    <strong>no outgoing edge</strong> from the current state. For example, if the
+                    protocol is in state q&#x2081; and only transition <code>read</code> is
+                    available, calling <code>close</code> is a violation.
+                </p>
+                <p>
+                    Session type systems detect violations <strong>statically</strong> (at compile
+                    time) by tracking the object's type as it evolves through method calls. The
+                    type system rejects programs that could ever reach a violating call. This is
+                    the core value proposition: bugs like reading a closed file, double-closing,
+                    or sending on a finished connection are caught before the program runs.
+                </p>
+                <p>
+                    Reticulate's <strong>test generation</strong> produces three kinds of test
+                    cases from a session type:
+                </p>
+                <ul>
+                    <li><strong>Valid paths</strong> &mdash; complete traces from q&#x22A4; to q&#x22A5; (should succeed)</li>
+                    <li><strong>Violations</strong> &mdash; a valid prefix followed by a disabled method call (should throw)</li>
+                    <li><strong>Incomplete prefixes</strong> &mdash; a valid prefix that stops before q&#x22A5; (resource leak)</li>
+                </ul>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        For <code>open . read . close . end</code>, calling
+                        <code>read</code> before <code>open</code> is a violation &mdash;
+                        the initial state only permits <code>open</code>. Calling
+                        <code>open</code> after <code>read</code> is also a violation &mdash;
+                        that state only permits <code>close</code>.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is termination in session types?</strong></summary>
             <div class="faq-answer">
                 <p>
