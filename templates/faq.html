@@ -178,6 +178,46 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>What is top absorption?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    <strong>Top absorption</strong> is the key lemma that handles recursion in the
+                    Reticulate Theorem. It states: if you take a bounded lattice and collapse an
+                    <strong>upward-closed set</strong> containing &top; into a single top element,
+                    the result is still a bounded lattice.
+                </p>
+                <p>
+                    This is exactly what happens when recursion adds back-edges &mdash; states that
+                    become mutually reachable with the initial state (q&#x22A4;) get
+                    <strong>absorbed</strong> into its SCC. The absorbed set is upward-closed because
+                    if a state is on a cycle through q&#x22A4; and another state is above it, that
+                    state is also on the cycle.
+                </p>
+                <p>
+                    The proof works in two parts:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Meets are preserved</strong> &mdash; the surviving states form a
+                        downward-closed set (order-ideal), so meets of survivors stay among the
+                        survivors.
+                    </li>
+                    <li>
+                        <strong>Joins</strong> &mdash; if the join of two survivors lands in the
+                        absorbed set, it simply becomes &top;. No non-&top; upper bound can exist
+                        among the survivors (it would contradict downward-closure).
+                    </li>
+                </ul>
+                <p>
+                    This lemma has been <strong>mechanically verified</strong> in Lean 4 with Mathlib
+                    (~480 lines, zero <code>sorry</code>).
+                </p>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
