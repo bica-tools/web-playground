@@ -102,6 +102,49 @@
     </section>
 
     <section class="theory-section">
+        <details>
+            <summary><strong>What is the parallel constructor?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    The <strong>parallel constructor</strong> <code>S&#x2081; &parallel; S&#x2082;</code>
+                    allows two sub-protocols to execute concurrently on the <strong>same shared
+                    object</strong>. Its state space is the <strong>product</strong> of the two
+                    component state spaces:
+                </p>
+                <div class="theory-highlight">
+                    <code>L(S&#x2081; &parallel; S&#x2082;) = L(S&#x2081;) &times; L(S&#x2082;)</code>
+                </div>
+                <p>
+                    Transitions are componentwise &mdash; each step advances exactly one component
+                    &mdash; and the ordering is also componentwise:
+                    <code>(s&#x2081;, s&#x2082;) &ge; (t&#x2081;, t&#x2082;)</code> iff
+                    <code>s&#x2081; &ge; t&#x2081;</code> and <code>s&#x2082; &ge; t&#x2082;</code>.
+                </p>
+                <p>
+                    This is the <strong>key novelty</strong> of the work &mdash; it is where lattice
+                    structure becomes <em>necessary</em> rather than merely convenient, because the
+                    product of two lattices is always a lattice.
+                </p>
+                <p>
+                    Well-formedness (<strong>WF-Par</strong>) requires both branches to be
+                    <strong>terminating</strong>, <strong>variable-disjoint</strong>, and free of
+                    <strong>nested <code>&parallel;</code></strong>, ensuring the branches always
+                    synchronise at a common terminal state.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        <code>(a . b . end || c . d . end)</code> creates a 3 &times; 3 = 9 state
+                        product lattice. The initial state <code>(0,0)</code> is at the top; the
+                        terminal <code>(2,2)</code> at the bottom. Every interleaving of
+                        <code>a, b</code> with <code>c, d</code> is a valid path through the grid.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
         <a href="/theory" role="button" class="outline">Theory Overview &rarr;</a>
         &nbsp;
         <a href="/tool" role="button">Try the Interactive Analyzer &rarr;</a>
