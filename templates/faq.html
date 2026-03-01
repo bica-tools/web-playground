@@ -52,6 +52,37 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a state space?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>state space</strong> <code>L(S)</code> is the labeled transition system
+                    obtained by "executing" a session type <code>S</code>. Each <strong>state</strong>
+                    represents a protocol stage, and each <strong>transition</strong> a permitted
+                    action (method call or selection label).
+                </p>
+                <p>
+                    It has a unique <strong>initial state</strong> q&#x22A4; (the protocol entry
+                    point) and a unique <strong>terminal state</strong> q&#x22A5; (corresponding to
+                    <code>end</code>). Formally, a state space is a tuple
+                    <code>L(S) = (Q, &Sigma;, &delta;, q&#x22A4;, q&#x22A5;)</code>.
+                </p>
+                <p>
+                    The construction is <strong>inductive</strong>: <code>end</code> gives a single
+                    state; sequencing chains states; branch/selection fan out from a fresh initial to
+                    each sub-space; recursion adds back-edges creating cycles; and parallel builds the
+                    product of two state spaces.
+                </p>
+                <p>
+                    The <strong>reachability ordering</strong> on states
+                    (s&#x2081; &ge; s&#x2082; iff path from s&#x2081; to s&#x2082;) gives the state
+                    space the structure of a poset &mdash; and after SCC quotient, a bounded lattice.
+                </p>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is a meet in a session type?</strong></summary>
             <div class="faq-answer">
                 <p>
