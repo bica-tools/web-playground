@@ -521,6 +521,53 @@
 
     <section class="theory-section">
         <details>
+            <summary><strong>What is a Galois connection?</strong></summary>
+            <div class="faq-answer">
+                <p>
+                    A <strong>Galois connection</strong> between two posets (or lattices) is a
+                    pair of monotone functions (&alpha;, &gamma;) satisfying the
+                    <strong>adjunction law</strong>:
+                </p>
+                <div class="theory-highlight">
+                    <code>&alpha;(x) &le; y &hArr; x &le; &gamma;(y)</code>
+                </div>
+                <p>
+                    Here &alpha; is the <strong>abstraction</strong> (left adjoint) and &gamma;
+                    is the <strong>concretisation</strong> (right adjoint). Together they express
+                    a "best approximation" relationship: &alpha; maps into a simpler domain,
+                    and &gamma; maps back, with the round-trips satisfying
+                    <code>x &le; &gamma;(&alpha;(x))</code> and
+                    <code>&alpha;(&gamma;(y)) &le; y</code>.
+                </p>
+                <p>
+                    In session types, a Galois connection between <code>L(S&#x2081;)</code> and
+                    <code>L(S&#x2082;)</code> means that one protocol is a <strong>sound
+                    approximation</strong> of the other &mdash; the abstraction may lose detail,
+                    but it never introduces false behaviour. This is weaker than an embedding
+                    (which preserves structure exactly) but stronger than a plain homomorphism.
+                </p>
+                <p>
+                    Galois connections are central to <strong>abstract interpretation</strong>
+                    and program analysis, where they formalise the relationship between concrete
+                    and abstract domains. In our setting, they connect protocol refinement to
+                    the lattice-theoretic framework.
+                </p>
+                <div class="theory-example">
+                    <h4>Example</h4>
+                    <p>
+                        If protocol S&#x2081; has states {q&#x2080;, q&#x2081;, q&#x2082;,
+                        q&#x2083;} and S&#x2082; collapses q&#x2081; and q&#x2082; into a
+                        single state, the abstraction &alpha; maps both to the collapsed state,
+                        and the concretisation &gamma; maps back to their join. The adjunction
+                        law ensures this approximation is consistent.
+                    </p>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <section class="theory-section">
+        <details>
             <summary><strong>What is top absorption?</strong></summary>
             <div class="faq-answer">
                 <p>
