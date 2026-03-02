@@ -3,13 +3,15 @@
 {% block title %}Interactive Analyzer{% endblock %}
 {% block meta_description %}Analyze session types interactively: parse, build state spaces, check lattice properties, and visualize Hasse diagrams.{% endblock %}
 {% block og_title %}Reticulate — Interactive Session Type Analyzer{% endblock %}
-{% block og_path %}/tool{% endblock %}
+{% block og_path %}/tools/analyzer{% endblock %}
 
 {% block head_extra %}
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 {% endblock %}
 
 {% block content %}
+    <p class="breadcrumb"><a href="/tools">&larr; Back to Tools</a></p>
+
     <header>
         <h1>Interactive Analyzer</h1>
         <p>Parse a session type, build its state space, check lattice properties, and visualize the Hasse diagram.</p>

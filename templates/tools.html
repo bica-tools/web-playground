@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Tools{% endblock %}
+{% block meta_description %}Reticulate toolchain: Python CLI, Java annotation processor, and web-based session type analyzer.{% endblock %}
+{% block og_title %}Reticulate — Tools{% endblock %}
+{% block og_path %}/tools{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Tools</h1>
+        <p>Three tools for analyzing session types and verifying lattice properties, from theory to practice.</p>
+    </header>
+
+    <!-- Toolchain overview -->
+    <section class="home-section">
+        <h2>Toolchain Pipeline</h2>
+        <div class="tool-grid">
+            <article class="tool-card">
+                <h3>1. Reticulate</h3>
+                <p class="tool-card-lang">Python CLI &amp; Library</p>
+                <p>Parse session types, build state spaces, check lattice properties, generate Hasse diagrams.</p>
+            </article>
+            <article class="tool-card">
+                <h3>2. BICA Reborn</h3>
+                <p class="tool-card-lang">Java Annotation Processor</p>
+                <p>Typestate checking for Java objects via <code>@Session</code> annotations. Compile-time protocol verification.</p>
+            </article>
+            <article class="tool-card">
+                <h3>3. Web Analyzer</h3>
+                <p class="tool-card-lang">Browser-based</p>
+                <p>Interactive analysis in the browser. No installation required. Instant Hasse diagrams and test generation.</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- Reticulate (Python) -->
+    <section id="reticulate" class="tool-section">
+        <h2>Reticulate &mdash; Python CLI &amp; Library</h2>
+        <p>
+            Reticulate is a Python library and command-line tool that constructs state spaces from session type
+            definitions, checks whether they form lattices, and generates Hasse diagrams. It implements the
+            full theory: parsing, state-space construction (including the product construction for the
+            parallel constructor <code>&parallel;</code>), SCC-based lattice checking, morphism classification,
+            termination analysis, and JUnit 5 test generation.
+        </p>
+
+        <h3>Features</h3>
+        <ul>
+            <li>Session type parser with Unicode support (<code>&oplus;</code>, <code>&parallel;</code>, <code>&mu;</code>)</li>
+            <li>State-space construction with product lattice for parallel (<code>&parallel;</code>)</li>
+            <li>Lattice checking via SCC quotient and pairwise meet/join verification</li>
+            <li>Morphism hierarchy: isomorphism, embedding, projection, Galois connection</li>
+            <li>Termination and well-formedness checking for recursive parallel types</li>
+            <li>Hasse diagram generation (DOT/Graphviz)</li>
+            <li>JUnit 5 test generation from session type state spaces</li>
+        </ul>
+
+        <h3>Requirements</h3>
+        <ul>
+            <li>Python 3.11+</li>
+            <li>Optional: <code>graphviz</code> (Python package + system binary) for diagram rendering</li>
+        </ul>
+
+        <h3>Installation</h3>
+        <pre class="cli-example"><code>git clone https://github.com/alcides/bica.git
+cd bica/reticulate
+python3 -m pytest tests/ -v   # verify installation</code></pre>
+
+        <h3>Quick Start</h3>
+
+        <p>Parse and check a simple branch type:</p>
+        <pre class="cli-example"><code>$ python3 -m reticulate "&amp;{read: end, write: end}"
+Type:        &amp;{read: end, write: end}
+States:      3
+Transitions: 2
+SCCs:        3
+Lattice:     Yes</code></pre>
+
+        <p>Check a recursive type with parallel:</p>
+        <pre class="cli-example"><code>$ python3 -m reticulate "(rec X . &amp;{next: X, done: end} || a.b.end)"
+Type:        (rec X . &amp;{next: X, done: end} || a.b.end)
+States:      6
+Transitions: 8
+SCCs:        6
+Lattice:     Yes</code></pre>
+
+        <p>Generate a Hasse diagram:</p>
+        <pre class="cli-example"><code>$ python3 -m reticulate --hasse --fmt svg "init . &amp;{open: close.end, fail: end}"</code></pre>
+
+        <p class="analyzer-link"><a href="/tools/analyzer">Try it in the browser &rarr;</a></p>
+    </section>
+
+    <!-- BICA Reborn (Java) -->
+    <section id="bica-reborn" class="tool-section">
+        <h2>BICA Reborn &mdash; Java Annotation Processor</h2>
+        <p>
+            BICA Reborn is a Java annotation-based session type checker for objects, the successor to the
+            original BICA (2009). It verifies that Java classes conform to session type protocols at
+            compile time via <code>@Session</code> annotations. Key novelty: the <code>&parallel;</code>
+            constructor for concurrent access, which forces lattice structure.
+        </p>
+
+        <h3>Features</h3>
+        <ul>
+            <li>Session type annotations: <code>@Session</code>, <code>@Shared</code>, <code>@ReadOnly</code>, <code>@Exclusive</code></li>
+            <li>Compile-time typestate checking via annotation processor</li>
+            <li>Concurrency classification: shared, sync, read-only, exclusive</li>
+            <li>Thread safety verification based on concurrency lattice</li>
+            <li>Standalone CLI tool for analysis without compilation</li>
+            <li>JUnit 5 test generation from <code>@Session</code> annotations</li>
+            <li>All 34 benchmark protocols verified</li>
+        </ul>
+
+        <h3>Requirements</h3>
+        <ul>
+            <li>Java 21+</li>
+            <li>Maven 3</li>
+        </ul>
+
+        <h3>Installation</h3>
+        <pre class="cli-example"><code>git clone https://github.com/alcides/bica.git
+cd bica/bica
+mvn install        # build and install to local repo
+mvn test           # run 1,024 tests</code></pre>
+
+        <h3>Usage: Annotation</h3>
+        <p>Annotate your Java class with a session type:</p>
+        <pre class="cli-example"><code>import com.bica.reborn.annotation.Session;
+
+@Session("init . &amp;{open: +{OK: read.close.end, ERROR: end}}")
+public class FileHandle {
+    public void init() { /* ... */ }
+    public void open() { /* ... */ }
+    public boolean read() { /* ... */ }
+    public void close() { /* ... */ }
+}</code></pre>
+
+        <h3>Usage: CLI</h3>
+        <pre class="cli-example"><code>$ java -jar bica-reborn.jar "&amp;{read: end, write: end}"
+Type:        &amp;{read: end, write: end}
+States:      3
+Transitions: 2
+Lattice:     Yes</code></pre>
+
+        <h3>Maven Dependency</h3>
+        <pre class="cli-example"><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.bica&lt;/groupId&gt;
+    &lt;artifactId&gt;bica-reborn&lt;/artifactId&gt;
+    &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+    </section>
+
+    <!-- Web Analyzer -->
+    <section id="web-analyzer" class="tool-section">
+        <h2>Web Analyzer</h2>
+        <p>
+            The web analyzer provides the full Reticulate pipeline in the browser &mdash; no installation
+            required. Enter a session type, get instant lattice analysis, Hasse diagrams, and generated
+            JUnit 5 tests. All 34 benchmark protocols are pre-loaded for quick exploration.
+        </p>
+
+        <p><strong><a href="/tools/analyzer">Launch the interactive analyzer &rarr;</a></strong></p>
+
+        <h3>Docker Deployment</h3>
+        <pre class="cli-example"><code>docker build -t reticulate-web ./web
+docker run -p 8000:8000 reticulate-web</code></pre>
+    </section>
+
+    <!-- Feature comparison table -->
+    <section class="home-section">
+        <h2>Feature Comparison</h2>
+        <table class="benchmark-table feature-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Reticulate</th>
+                    <th>BICA Reborn</th>
+                    <th>Web Analyzer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Session type parsing</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>State-space construction</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>Lattice checking</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>Parallel constructor (<code>&parallel;</code>)</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>Hasse diagram generation</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713; (DOT)</td>
+                    <td class="check-pass">&#x2713; (SVG)</td>
+                </tr>
+                <tr>
+                    <td>Morphism hierarchy</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td>&mdash;</td>
+                </tr>
+                <tr>
+                    <td>Termination checking</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>Test generation (JUnit 5)</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td class="check-pass">&#x2713;</td>
+                </tr>
+                <tr>
+                    <td>Typestate checking</td>
+                    <td>&mdash;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td>&mdash;</td>
+                </tr>
+                <tr>
+                    <td>Annotation processor</td>
+                    <td>&mdash;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td>&mdash;</td>
+                </tr>
+                <tr>
+                    <td>Thread safety analysis</td>
+                    <td>&mdash;</td>
+                    <td class="check-pass">&#x2713;</td>
+                    <td>&mdash;</td>
+                </tr>
+                <tr>
+                    <td>Language</td>
+                    <td>Python 3.11+</td>
+                    <td>Java 21+</td>
+                    <td>Browser</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Source & License -->
+    <section class="home-section">
+        <h2>Source &amp; License</h2>
+        <p>
+            All tools are open source and available on GitHub:
+            <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">github.com/alcides/bica</a>.
+        </p>
+    </section>
+{% endblock %}

@@ -112,7 +112,7 @@ def _prerender_benchmarks() -> list[BenchmarkCacheEntry]:
             logger.warning("Failed to pre-render benchmark %s: %s", b.name, exc)
             continue
 
-        tool_url = "/tool?type=" + urllib.parse.quote(b.type_string, safe="")
+        tool_url = "/tools/analyzer?type=" + urllib.parse.quote(b.type_string, safe="")
         entries.append(
             BenchmarkCacheEntry(
                 name=b.name,
@@ -239,18 +239,37 @@ async def index(request: Request) -> HTMLResponse:
     )
 
 
-@app.get("/tool", response_class=HTMLResponse)
-async def tool(request: Request, type: str | None = None) -> HTMLResponse:
+@app.get("/tools", response_class=HTMLResponse)
+async def tools(request: Request) -> HTMLResponse:
+    """Tools landing page with overview of all three tools."""
+    return templates.TemplateResponse(
+        "tools.html",
+        {"request": request, "active_page": "tools"},
+    )
+
+
+@app.get("/tools/analyzer", response_class=HTMLResponse)
+async def tools_analyzer(request: Request, type: str | None = None) -> HTMLResponse:
     """Interactive analyzer page."""
     return templates.TemplateResponse(
-        "tool.html",
+        "analyzer.html",
         {
             "request": request,
-            "active_page": "tool",
+            "active_page": "tools",
             "benchmarks": BENCHMARKS,
             "prefill": type or "",
         },
     )
+
+
+@app.get("/tool")
+async def tool_redirect(request: Request) -> RedirectResponse:
+    """Backward-compatible redirect from /tool to /tools/analyzer."""
+    query = str(request.query_params)
+    url = "/tools/analyzer"
+    if query:
+        url += "?" + query
+    return RedirectResponse(url=url, status_code=301)
 
 
 @app.post("/analyze", response_class=HTMLResponse)

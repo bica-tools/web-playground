@@ -712,4 +712,85 @@ table:not(.benchmark-table) {
     .paper-header h1 {
         font-size: 1.4rem;
     }
+
+    .tool-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Tools landing page                                                  */
+/* ------------------------------------------------------------------ */
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    text-align: center;
+}
+
+.tool-card h3 {
+    margin-top: 0;
+    font-size: 1.05rem;
+}
+
+.tool-card-lang {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-top: -0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.tool-section {
+    margin: 3rem 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.tool-section h2 {
+    margin-bottom: 1rem;
+}
+
+.tool-section h3 {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cli-example {
+    background: #fff;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.feature-table {
+    max-width: 100% !important;
+}
+
+.feature-table td:nth-child(2),
+.feature-table td:nth-child(3),
+.feature-table td:nth-child(4),
+.feature-table th:nth-child(2),
+.feature-table th:nth-child(3),
+.feature-table th:nth-child(4) {
+    text-align: center;
+}
+
+.breadcrumb {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    margin-bottom: 0;
 }
