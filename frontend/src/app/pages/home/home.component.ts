@@ -60,6 +60,8 @@ import { HomeStats } from '../../models/api.models';
           Some non-lattices
         }
       </p>
+    } @else if (statsError) {
+      <p class="stats-line stats-error">Could not load benchmark stats</p>
     }
 
     <!-- Three pillars -->
@@ -207,6 +209,7 @@ import { HomeStats } from '../../models/api.models';
 export class HomeComponent implements OnInit {
   stats: HomeStats | null = null;
   loading = true;
+  statsError = false;
 
   constructor(private api: ApiService) {}
 
@@ -221,6 +224,7 @@ export class HomeComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
+        this.statsError = true;
         this.loading = false;
       },
     });
