@@ -28,7 +28,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.bica</groupId>
+            <groupId>com.zuacaldeira.bica</groupId>
             <artifactId>bica-reborn</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>

@@ -178,7 +178,7 @@ python -m reticulate "open . &{read: close . end, write: close . end}"
 python -m reticulate --hasse diagram.svg "open . &{read: close . end, write: close . end}"`;
 
   readonly javaDep = `<dependency>
-    <groupId>com.bica</groupId>
+    <groupId>com.zuacaldeira.bica</groupId>
     <artifactId>bica-reborn</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>`;
