@@ -1,0 +1,10 @@
+com/bica/web/dto/AnalyzeResponse.class
+com/bica/web/controller/AnalyzeController.class
+com/bica/web/BicaWebApplication.class
+com/bica/web/dto/TestGenResponse.class
+com/bica/web/dto/BenchmarkDto.class
+com/bica/web/service/AnalysisService.class
+com/bica/web/service/AnalysisService$BenchmarkDef.class
+com/bica/web/dto/TestGenRequest.class
+com/bica/web/dto/AnalyzeRequest.class
+com/bica/web/config/WebConfig.class

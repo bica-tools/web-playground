@@ -1,0 +1,9 @@
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/BicaWebApplication.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/config/WebConfig.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/controller/AnalyzeController.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/dto/AnalyzeRequest.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/dto/AnalyzeResponse.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/dto/BenchmarkDto.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/dto/TestGenRequest.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/dto/TestGenResponse.java
+/home/zuacaldeira/Development/SessionTypesResearch/web/backend/src/main/java/com/bica/web/service/AnalysisService.java
