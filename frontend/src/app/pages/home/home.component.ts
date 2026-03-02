@@ -52,8 +52,8 @@ import { HomeStats } from '../../models/api.models';
     } @else if (stats) {
       <p class="stats-line">
         {{ stats.numBenchmarks }} benchmarks &middot;
-        9 modules &middot;
         {{ stats.totalStates }} states analyzed &middot;
+        {{ stats.totalTests }} tests generated &middot;
         @if (stats.allLattice) {
           All lattices &#x2713;
         } @else {
@@ -85,12 +85,12 @@ import { HomeStats } from '../../models/api.models';
 
         <mat-card>
           <mat-card-header>
-            <mat-card-title>Reticulate</mat-card-title>
+            <mat-card-title>Tools &amp; Analyzer</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <p>
-              Python library that constructs state spaces from session type
-              definitions, checks lattice properties, and verifies protocols.
+              Python library (Reticulate) and Java toolkit (BICA Reborn) that
+              construct state spaces, check lattice properties, and generate tests.
             </p>
           </mat-card-content>
           <mat-card-actions>
@@ -219,6 +219,7 @@ export class HomeComponent implements OnInit {
         this.stats = {
           numBenchmarks: benchmarks.length,
           totalStates: benchmarks.reduce((sum, b) => sum + b.numStates, 0),
+          totalTests: benchmarks.reduce((sum, b) => sum + b.numTests, 0),
           allLattice: benchmarks.every((b) => b.isLattice),
         };
         this.loading = false;

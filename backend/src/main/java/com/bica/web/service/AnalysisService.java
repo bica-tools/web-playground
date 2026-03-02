@@ -13,6 +13,7 @@ import com.bica.reborn.statespace.StateSpaceBuilder;
 import com.bica.reborn.termination.TerminationChecker;
 import com.bica.reborn.termination.TerminationResult;
 import com.bica.reborn.termination.WFParallelResult;
+import com.bica.reborn.testgen.PathEnumerator;
 import com.bica.reborn.testgen.TestGenConfig;
 import com.bica.reborn.testgen.TestGenerator;
 import com.bica.reborn.testgen.ViolationStyle;
@@ -173,6 +174,12 @@ public class AnalysisService {
         String svgHtml = renderSvg(dotSource);
         String toolUrl = "/tools/analyzer?type=" + URLEncoder.encode(def.typeString(), StandardCharsets.UTF_8);
 
+        var enumConfig = new TestGenConfig(def.name(), null, "obj", 2, 100, ViolationStyle.CALL_ANYWAY);
+        var enumResult = PathEnumerator.enumerate(ss, enumConfig);
+        int numTests = enumResult.validPaths().size()
+                + enumResult.violations().size()
+                + enumResult.incompletePrefixes().size();
+
         return new BenchmarkDto(
                 def.name(),
                 def.description(),
@@ -184,7 +191,8 @@ public class AnalysisService {
                 latticeResult.isLattice(),
                 def.usesParallel(),
                 svgHtml,
-                toolUrl
+                toolUrl,
+                numTests
         );
     }
 

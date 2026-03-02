@@ -29,6 +29,7 @@ export interface TestGenResponse {
 export interface HomeStats {
   numBenchmarks: number;
   totalStates: number;
+  totalTests: number;
   allLattice: boolean;
 }
 
@@ -44,4 +45,5 @@ export interface BenchmarkDto {
   usesParallel: boolean;
   svgHtml: string;
   toolUrl: string;
+  numTests: number;
 }
