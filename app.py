@@ -9,7 +9,6 @@ benchmark gallery, publications, and author information.
 
 from __future__ import annotations
 
-import base64
 import hashlib
 import hmac
 import logging
@@ -227,21 +226,12 @@ async def logout():
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    """Landing page with hero, abstract, featured diagram, and stats."""
-    # Pick a featured benchmark for the landing page diagram
-    featured = _benchmark_cache[0] if _benchmark_cache else None
-    # Encode SVG as a data URI for CSS background-image
-    hero_bg_uri = ""
-    if featured:
-        b64 = base64.b64encode(featured.svg_html.encode("utf-8")).decode("ascii")
-        hero_bg_uri = f"data:image/svg+xml;base64,{b64}"
+    """Landing page with paper-style header, abstract, and stats."""
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "active_page": "home",
-            "featured": featured,
-            "hero_bg_uri": hero_bg_uri,
             "num_benchmarks": len(_benchmark_cache),
             "total_states": sum(b.num_states for b in _benchmark_cache),
             "all_lattice": all(b.is_lattice for b in _benchmark_cache),
@@ -354,22 +344,25 @@ async def analyze(
     )
 
 
-@app.get("/tutorials", response_class=HTMLResponse)
-async def tutorials(request: Request) -> HTMLResponse:
-    """Tutorials page."""
+@app.get("/documentation", response_class=HTMLResponse)
+async def documentation(request: Request) -> HTMLResponse:
+    """Merged documentation page: theory, tutorials, FAQ."""
     return templates.TemplateResponse(
-        "tutorials.html",
-        {"request": request, "active_page": "tutorials"},
+        "documentation.html",
+        {"request": request, "active_page": "documentation"},
     )
 
 
-@app.get("/theory", response_class=HTMLResponse)
-async def theory(request: Request) -> HTMLResponse:
-    """Theory overview page."""
-    return templates.TemplateResponse(
-        "theory.html",
-        {"request": request, "active_page": "theory"},
-    )
+@app.get("/tutorials")
+async def tutorials() -> RedirectResponse:
+    """Redirect to documentation page (tutorials section)."""
+    return RedirectResponse(url="/documentation#tutorials", status_code=301)
+
+
+@app.get("/theory")
+async def theory() -> RedirectResponse:
+    """Redirect to documentation page (theory section)."""
+    return RedirectResponse(url="/documentation#theory", status_code=301)
 
 
 @app.get("/benchmarks", response_class=HTMLResponse)
@@ -394,13 +387,10 @@ async def publications(request: Request) -> HTMLResponse:
     )
 
 
-@app.get("/faq", response_class=HTMLResponse)
-async def faq(request: Request) -> HTMLResponse:
-    """FAQ page."""
-    return templates.TemplateResponse(
-        "faq.html",
-        {"request": request, "active_page": "faq"},
-    )
+@app.get("/faq")
+async def faq() -> RedirectResponse:
+    """Redirect to documentation page (FAQ section)."""
+    return RedirectResponse(url="/documentation#faq", status_code=301)
 
 
 @app.get("/about", response_class=HTMLResponse)

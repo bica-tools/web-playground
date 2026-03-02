@@ -7,62 +7,57 @@
 
 {% block content %}
     <header>
-        <h1>Benchmark Gallery</h1>
+        <h1>Benchmarks</h1>
         <p>
-            {{ benchmarks | length }} real-world and classic protocols expressed as session types.
-            Every benchmark has been verified through the full reticulate pipeline:
-            parse, build state space, check lattice properties, and render the Hasse diagram.
+            {{ benchmarks | length }} real-world and classic protocols expressed as session types,
+            verified through the full reticulate pipeline.
         </p>
     </header>
 
-    <!-- Summary -->
-    <section class="benchmark-summary">
-        <div class="stat-card">
-            <span class="stat-number">{{ benchmarks | length }}</span>
-            <span class="stat-label">Protocols</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-number">{{ benchmarks | selectattr("uses_parallel") | list | length }}</span>
-            <span class="stat-label">Use Parallel</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-number">{{ benchmarks | selectattr("is_lattice") | list | length }}</span>
-            <span class="stat-label">Are Lattices</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-number">{{ benchmarks | sum(attribute="num_states") }}</span>
-            <span class="stat-label">Total States</span>
-        </div>
-    </section>
+    <!-- Summary line -->
+    <p class="stats-line">
+        {{ benchmarks | length }} protocols &middot;
+        {{ benchmarks | selectattr("uses_parallel") | list | length }} use parallel &middot;
+        {{ benchmarks | selectattr("is_lattice") | list | length }} are lattices &middot;
+        {{ benchmarks | sum(attribute="num_states") }} total states
+    </p>
 
-    <!-- Benchmark cards -->
-    <section class="benchmark-grid">
-        {% for b in benchmarks %}
-        <article class="benchmark-card" id="benchmark-{{ loop.index }}">
-            <header>
-                <h3>
-                    {{ loop.index }}. {{ b.name }}
-                    {% if b.uses_parallel %}<span class="badge badge-parallel" title="Uses parallel constructor">&parallel;</span>{% endif %}
-                    {% if b.is_lattice %}<span class="badge badge-lattice" title="Verified lattice">&check;</span>{% endif %}
-                </h3>
-            </header>
-            <p class="benchmark-desc">{{ b.description }}</p>
-            <pre class="benchmark-type"><code>{{ b.pretty_str }}</code></pre>
-            <div class="benchmark-metrics">
-                <span>{{ b.num_states }} states</span>
-                <span>{{ b.num_transitions }} transitions</span>
-                <span>{{ b.num_sccs }} SCCs</span>
-            </div>
-            <details>
-                <summary>Hasse Diagram</summary>
-                <div class="svg-container">
-                    {{ b.svg_html | safe }}
-                </div>
-            </details>
-            <p class="benchmark-action">
-                <a href="{{ b.tool_url }}">Analyze interactively &rarr;</a>
-            </p>
-        </article>
-        {% endfor %}
-    </section>
+    <!-- Benchmark table -->
+    <table class="benchmark-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Protocol</th>
+                <th>States</th>
+                <th>Trans.</th>
+                <th>SCCs</th>
+                <th>&parallel;</th>
+                <th>Lattice</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in benchmarks %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ b.name }}</td>
+                <td>{{ b.num_states }}</td>
+                <td>{{ b.num_transitions }}</td>
+                <td>{{ b.num_sccs }}</td>
+                <td>{% if b.uses_parallel %}&#x2713;{% endif %}</td>
+                <td>{% if b.is_lattice %}&#x2713;{% endif %}</td>
+                <td><a href="{{ b.tool_url }}">analyze</a></td>
+            </tr>
+            <tr class="benchmark-detail">
+                <td colspan="8">
+                    <details>
+                        <summary>Session type &amp; diagram</summary>
+                        <pre><code>{{ b.pretty_str }}</code></pre>
+                        <div class="svg-container">{{ b.svg_html | safe }}</div>
+                    </details>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

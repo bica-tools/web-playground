@@ -12,6 +12,10 @@
     <meta property="og:url" content="https://bica.zuacaldeira.com{% block og_path %}/{% endblock %}">
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <link rel="stylesheet" href="/static/style.css">
@@ -21,18 +25,16 @@
     {% if not hide_nav %}
     <nav class="site-nav">
         <div class="container nav-inner">
-            <a href="/" class="nav-brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><line x1="16" y1="4" x2="6" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="4" x2="26" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="4" r="3" fill="currentColor"/><circle cx="6" cy="16" r="3" fill="currentColor"/><circle cx="26" cy="16" r="3" fill="currentColor"/><circle cx="16" cy="28" r="3" fill="currentColor"/></svg> Reticulate</a>
+            <a href="/" class="nav-brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="18" height="18" aria-hidden="true"><line x1="16" y1="4" x2="6" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="4" x2="26" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="16" x2="16" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="4" r="3" fill="currentColor"/><circle cx="6" cy="16" r="3" fill="currentColor"/><circle cx="26" cy="16" r="3" fill="currentColor"/><circle cx="16" cy="28" r="3" fill="currentColor"/></svg> Reticulate</a>
             <button class="nav-toggle" aria-label="Toggle navigation" onclick="this.parentElement.classList.toggle('open')">
                 <span></span><span></span><span></span>
             </button>
             <ul class="nav-links">
                 <li><a href="/" {% if active_page == "home" %}class="active"{% endif %}>Home</a></li>
                 <li><a href="/tool" {% if active_page == "tool" %}class="active"{% endif %}>Tool</a></li>
-                <li><a href="/tutorials" {% if active_page == "tutorials" %}class="active"{% endif %}>Tutorials</a></li>
-                <li><a href="/theory" {% if active_page == "theory" %}class="active"{% endif %}>Theory</a></li>
+                <li><a href="/documentation" {% if active_page == "documentation" %}class="active"{% endif %}>Documentation</a></li>
                 <li><a href="/benchmarks" {% if active_page == "benchmarks" %}class="active"{% endif %}>Benchmarks</a></li>
                 <li><a href="/publications" {% if active_page == "publications" %}class="active"{% endif %}>Publications</a></li>
-                <li><a href="/faq" {% if active_page == "faq" %}class="active"{% endif %}>FAQ</a></li>
                 <li><a href="/about" {% if active_page == "about" %}class="active"{% endif %}>About</a></li>
             </ul>
         </div>
@@ -46,14 +48,8 @@
     <footer class="site-footer">
         <div class="container">
             <p>
-                <strong>Reticulate</strong> &mdash; Session Types as Algebraic Reticulates<br>
-                PhD research by Alexandre Zua Caldeira &middot; LASIGE/FCUL, University of Lisbon<br>
-                Supervisor: Prof. Vasco T. Vasconcelos
-            </p>
-            <p class="footer-links">
-                <a href="/tool">Try the Tool</a> &middot;
-                <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub</a> &middot;
-                <a href="https://www.lasige.pt" target="_blank" rel="noopener">LASIGE</a>
+                &copy; 2026 Alexandre Zua Caldeira &middot; LASIGE/FCUL, University of Lisbon &middot;
+                <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub</a>
             </p>
         </div>
     </footer>
