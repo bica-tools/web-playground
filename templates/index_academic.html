@@ -94,11 +94,28 @@
                 <span class="pub-title">Session Type State Spaces Form Lattices</span>
                 <span class="badge-draft">Draft</span>
                 <p class="pub-authors">A. Z. Caldeira, V. T. Vasconcelos</p>
-                <p class="pub-venue">Target: CONCUR 2026</p>
+                <p class="pub-venue">CONCUR 2026, Liverpool</p>
+                <div class="pub-links-inline">
+                    <a href="/static/papers/step5-lattice.pdf">PDF</a>
+                    <a href="/tools/analyzer">Live Demo</a>
+                </div>
+            </li>
+            <li>
+                <span class="pub-title">Reticulate: A Lattice-Theoretic Toolkit for Session Types</span>
+                <span class="badge-draft">Draft</span>
+                <p class="pub-authors">A. Z. Caldeira, V. T. Vasconcelos</p>
+                <p class="pub-venue">Tool paper &mdash; Python library (target: TACAS 2027)</p>
                 <div class="pub-links-inline">
                     <a href="/static/papers/reticulate-tool.pdf">PDF</a>
-                    <a href="/tools/analyzer">Live Demo</a>
-                    <a href="https://github.com/alcides/bica">Source Code</a>
+                </div>
+            </li>
+            <li>
+                <span class="pub-title">BICA Reborn: Annotation-Based Session Type Checking for Java</span>
+                <span class="badge-draft">Draft</span>
+                <p class="pub-authors">A. Z. Caldeira, V. T. Vasconcelos</p>
+                <p class="pub-venue">Tool paper &mdash; Java annotation processor (target: OOPSLA 2027)</p>
+                <div class="pub-links-inline">
+                    <a href="/static/papers/bica-reborn.pdf">PDF</a>
                 </div>
             </li>
         </ul>
@@ -109,7 +126,7 @@
     <p class="stats-line">
         {{ num_benchmarks }} benchmarks &middot;
         {{ total_states }} states analyzed &middot;
-        1,052+ tests &middot;
+        {{ total_tests }} tests &middot;
         Lean 4 formalization &middot;
         {% if all_lattice %}All lattices &#x2713;{% else %}Some non-lattices{% endif %}
     </p>

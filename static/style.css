@@ -456,6 +456,18 @@ pre code {
     margin-left: 0.3rem;
 }
 
+.badge-submitted {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    background: #dcfce7;
+    color: #166534;
+    vertical-align: middle;
+    margin-left: 0.3rem;
+}
+
 /* ------------------------------------------------------------------ */
 /* Documentation page (merged theory + tutorials + FAQ)                */
 /* ------------------------------------------------------------------ */

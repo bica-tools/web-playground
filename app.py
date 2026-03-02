@@ -224,6 +224,10 @@ async def logout():
     return response
 
 
+# Project-wide test counts (Python 383 + 34 benchmarks + Java 1,052 + Tutorial 119).
+_TOTAL_TESTS = "1,588"
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     """Landing page with paper-style header, abstract, and stats."""
@@ -235,6 +239,7 @@ async def index(request: Request) -> HTMLResponse:
             "num_benchmarks": len(_benchmark_cache),
             "total_states": sum(b.num_states for b in _benchmark_cache),
             "all_lattice": all(b.is_lattice for b in _benchmark_cache),
+            "total_tests": _TOTAL_TESTS,
         },
     )
 
@@ -461,6 +466,7 @@ def _landing_ctx() -> dict[str, Any]:
         "num_benchmarks": len(_benchmark_cache),
         "total_states": sum(b.num_states for b in _benchmark_cache),
         "all_lattice": all(b.is_lattice for b in _benchmark_cache),
+        "total_tests": _TOTAL_TESTS,
     }
 
 
