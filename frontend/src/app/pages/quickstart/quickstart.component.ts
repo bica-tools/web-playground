@@ -19,8 +19,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
         <div class="tab-content">
           <div class="tutorial-step">
             <h3>Step 1: Install</h3>
-            <app-code-block [code]="pythonInstall" label="bash"></app-code-block>
-            <p>Or clone and install from source:</p>
+            <p>Clone the repository and run directly (Python 3.11+, no dependencies):</p>
             <app-code-block [code]="pythonInstallSource" label="bash"></app-code-block>
           </div>
 
@@ -153,11 +152,9 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
   `],
 })
 export class QuickstartComponent {
-  readonly pythonInstall = 'pip install reticulate-sessiontypes';
-
-  readonly pythonInstallSource = `git clone https://github.com/alcides/bica.git
-cd bica/reticulate
-pip install -e .`;
+  readonly pythonInstallSource = `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
+cd SessionTypesResearch/reticulate
+python3 -m reticulate "end"`;
 
   readonly pythonDefine = `from reticulate import parse, build_statespace, check_lattice, pretty
 

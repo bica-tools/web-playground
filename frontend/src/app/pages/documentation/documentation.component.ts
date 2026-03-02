@@ -17,9 +17,9 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     <nav class="doc-toc">
       <h3>Contents</h3>
       <ol>
-        <li><a href="#theory">Theory</a> &mdash; formal foundations</li>
-        <li><a href="#tutorials">Tutorials</a> &mdash; step-by-step guides</li>
-        <li><a href="#faq">FAQ</a> &mdash; frequently asked questions</li>
+        <li><a (click)="scrollTo('theory')">Theory</a> &mdash; formal foundations</li>
+        <li><a (click)="scrollTo('tutorials')">Tutorials</a> &mdash; step-by-step guides</li>
+        <li><a (click)="scrollTo('faq')">FAQ</a> &mdash; frequently asked questions</li>
       </ol>
     </nav>
 
@@ -362,6 +362,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     .doc-toc a {
       color: var(--brand-primary, #4338ca);
       text-decoration: none;
+      cursor: pointer;
     }
     .doc-toc a:hover {
       text-decoration: underline;
@@ -465,6 +466,10 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
   `],
 })
 export class DocumentationComponent {
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   readonly grammarCode = `S  ::=  &{ m\u2081 : S\u2081 , \u2026 , m\u2099 : S\u2099 }    \u2014 branch (external choice)
      |  +{ l\u2081 : S\u2081 , \u2026 , l\u2099 : S\u2099 }    \u2014 selection (internal choice)
      |  ( S\u2081 || S\u2082 )                    \u2014 parallel

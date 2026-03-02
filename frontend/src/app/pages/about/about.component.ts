@@ -32,7 +32,7 @@ import { MatCardModule } from '@angular/material/card';
           </p>
           <div class="person-links">
             <a href="https://www.zuacaldeira.com" target="_blank" rel="noopener">Website</a>
-            <a href="https://github.com/alcides" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://github.com/zuacaldeira" target="_blank" rel="noopener">GitHub</a>
           </div>
         </mat-card-content>
       </mat-card>
@@ -125,7 +125,7 @@ import { MatCardModule } from '@angular/material/card';
       <p>
         For questions about the research or collaboration inquiries, please
         reach out via the institutional channels listed above or through the
-        <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub repository</a>.
+        <a href="https://github.com/zuacaldeira/SessionTypesResearch" target="_blank" rel="noopener">GitHub repository</a>.
       </p>
     </section>
   `,
