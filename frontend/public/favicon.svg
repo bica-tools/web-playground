@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Lattice/diamond: top node, two middle nodes, bottom node -->
+  <style>
+    line { stroke: #4338ca; stroke-width: 2; stroke-linecap: round; }
+    circle { fill: #4338ca; }
+  </style>
+  <!-- Edges -->
+  <line x1="16" y1="4" x2="6" y2="16"/>
+  <line x1="16" y1="4" x2="26" y2="16"/>
+  <line x1="6" y1="16" x2="16" y2="28"/>
+  <line x1="26" y1="16" x2="16" y2="28"/>
+  <!-- Nodes -->
+  <circle cx="16" cy="4" r="3"/>
+  <circle cx="6" cy="16" r="3"/>
+  <circle cx="26" cy="16" r="3"/>
+  <circle cx="16" cy="28" r="3"/>
+</svg>
