@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}Reticulate: verify session type protocols instantly in your browser. Parse, check lattice, visualize, generate tests.{% endblock %}
+
+{% block head_extra %}
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero with embedded mini-analyzer -->
+    <section class="tool-hero">
+        <h1>Verify session type protocols <em>instantly</em></h1>
+        <p class="hero-subtitle">
+            Parse a protocol, check it forms a lattice, visualize the state space,
+            and generate JUnit 5 tests &mdash; all in your browser.
+        </p>
+
+        <!-- Inline mini-analyzer -->
+        <form hx-post="/analyze" hx-target="#mini-results" hx-indicator="#mini-spinner" class="mini-analyzer">
+            <div class="mini-input-row">
+                <input type="text" name="type_string" placeholder='Try: open . &{read: close . end, write: close . end}'
+                       value="{{ prefill }}" class="mini-input" id="mini-type">
+                <button type="submit" class="mini-btn">Analyze</button>
+            </div>
+        </form>
+        <div id="mini-spinner" class="htmx-indicator" style="text-align:center; padding:1rem;">Analyzing...</div>
+        <div id="mini-results"></div>
+    </section>
+
+    <!-- Quick links -->
+    <section class="home-section">
+        <div class="pillars-grid">
+            <article class="pillar-card">
+                <h3>Try It</h3>
+                <p>Full interactive analyzer with benchmark selector, Hasse diagrams, and test generation.</p>
+                <a href="/tools/analyzer">Open analyzer &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>How It Works</h3>
+                <p>7-stage verification pipeline from session type string to fully verified protocol.</p>
+                <a href="/pipeline">See the pipeline &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>Benchmarks</h3>
+                <p>{{ num_benchmarks }} verified protocols: SMTP, OAuth, ATM, MCP, gRPC, and more.</p>
+                <a href="/benchmarks">Browse benchmarks &rarr;</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Get Started -->
+    <section class="home-section">
+        <h2>Get Started</h2>
+        <div class="pillars-grid">
+            <article class="pillar-card">
+                <h3>Python</h3>
+                <p>Reticulate: lattice checker, state space builder, visualizer, test generator.</p>
+                <a href="/quickstart">Quick start &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>Java</h3>
+                <p>BICA Reborn: <code>@Session</code> annotation processor with compile-time checking.</p>
+                <a href="/quickstart">Quick start &rarr;</a>
+            </article>
+            <article class="pillar-card">
+                <h3>Web</h3>
+                <p>No installation. Run the analyzer in your browser with Docker deployment.</p>
+                <a href="/tools/analyzer">Open analyzer &rarr;</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Stats line -->
+    <p class="stats-line">
+        {{ num_benchmarks }} benchmarks &middot;
+        {{ total_states }} states analyzed &middot;
+        1,052 tests &middot;
+        {% if all_lattice %}All lattices &#x2713;{% else %}Some non-lattices{% endif %}
+    </p>
+{% endblock %}

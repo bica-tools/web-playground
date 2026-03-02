@@ -419,3 +419,89 @@ async def about(request: Request) -> HTMLResponse:
         "about.html",
         {"request": request, "active_page": "about"},
     )
+
+
+# ---------------------------------------------------------------------------
+# New pages: pipeline, quick start
+# ---------------------------------------------------------------------------
+
+
+@app.get("/pipeline", response_class=HTMLResponse)
+async def pipeline(request: Request) -> HTMLResponse:
+    """Pipeline walkthrough page."""
+    return templates.TemplateResponse(
+        "pipeline.html",
+        {"request": request, "active_page": "pipeline"},
+    )
+
+
+@app.get("/quickstart", response_class=HTMLResponse)
+async def quickstart(request: Request) -> HTMLResponse:
+    """Quick start guide."""
+    return templates.TemplateResponse(
+        "quickstart.html",
+        {
+            "request": request,
+            "active_page": "quickstart",
+            "num_benchmarks": len(_benchmark_cache),
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Layout variant routes
+# ---------------------------------------------------------------------------
+
+_LANDING_STATS: dict[str, Any] = {}
+
+
+def _landing_ctx() -> dict[str, Any]:
+    """Common context for landing page variants."""
+    return {
+        "num_benchmarks": len(_benchmark_cache),
+        "total_states": sum(b.num_states for b in _benchmark_cache),
+        "all_lattice": all(b.is_lattice for b in _benchmark_cache),
+    }
+
+
+@app.get("/v/audience", response_class=HTMLResponse)
+async def variant_audience(request: Request) -> HTMLResponse:
+    """Audience-driven landing page variant."""
+    return templates.TemplateResponse(
+        "index_audience.html",
+        {
+            "request": request,
+            "active_page": "home",
+            "layout_variant": "audience",
+            **_landing_ctx(),
+        },
+    )
+
+
+@app.get("/v/tool", response_class=HTMLResponse)
+async def variant_tool(request: Request, type: str | None = None) -> HTMLResponse:
+    """Tool-centric landing page variant."""
+    return templates.TemplateResponse(
+        "index_tool.html",
+        {
+            "request": request,
+            "active_page": "home",
+            "layout_variant": "tool",
+            "prefill": type or "",
+            **_landing_ctx(),
+        },
+    )
+
+
+@app.get("/v/academic", response_class=HTMLResponse)
+async def variant_academic(request: Request) -> HTMLResponse:
+    """Academic portal landing page variant."""
+    return templates.TemplateResponse(
+        "index_academic.html",
+        {
+            "request": request,
+            "active_page": "home",
+            "layout_variant": "academic",
+            **_landing_ctx(),
+        },
+    )

@@ -794,3 +794,294 @@ table:not(.benchmark-table) {
     font-size: 0.85rem;
     margin-bottom: 0;
 }
+
+/* ------------------------------------------------------------------ */
+/* Layout variant switcher                                             */
+/* ------------------------------------------------------------------ */
+
+.variant-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    background: #eef2ff;
+    border-bottom: 1px solid #c7d2fe;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+}
+
+.variant-label {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.variant-switcher a {
+    color: var(--pico-primary);
+    text-decoration: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.variant-switcher a:hover {
+    background: rgba(67, 56, 202, 0.1);
+}
+
+.variant-switcher a.variant-active {
+    background: var(--pico-primary);
+    color: #fff;
+}
+
+.variant-reset {
+    color: var(--text-muted) !important;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pipeline diagram (CSS-based)                                        */
+/* ------------------------------------------------------------------ */
+
+.pipeline-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 1.5rem 0;
+    margin: 1rem 0 2rem;
+    overflow-x: auto;
+    flex-wrap: wrap;
+}
+
+.pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid var(--border-subtle);
+    border-radius: 6px;
+    background: #fff;
+    min-width: 80px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.pipeline-stage.stage-active {
+    border-color: var(--pico-primary);
+}
+
+.stage-num {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--pico-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stage-name {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.pipeline-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Audience-driven landing page                                        */
+/* ------------------------------------------------------------------ */
+
+.audience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.audience-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    border-top: 4px solid var(--pico-primary);
+}
+
+.audience-researcher { border-top-color: #7c3aed; }
+.audience-developer { border-top-color: #059669; }
+.audience-reviewer { border-top-color: #d97706; }
+
+.audience-card h2 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.audience-card ul {
+    padding-left: 1.25rem;
+    margin: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+.audience-card ul li {
+    margin-bottom: 0.3rem;
+}
+
+.audience-cta {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--pico-primary);
+}
+
+/* ------------------------------------------------------------------ */
+/* Tool-centric landing page                                           */
+/* ------------------------------------------------------------------ */
+
+.tool-hero {
+    text-align: center;
+    padding: 2.5rem 0 1.5rem;
+}
+
+.tool-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.tool-hero h1 em {
+    color: var(--pico-primary);
+    font-style: normal;
+}
+
+.hero-subtitle {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+}
+
+.mini-analyzer {
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.mini-input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mini-input {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+}
+
+.mini-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 1.25rem;
+    background: var(--pico-primary);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mini-btn:hover {
+    background: var(--pico-primary-hover);
+}
+
+/* ------------------------------------------------------------------ */
+/* Academic portal landing page                                        */
+/* ------------------------------------------------------------------ */
+
+.result-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.result-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--pico-primary);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.result-card h3 {
+    margin-top: 0;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+/* Quick start tabs                                                    */
+/* ------------------------------------------------------------------ */
+
+.quickstart-tabs {
+    display: flex;
+    gap: 0;
+    margin: 1.5rem 0 0;
+    border-bottom: 2px solid var(--border-subtle);
+}
+
+.qs-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.qs-tab:hover {
+    color: var(--pico-primary);
+}
+
+.qs-tab.active {
+    color: var(--pico-primary);
+    border-bottom-color: var(--pico-primary);
+    font-weight: 600;
+}
+
+.qs-panel {
+    padding: 1rem 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive: variant switcher + pipeline                             */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+    .audience-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pipeline-diagram {
+        justify-content: flex-start;
+    }
+
+    .variant-switcher {
+        font-size: 0.75rem;
+        gap: 0.3rem;
+    }
+
+    .tool-hero h1 {
+        font-size: 1.4rem;
+    }
+
+    .mini-input-row {
+        flex-direction: column;
+    }
+}

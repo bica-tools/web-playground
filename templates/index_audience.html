@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}Session Types as Algebraic Reticulates: a theory and toolchain for researchers, developers, and reviewers.{% endblock %}
+
+{% block content %}
+    <!-- Paper-style header -->
+    <section class="paper-header">
+        <h1>Session Types as Algebraic Reticulates</h1>
+        <p class="author-line">Alexandre Zua Caldeira &middot; Vasco T. Vasconcelos</p>
+        <p class="institution-line">LASIGE, Faculty of Sciences, University of Lisbon</p>
+    </section>
+
+    <!-- Brief abstract -->
+    <section class="abstract">
+        <p>
+            We prove that session-type state spaces form <strong>lattices</strong>, develop
+            a morphism hierarchy between them, and provide tools for verification at both
+            the Python and Java level. Choose your path below.
+        </p>
+    </section>
+
+    <!-- Audience paths -->
+    <section class="home-section">
+        <div class="audience-grid">
+            <article class="audience-card audience-researcher">
+                <h2>For Researchers</h2>
+                <p>
+                    Explore the theory: lattice proofs, the parallel constructor,
+                    morphism hierarchy, and connections to bisimulation.
+                </p>
+                <ul>
+                    <li><a href="/documentation#theory">Lattice theory</a></li>
+                    <li><a href="/pipeline">Verification pipeline (7 stages)</a></li>
+                    <li><a href="/benchmarks">34 verified benchmarks</a></li>
+                    <li><a href="/publications">Papers &amp; proofs</a></li>
+                </ul>
+                <a href="/documentation#theory" class="audience-cta">Explore the theory &rarr;</a>
+            </article>
+
+            <article class="audience-card audience-developer">
+                <h2>For Developers</h2>
+                <p>
+                    Verify your protocols with Python or Java. Compile-time checking,
+                    test generation, and Hasse diagram visualization.
+                </p>
+                <ul>
+                    <li><a href="/quickstart">5-minute quick start</a></li>
+                    <li><a href="/documentation#tutorials">Step-by-step tutorials</a></li>
+                    <li><a href="/tools">Tools overview</a></li>
+                    <li><a href="/tools/analyzer">Interactive analyzer</a></li>
+                </ul>
+                <a href="/quickstart" class="audience-cta">Get started &rarr;</a>
+            </article>
+
+            <article class="audience-card audience-reviewer">
+                <h2>For Reviewers</h2>
+                <p>
+                    See the system in action: live demos, benchmark results,
+                    pipeline walkthrough, and test metrics.
+                </p>
+                <ul>
+                    <li><a href="/tools/analyzer?type=insertCard%20.%20enterPIN%20.%20%2B%7BAUTH%3A%20rec%20X%20.%20%26%7BcheckBalance%3A%20X%2C%20withdraw%3A%20%2B%7BOK%3A%20X%2C%20INSUFFICIENT%3A%20X%7D%2C%20deposit%3A%20X%2C%20ejectCard%3A%20end%7D%2C%20REJECTED%3A%20ejectCard%20.%20end%7D">Live demo (ATM protocol)</a></li>
+                    <li><a href="/pipeline">7-stage pipeline walkthrough</a></li>
+                    <li><a href="/benchmarks">Benchmark gallery ({{ num_benchmarks }} protocols)</a></li>
+                    <li><a href="/publications">Artifact &amp; papers</a></li>
+                </ul>
+                <a href="/tools/analyzer" class="audience-cta">Try the live demo &rarr;</a>
+            </article>
+        </div>
+    </section>
+
+    <!-- Stats line -->
+    <p class="stats-line">
+        {{ num_benchmarks }} benchmarks &middot;
+        {{ total_states }} states verified &middot;
+        1,052 tests &middot;
+        {% if all_lattice %}All lattices &#x2713;{% else %}Some non-lattices{% endif %}
+    </p>
+{% endblock %}
