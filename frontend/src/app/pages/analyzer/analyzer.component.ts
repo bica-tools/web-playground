@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,7 +43,9 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
         <textarea matInput
                   [(ngModel)]="typeString"
                   rows="3"
-                  placeholder="e.g. rec X . &{read: X, done: end}"></textarea>
+                  placeholder="e.g. rec X . &{read: X, done: end}"
+                  (keydown.control.enter)="analyze()"></textarea>
+        <mat-hint>Press Ctrl+Enter to analyze</mat-hint>
       </mat-form-field>
 
       <div class="form-row">
@@ -86,7 +88,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
 
     <!-- Results -->
     @if (result) {
-      <section class="results">
+      <section class="results" #resultsSection>
         <h2>Analysis Result</h2>
 
         <!-- Pretty-printed type -->
@@ -146,30 +148,29 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
           </mat-expansion-panel>
         }
 
-        <!-- Test generation -->
-        <mat-expansion-panel class="test-gen-panel">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Test Generation</mat-panel-title>
-          </mat-expansion-panel-header>
-          @if (testSource) {
-            <app-code-block [code]="testSource" label="JUnit 5"></app-code-block>
-          } @else {
-            <div class="test-gen-form">
-              @if (!className.trim()) {
-                <p>Enter a class name above, then click Generate.</p>
-              }
-              <button mat-stroked-button
-                      [disabled]="generatingTests || !className.trim()"
-                      (click)="generateTests()">
-                @if (generatingTests) {
-                  <mat-spinner diameter="18"></mat-spinner>
-                } @else {
-                  Generate Tests
-                }
-              </button>
-            </div>
-          }
-        </mat-expansion-panel>
+        <!-- Test generation (only show when className is provided) -->
+        @if (className.trim()) {
+          <mat-expansion-panel class="test-gen-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Test Generation</mat-panel-title>
+            </mat-expansion-panel-header>
+            @if (testSource) {
+              <app-code-block [code]="testSource" label="JUnit 5"></app-code-block>
+            } @else {
+              <div class="test-gen-form">
+                <button mat-stroked-button
+                        [disabled]="generatingTests"
+                        (click)="generateTests()">
+                  @if (generatingTests) {
+                    <mat-spinner diameter="18"></mat-spinner>
+                  } @else {
+                    Generate Tests
+                  }
+                </button>
+              </div>
+            }
+          </mat-expansion-panel>
+        }
       </section>
     }
 
@@ -283,11 +284,6 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       align-items: center;
       gap: 16px;
     }
-    .test-gen-form p {
-      color: rgba(0, 0, 0, 0.6);
-      font-size: 14px;
-      margin: 0;
-    }
 
     .grammar-panel {
       margin: 32px 0;
@@ -295,6 +291,8 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
   `],
 })
 export class AnalyzerComponent implements OnInit {
+  @ViewChild('resultsSection') resultsSection?: ElementRef;
+
   typeString = '';
   className = '';
   benchmarks: BenchmarkDto[] = [];
@@ -304,13 +302,13 @@ export class AnalyzerComponent implements OnInit {
   analyzing = false;
   generatingTests = false;
 
-  readonly grammarRef = `S  ::=  &{ m₁ : S₁ , ... , mₙ : Sₙ }    -- branch (external choice)
-     |  +{ l₁ : S₁ , ... , lₙ : Sₙ }    -- selection (internal choice)
-     |  ( S₁ || S₂ )                    -- parallel
+  readonly grammarRef = `S  ::=  &{ m\u2081 : S\u2081 , ... , m\u2099 : S\u2099 }    -- branch (external choice)
+     |  +{ l\u2081 : S\u2081 , ... , l\u2099 : S\u2099 }    -- selection (internal choice)
+     |  ( S\u2081 || S\u2082 )                    -- parallel
      |  rec X . S                        -- recursion
      |  X                                -- variable
      |  end                              -- terminated
-     |  S₁ . S₂                          -- sequencing`;
+     |  S\u2081 . S\u2082                          -- sequencing`;
 
   constructor(
     private api: ApiService,
@@ -319,10 +317,11 @@ export class AnalyzerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Pre-fill from URL param
+    // Pre-fill from URL param and auto-analyze
     this.route.queryParams.subscribe((params) => {
       if (params['type']) {
         this.typeString = params['type'];
+        setTimeout(() => this.analyze(), 0);
       }
     });
 
@@ -349,6 +348,11 @@ export class AnalyzerComponent implements OnInit {
       next: (res) => {
         this.result = res;
         this.analyzing = false;
+        setTimeout(() => {
+          this.resultsSection?.nativeElement.scrollIntoView({
+            behavior: 'smooth',
+          });
+        }, 100);
       },
       error: (err) => {
         this.error = err.error?.error || err.message || 'Analysis failed';
