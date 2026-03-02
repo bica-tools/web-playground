@@ -1,0 +1,624 @@
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { CodeBlockComponent } from '../../components/code-block/code-block.component';
+
+@Component({
+  selector: 'app-documentation',
+  standalone: true,
+  imports: [RouterLink, MatExpansionModule, CodeBlockComponent],
+  template: `
+    <header class="page-header">
+      <h1>Documentation</h1>
+      <p>Theory, tutorials, and frequently asked questions.</p>
+    </header>
+
+    <!-- Table of contents -->
+    <nav class="doc-toc">
+      <h3>Contents</h3>
+      <ol>
+        <li><a href="#theory">Theory</a> &mdash; formal foundations</li>
+        <li><a href="#tutorials">Tutorials</a> &mdash; step-by-step guides</li>
+        <li><a href="#faq">FAQ</a> &mdash; frequently asked questions</li>
+      </ol>
+    </nav>
+
+    <!-- ================================================================ -->
+    <!-- THEORY                                                           -->
+    <!-- ================================================================ -->
+    <section class="doc-section" id="theory">
+      <h2>Theory</h2>
+
+      <div class="theory-section">
+        <h3>Session Types</h3>
+        <p>
+          A <strong>session type</strong> describes a communication protocol on an object &mdash;
+          the legal sequences of method calls, branches, and selections that a client may perform.
+          Instead of a flat interface, an object's type evolves as methods are called, enforcing
+          protocol compliance at compile time.
+        </p>
+        <div class="example-card">
+          <h4>Example: File Object</h4>
+          <app-code-block code="open . rec X . &{read: +{data: X, eof: close . end}}" label="Session type"></app-code-block>
+          <p>
+            Open the file, then repeatedly read: on <code>data</code>, loop back;
+            on <code>eof</code>, close and terminate. The type ensures <code>close</code>
+            is always called exactly once.
+          </p>
+        </div>
+      </div>
+
+      <div class="theory-section">
+        <h3>Grammar</h3>
+        <p>Session types are defined by the following grammar:</p>
+        <app-code-block [code]="grammarCode" label="Grammar"></app-code-block>
+      </div>
+
+      <div class="theory-section">
+        <h3>Constructors</h3>
+        <div class="constructors-grid">
+          <article class="constructor-card">
+            <h4><code>&amp;&#123;...&#125;</code> &mdash; Branch</h4>
+            <p>
+              <strong>External choice.</strong> The environment (client) chooses which method
+              to call. Each branch leads to a different continuation type.
+            </p>
+          </article>
+          <article class="constructor-card">
+            <h4><code>+&#123;...&#125;</code> &mdash; Selection</h4>
+            <p>
+              <strong>Internal choice.</strong> The object (server) decides the outcome.
+              The client must handle all possibilities.
+            </p>
+          </article>
+          <article class="constructor-card">
+            <h4><code>( S1 || S2 )</code> &mdash; Parallel</h4>
+            <p>
+              <strong>Concurrent access.</strong> Two execution paths run simultaneously
+              on a shared object. The combined state space is the product lattice.
+              This is the <strong>key novelty</strong> of this work.
+            </p>
+          </article>
+          <article class="constructor-card">
+            <h4><code>rec X . S</code> &mdash; Recursion</h4>
+            <p>
+              <strong>Looping protocols.</strong> The variable <code>X</code> marks the
+              loop point. Well-formed recursive types must have an exit path.
+            </p>
+          </article>
+          <article class="constructor-card">
+            <h4><code>S1 . S2</code> &mdash; Sequencing</h4>
+            <p>
+              <strong>Sequential composition.</strong> Syntactic sugar for a single-method
+              branch: <code>m . S</code> is equivalent to <code>&amp;&#123;m: S&#125;</code>.
+            </p>
+          </article>
+          <article class="constructor-card">
+            <h4><code>end</code> &mdash; Terminated</h4>
+            <p>
+              <strong>Protocol end.</strong> No further operations are allowed. Every
+              well-formed session type must eventually reach <code>end</code>.
+            </p>
+          </article>
+        </div>
+      </div>
+
+      <div class="theory-section">
+        <h3>State Spaces</h3>
+        <p>
+          Given a session type <code>S</code>, we construct its <strong>state space</strong>
+          <code>L(S)</code> &mdash; a directed graph where:
+        </p>
+        <ul>
+          <li><strong>States</strong> are the reachable configurations of the protocol</li>
+          <li><strong>Transitions</strong> are labeled edges (method calls, selections)</li>
+          <li>The <strong>initial state</strong> (top) is the protocol's entry point</li>
+          <li>The <strong>terminal state</strong> (bottom) corresponds to <code>end</code></li>
+        </ul>
+        <p>
+          The <strong>reachability ordering</strong> defines a partial order on states:
+          s1 &ge; s2 iff there is a path from s1 to s2.
+        </p>
+      </div>
+
+      <div class="theory-section">
+        <h3>Lattice Properties</h3>
+        <p>
+          A state space is a <strong>lattice</strong> (a <em>reticulate</em>) if and only if:
+        </p>
+        <ol>
+          <li>There is a <strong>top element</strong> (initial state)</li>
+          <li>There is a <strong>bottom element</strong> (terminal state)</li>
+          <li>Every pair of states has a <strong>meet</strong> (greatest lower bound)</li>
+          <li>Every pair of states has a <strong>join</strong> (least upper bound)</li>
+        </ol>
+        <p>
+          For cyclic state spaces (from recursion), we first <strong>quotient by SCCs</strong>
+          to obtain an acyclic DAG, then check lattice properties on the quotient.
+        </p>
+      </div>
+
+      <div class="theory-section">
+        <h3>The Parallel Constructor</h3>
+        <p>
+          The <code>&parallel;</code> constructor is the key novelty of this work. When two
+          branches execute in parallel on a shared object:
+        </p>
+        <div class="theory-highlight">
+          <code>L(S1 &parallel; S2) = L(S1) &times; L(S2)</code>
+        </div>
+        <p>
+          The product construction orders states componentwise.
+          <strong>Crucially</strong>, the product of two lattices is always a lattice.
+          This means that any well-formed session type using <code>&parallel;</code>
+          <em>necessarily</em> has a lattice state space.
+        </p>
+      </div>
+
+      <div class="theory-section">
+        <h3>Morphism Hierarchy</h3>
+        <p>
+          Between session-type state spaces, we define a hierarchy of structure-preserving maps:
+        </p>
+        <ol>
+          <li><strong>Isomorphism</strong> &mdash; bijective, order-preserving and reflecting.</li>
+          <li><strong>Embedding</strong> &mdash; injective, order-preserving and reflecting.</li>
+          <li><strong>Projection</strong> &mdash; surjective, order-preserving.</li>
+          <li><strong>Galois connection</strong> &mdash; an adjunction &alpha;(x) &le; y &hArr; x &le; &gamma;(y).</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- TUTORIALS                                                        -->
+    <!-- ================================================================ -->
+    <section class="doc-section" id="tutorials">
+      <h2>Tutorials</h2>
+
+      <h3>Tutorial 1: Typechecking Object Usage with <code>&#64;Session</code></h3>
+      <p>
+        BICA Reborn is a Java annotation processor that enforces communication protocols
+        at <strong>compile time</strong>. You annotate a class with <code>&#64;Session</code>,
+        write the protocol as a session type string, and the compiler checks that every
+        client uses the object correctly.
+      </p>
+
+      <div class="tutorial-step">
+        <h4>Step 1: Add the Dependency</h4>
+        <p>Clone the repository and install it to your local Maven cache:</p>
+        <app-code-block [code]="tut1Install" label="bash"></app-code-block>
+        <p>Then add the dependency to your project:</p>
+        <app-code-block [code]="tut1Dep" label="pom.xml"></app-code-block>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 2: Annotate Your Class</h4>
+        <app-code-block [code]="tut1Annotate" label="FileHandle.java"></app-code-block>
+        <p>
+          This type says: first call <code>open</code>, then choose either
+          <code>read</code> or <code>write</code>, then call <code>close</code>,
+          then the protocol ends.
+        </p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 3: Implement the Protocol</h4>
+        <app-code-block [code]="tut1Implement" label="FileHandle.java (full)"></app-code-block>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 4: Write Correct Client Code</h4>
+        <app-code-block [code]="tut1Client" label="Client.java"></app-code-block>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 5: See Compile-Time Errors</h4>
+        <app-code-block [code]="tut1BadClient" label="BadClient.java"></app-code-block>
+        <p>The error message tells you exactly which methods are available in the current state.</p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 6: Add Concurrency Annotations</h4>
+        <p>
+          When your session type uses <code>&parallel;</code>, methods in concurrent branches
+          need concurrency annotations:
+        </p>
+        <ul>
+          <li><code>&#64;Shared</code> &mdash; safe for concurrent access</li>
+          <li><code>&#64;ReadOnly</code> &mdash; read-only access</li>
+          <li><code>&#64;Exclusive</code> &mdash; exclusive access</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 7: Generate Tests Automatically</h4>
+        <p>
+          BICA can generate JUnit 5 test suites from a session type covering valid paths,
+          violations, and incomplete prefixes.
+        </p>
+        <app-code-block [code]="tut1TestGen" label="bash"></app-code-block>
+        <p>
+          You can also generate tests from the
+          <a routerLink="/tools/analyzer">interactive tool</a> by entering a class name.
+        </p>
+      </div>
+
+      <h3>Tutorial 2: Analyzing Session Types with the Reticulate CLI</h3>
+      <p>
+        Reticulate is a Python command-line tool that takes a session type string and
+        performs the full analysis pipeline: <strong>parse</strong>, <strong>build</strong>
+        the state space, <strong>check</strong> lattice properties, and optionally
+        <strong>visualize</strong> the Hasse diagram.
+      </p>
+
+      <div class="tutorial-step">
+        <h4>Step 1: Install Reticulate</h4>
+        <app-code-block [code]="tut2Install" label="bash"></app-code-block>
+        <p>You only need Python 3.11+ and the standard library.
+          The optional <code>graphviz</code> Python package is needed for Hasse diagrams.</p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 2: Your First Analysis</h4>
+        <app-code-block code='python -m reticulate "a . b . end"' label="bash"></app-code-block>
+        <p>Output:</p>
+        <app-code-block [code]="tut2Output" label="output"></app-code-block>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 3: Branches and Selections</h4>
+        <app-code-block [code]="tut2Branch" label="bash"></app-code-block>
+        <p>
+          This gives a 4-state diamond: the initial state branches into <code>read</code>
+          and <code>write</code>, both merging at <code>close</code>.
+        </p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 4: Recursion</h4>
+        <app-code-block [code]="tut2Rec" label="bash"></app-code-block>
+        <p>
+          The SCC quotient collapses cyclic states. The Recursion Lemma guarantees that
+          if the quotient is a lattice, so is the original.
+        </p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 5: The Parallel Constructor</h4>
+        <app-code-block code='python -m reticulate "(a.end || b.end)"' label="bash"></app-code-block>
+        <p>
+          The state space is the product lattice L(S1) &times; L(S2),
+          ordered componentwise.
+        </p>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 6: Visualize with <code>--dot</code> and <code>--hasse</code></h4>
+        <app-code-block [code]="tut2Viz" label="bash"></app-code-block>
+      </div>
+
+      <div class="tutorial-step">
+        <h4>Step 7: Real-World Protocols</h4>
+        <app-code-block [code]="tut2RealWorld" label="bash"></app-code-block>
+        <p>
+          The project includes <strong>34 benchmark protocols</strong>.
+          Browse them in the <a routerLink="/benchmarks">benchmarks gallery</a> or paste any
+          protocol into the <a routerLink="/tools/analyzer">interactive analyzer</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- FAQ                                                              -->
+    <!-- ================================================================ -->
+    <section class="doc-section" id="faq">
+      <h2>FAQ</h2>
+
+      <mat-accordion>
+        @for (q of faqItems; track q.question) {
+          <mat-expansion-panel [expanded]="q.expanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ q.question }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <p [innerHTML]="q.answer"></p>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </section>
+  `,
+  styles: [`
+    .page-header {
+      padding: 24px 0 16px;
+    }
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0 0 8px;
+    }
+    .page-header p {
+      color: rgba(0, 0, 0, 0.6);
+      margin: 0;
+    }
+
+    .doc-toc {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin: 24px 0;
+      background: rgba(0, 0, 0, 0.01);
+    }
+    .doc-toc h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 8px;
+    }
+    .doc-toc ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .doc-toc li {
+      line-height: 1.8;
+    }
+    .doc-toc a {
+      color: var(--brand-primary, #4338ca);
+      text-decoration: none;
+    }
+    .doc-toc a:hover {
+      text-decoration: underline;
+    }
+
+    .doc-section {
+      margin: 40px 0;
+    }
+    .doc-section h2 {
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    .doc-section h3 {
+      font-size: 18px;
+      font-weight: 500;
+      margin: 24px 0 12px;
+    }
+    .doc-section p {
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .doc-section ul, .doc-section ol {
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .theory-section {
+      margin: 24px 0;
+    }
+
+    .example-card {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+      background: rgba(0, 0, 0, 0.01);
+    }
+    .example-card h4 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 8px;
+    }
+    .example-card p {
+      margin: 8px 0 0;
+      font-size: 14px;
+    }
+
+    .constructors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .constructor-card {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.01);
+    }
+    .constructor-card h4 {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0 0 8px;
+    }
+    .constructor-card p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .theory-highlight {
+      text-align: center;
+      font-size: 18px;
+      padding: 16px;
+      margin: 16px 0;
+      background: rgba(67, 56, 202, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(67, 56, 202, 0.15);
+    }
+
+    .tutorial-step {
+      margin-bottom: 24px;
+    }
+    .tutorial-step h4 {
+      font-size: 15px;
+      font-weight: 500;
+      margin: 0 0 8px;
+    }
+    .tutorial-step p {
+      line-height: 1.7;
+      margin: 8px 0;
+    }
+    .tutorial-step a {
+      color: var(--brand-primary, #4338ca);
+      text-decoration: none;
+    }
+    .tutorial-step a:hover {
+      text-decoration: underline;
+    }
+  `],
+})
+export class DocumentationComponent {
+  readonly grammarCode = `S  ::=  &{ m\u2081 : S\u2081 , \u2026 , m\u2099 : S\u2099 }    \u2014 branch (external choice)
+     |  +{ l\u2081 : S\u2081 , \u2026 , l\u2099 : S\u2099 }    \u2014 selection (internal choice)
+     |  ( S\u2081 || S\u2082 )                    \u2014 parallel
+     |  rec X . S                        \u2014 recursion
+     |  X                                \u2014 variable
+     |  end                              \u2014 terminated
+     |  S\u2081 . S\u2082                          \u2014 sequencing`;
+
+  // Tutorial 1 code blocks
+  readonly tut1Install = `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
+cd SessionTypesResearch/bica
+mvn install`;
+
+  readonly tut1Dep = `<dependency>
+    <groupId>com.bica</groupId>
+    <artifactId>bica-reborn</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <scope>provided</scope>
+</dependency>`;
+
+  readonly tut1Annotate = `import com.bica.reborn.annotation.Session;
+
+@Session("open . &{read: close . end, write: close . end}")
+public class FileHandle {
+    // ...
+}`;
+
+  readonly tut1Implement = `import com.bica.reborn.annotation.Session;
+
+@Session("open . &{read: close . end, write: close . end}")
+public class FileHandle {
+    private enum State { INITIAL, OPENED, PENDING_CLOSE, CLOSED }
+    private State state = State.INITIAL;
+
+    public void open() {
+        requireState(State.INITIAL);
+        state = State.OPENED;
+    }
+
+    public void read() {
+        requireState(State.OPENED);
+        state = State.PENDING_CLOSE;
+    }
+
+    public void write() {
+        requireState(State.OPENED);
+        state = State.PENDING_CLOSE;
+    }
+
+    public void close() {
+        requireState(State.PENDING_CLOSE);
+        state = State.CLOSED;
+    }
+
+    private void requireState(State expected) {
+        if (state != expected)
+            throw new IllegalStateException(
+                "Expected " + expected + ", got " + state);
+    }
+}`;
+
+  readonly tut1Client = `public class Client {
+    void use() {
+        FileHandle f = new FileHandle();
+        f.open();
+        f.read();
+        f.close();
+        // Compiles \u2014 follows protocol: open \u2192 read \u2192 close \u2192 end
+    }
+}`;
+
+  readonly tut1BadClient = `public class BadClient {
+    void use() {
+        FileHandle f = new FileHandle();
+        f.read();   // ERROR: 'read' not enabled in state 0 (enabled: [open])
+        f.close();
+    }
+}`;
+
+  readonly tut1TestGen = `java -jar bica.jar --test-gen --class-name FileHandle \\
+    "open . &{read: close . end, write: close . end}"`;
+
+  // Tutorial 2 code blocks
+  readonly tut2Install = `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
+cd SessionTypesResearch/reticulate
+python -m reticulate "end"`;
+
+  readonly tut2Output = `Session type: a . b . end
+States:       3
+Transitions:  2
+SCCs:         3
+Lattice:      \u2713 yes`;
+
+  readonly tut2Branch = `python -m reticulate "&{read: close . end, write: close . end}"`;
+
+  readonly tut2Rec = `python -m reticulate "rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}"`;
+
+  readonly tut2Viz = `python -m reticulate --dot "a . b . end"
+python -m reticulate --dot "a . b . end" | dot -Tpng -o diagram.png
+python -m reticulate --hasse diagram "a . b . end"`;
+
+  readonly tut2RealWorld = `python -m reticulate "connect . ehlo . rec X . &{mail: rcpt . data . +{OK: X, ERR: X}, quit: end}"`;
+
+  // FAQ items
+  readonly faqItems = [
+    {
+      question: 'What is a session type?',
+      answer: 'A <strong>session type</strong> describes the communication protocol governing interaction with an object \u2014 the legal sequences of method calls, branches, and selections a client may perform. Unlike a flat interface, a session type makes the object\'s type <em>evolve</em> as methods are called, enforcing protocol compliance <strong>statically</strong>.',
+      expanded: true,
+    },
+    {
+      question: 'What is a state space?',
+      answer: 'A <strong>state space</strong> <code>L(S)</code> is the labeled transition system obtained by "executing" a session type. Each state represents a protocol stage, each transition a permitted action. It has a unique initial state (top) and terminal state (bottom). The reachability ordering gives it the structure of a bounded lattice (after SCC quotient).',
+      expanded: false,
+    },
+    {
+      question: 'What is a bounded lattice?',
+      answer: 'A <strong>bounded lattice</strong> is a partially ordered set where every pair has a meet (greatest lower bound) and join (least upper bound), plus top and bottom elements. In session types: top = initial state, bottom = terminal state, meet = convergence point, join = divergence point.',
+      expanded: false,
+    },
+    {
+      question: 'What is the parallel constructor?',
+      answer: 'The <strong>parallel constructor</strong> <code>S\u2081 \u2225 S\u2082</code> models two sub-protocols executing concurrently on a shared object. Its state space is the product of the two components. This is the <strong>key novelty</strong> \u2014 the product of two lattices is always a lattice, making lattice structure <em>necessary</em>.',
+      expanded: false,
+    },
+    {
+      question: 'What is a reticulate?',
+      answer: 'A <strong>reticulate</strong> is the bounded lattice formed by the state space of a well-formed session type, after quotienting by SCCs. The Reticulate Theorem proves every well-formed session type produces one \u2014 it is a guaranteed structural property.',
+      expanded: false,
+    },
+    {
+      question: 'What is an SCC quotient?',
+      answer: 'An <strong>SCC quotient</strong> collapses every strongly connected component into a single node, turning a cyclic graph into a DAG. In session types, cycles from recursion are collapsed, restoring antisymmetry for the partial order.',
+      expanded: false,
+    },
+    {
+      question: 'What is top absorption?',
+      answer: '<strong>Top absorption</strong> is the key lemma for recursion. It states: if you collapse an upward-closed set containing top into a single element, the result is still a bounded lattice. This has been mechanically verified in Lean 4.',
+      expanded: false,
+    },
+    {
+      question: 'What is WF-Par?',
+      answer: '<strong>WF-Par</strong> is the well-formedness condition for the parallel constructor. It requires both branches to be terminating, well-formed, variable-disjoint, and free of nested <code>\u2225</code>.',
+      expanded: false,
+    },
+    {
+      question: 'What is a morphism between session types?',
+      answer: 'A <strong>morphism</strong> is a structure-preserving map between state spaces. The hierarchy: homomorphism (order-preserving), projection (surjective), embedding (injective + reflecting), isomorphism (bijective embedding). Additionally, Galois connections capture approximation relationships.',
+      expanded: false,
+    },
+    {
+      question: 'Why do session type state spaces form lattices?',
+      answer: 'Because every constructor preserves lattice structure, and the proof goes by structural induction: <code>end</code> is trivial; sequencing adds a maximum; branch/selection create joins and meets; recursion is absorbed by SCC quotient; parallel takes the product. Since every constructor preserves the property and the base case has it, every well-formed session type has it.',
+      expanded: false,
+    },
+  ];
+}
