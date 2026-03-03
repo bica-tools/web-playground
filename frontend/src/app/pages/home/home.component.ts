@@ -354,8 +354,8 @@ export class HomeComponent implements OnInit {
         });
         this.loading.set(false);
 
-        // Hero diagram: Two-Buyer protocol (product lattice from ∥)
-        const showcase = benchmarks.find((b) => b.name === 'Two-Buyer')
+        // Hero diagram: Java Iterator (classic recursive session type)
+        const showcase = benchmarks.find((b) => b.name === 'Java Iterator')
           ?? benchmarks.find((b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml)
           ?? benchmarks.find((b) => b.svgHtml)
           ?? null;
