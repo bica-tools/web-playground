@@ -358,6 +358,15 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Hero diagram: the canonical 3×3 product lattice from the paper (§4.4.1)
+    this.api.analyze('(a.b.end || c.d.end)').subscribe({
+      next: (result) => {
+        if (result.svgHtml) {
+          this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
+        }
+      },
+    });
+
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
         this.stats.set({
@@ -366,15 +375,6 @@ export class HomeComponent implements OnInit {
           totalTests: benchmarks.reduce((sum, b) => sum + b.numTests, 0),
           allLattice: benchmarks.every((b) => b.isLattice),
         });
-
-        // Pick a showcase benchmark: parallel with moderate states (5-15)
-        const showcase = benchmarks.find(
-          (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml
-        ) ?? benchmarks.find((b) => b.svgHtml) ?? null;
-        if (showcase) {
-          this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
-        }
-
         this.loading.set(false);
       },
       error: () => {
