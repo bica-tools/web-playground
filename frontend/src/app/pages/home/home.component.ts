@@ -139,6 +139,11 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      overflow-x: clip;
+    }
+
     /* Hero — full-width breakout */
     .hero {
       width: 100vw;
@@ -310,6 +315,39 @@ export class HomeComponent implements OnInit {
 
   constructor(private api: ApiService) {}
 
+  /**
+   * Simplify SVG for hero display: replace verbose node labels with
+   * symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
+   */
+  private simplifyHeroSvg(svg: string): string {
+    // Simplify node labels: match <g> groups with class="node"
+    let result = svg.replace(
+      /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
+      (_match, open: string, body: string, close: string) => {
+        const simplified = body.replace(/>([^<]+)<\/text>/g, (_m, text: string) => {
+          const t = text.trim();
+          if (t.includes('\u22a4')) return '>\u22a4</text>';       // ⊤ top
+          if (t.includes('\u22a5')) return '>\u22a5</text>';       // ⊥ bottom
+          if (t.includes('&amp;{') || t.includes('&{')) return '>&amp;</text>';  // & branch
+          if (t.includes('+{') || t.includes('\u2295{')) return '>\u2295</text>'; // ⊕ selection
+          return '>\u00b7</text>';                                // · other
+        });
+        return open + simplified + close;
+      }
+    );
+
+    // Strip edge labels for a clean illustrative look
+    result = result.replace(
+      /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
+      (_match, open: string, body: string, close: string) => {
+        const stripped = body.replace(/<text[^>]*>[^<]*<\/text>/g, '');
+        return open + stripped + close;
+      }
+    );
+
+    return result;
+  }
+
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
@@ -325,7 +363,7 @@ export class HomeComponent implements OnInit {
           (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml
         ) ?? benchmarks.find((b) => b.svgHtml) ?? null;
         if (showcase) {
-          this.showcaseSvg.set(showcase.svgHtml);
+          this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
         }
 
         this.loading.set(false);
