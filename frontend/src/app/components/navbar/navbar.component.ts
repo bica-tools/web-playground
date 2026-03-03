@@ -21,7 +21,16 @@ import { filter } from 'rxjs/operators';
   template: `
     <mat-toolbar color="primary" class="navbar">
       <a routerLink="/" class="brand">
-        <span class="brand-icon">&#x22A5;</span>
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
+          <line x1="16" y1="4" x2="6" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="4" x2="26" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="6" y1="16" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="26" y1="16" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="16" cy="4" r="3" fill="white"/>
+          <circle cx="6" cy="16" r="3" fill="white"/>
+          <circle cx="26" cy="16" r="3" fill="white"/>
+          <circle cx="16" cy="28" r="3" fill="white"/>
+        </svg>
         <span class="brand-text">BICA Reborn</span>
       </a>
 
@@ -79,8 +88,7 @@ import { filter } from 'rxjs/operators';
       gap: 8px;
     }
     .brand-icon {
-      font-size: 24px;
-      font-weight: bold;
+      flex-shrink: 0;
     }
     .brand-text {
       font-size: 18px;
