@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
@@ -16,11 +16,11 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
         <nav class="sidebar-nav">
           <a class="back-link" routerLink="/tutorials">&larr; All Tutorials</a>
 
-          @if (tutorial) {
+          @if (tutorial()) {
             <h3>Steps</h3>
             <ul>
-              @for (step of tutorial.steps; track step.title; let i = $index) {
-                <li [class.active]="activeStepIndex === i">
+              @for (step of tutorial()!.steps; track step.title; let i = $index) {
+                <li [class.active]="activeStepIndex() === i">
                   <a (click)="scrollToStep(i)">{{ step.title }}</a>
                 </li>
               }
@@ -31,14 +31,14 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 
       <!-- Main content -->
       <div class="tut-content">
-        @if (loading) {
+        @if (loading()) {
           <div class="loading">Loading...</div>
-        } @else if (tutorial) {
+        } @else if (tutorial()) {
           <section class="tutorial-section">
-            <h2>Tutorial {{ tutorial.number }}: {{ tutorial.title }}</h2>
-            <p class="subtitle">{{ tutorial.subtitle }}</p>
+            <h2>Tutorial {{ tutorial()!.number }}: {{ tutorial()!.title }}</h2>
+            <p class="subtitle">{{ tutorial()!.subtitle }}</p>
 
-            @for (step of tutorial.steps; track step.title; let i = $index) {
+            @for (step of tutorial()!.steps; track step.title; let i = $index) {
               <div class="tutorial-step" [id]="'step-' + i">
                 <h3>{{ step.title }}</h3>
                 <p [innerHTML]="step.prose"></p>
@@ -49,12 +49,12 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
             }
 
             <div class="tutorial-nav">
-              @if (prevTutorial) {
-                <a class="nav-prev" [routerLink]="['/tutorials', prevTutorial.id]">&larr; {{ prevTutorial.title }}</a>
+              @if (prevTutorial()) {
+                <a class="nav-prev" [routerLink]="['/tutorials', prevTutorial()!.id]">&larr; {{ prevTutorial()!.title }}</a>
               }
               <span class="nav-spacer"></span>
-              @if (nextTutorial) {
-                <a class="nav-next" [routerLink]="['/tutorials', nextTutorial.id]">{{ nextTutorial.title }} &rarr;</a>
+              @if (nextTutorial()) {
+                <a class="nav-next" [routerLink]="['/tutorials', nextTutorial()!.id]">{{ nextTutorial()!.title }} &rarr;</a>
               }
             </div>
           </section>
@@ -237,14 +237,15 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 export class TutorialDetailComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
   private sub: Subscription | null = null;
 
-  tutorial: TutorialDto | null = null;
-  allTutorials: TutorialSummaryDto[] = [];
-  prevTutorial: TutorialSummaryDto | null = null;
-  nextTutorial: TutorialSummaryDto | null = null;
-  activeStepIndex = -1;
-  loading = false;
+  tutorial = signal<TutorialDto | null>(null);
+  allTutorials = signal<TutorialSummaryDto[]>([]);
+  prevTutorial = signal<TutorialSummaryDto | null>(null);
+  nextTutorial = signal<TutorialSummaryDto | null>(null);
+  activeStepIndex = signal(-1);
+  loading = signal(false);
 
   ngOnInit(): void {
     this.sub = this.route.paramMap.subscribe((params) => {
@@ -260,35 +261,37 @@ export class TutorialDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadTutorial(id: string): void {
-    this.loading = true;
-    this.tutorial = null;
-    this.activeStepIndex = -1;
+    this.loading.set(true);
+    this.tutorial.set(null);
+    this.activeStepIndex.set(-1);
 
     forkJoin({
       tutorial: this.api.getTutorial(id),
       list: this.api.getTutorials(),
     }).subscribe({
       next: ({ tutorial, list }) => {
-        this.tutorial = tutorial;
-        this.allTutorials = list;
+        this.tutorial.set(tutorial);
+        this.allTutorials.set(list);
         this.computePrevNext(tutorial, list);
-        this.loading = false;
+        this.loading.set(false);
+        this.cdr.markForCheck();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
+        this.cdr.markForCheck();
       },
     });
   }
 
   private computePrevNext(tutorial: TutorialDto, list: TutorialSummaryDto[]): void {
     const idx = list.findIndex((t) => t.id === tutorial.id);
-    this.prevTutorial = idx > 0 ? list[idx - 1] : null;
-    this.nextTutorial = idx < list.length - 1 ? list[idx + 1] : null;
+    this.prevTutorial.set(idx > 0 ? list[idx - 1] : null);
+    this.nextTutorial.set(idx < list.length - 1 ? list[idx + 1] : null);
   }
 
   scrollToStep(index: number): void {
-    this.activeStepIndex = index;
+    this.activeStepIndex.set(index);
     const el = document.getElementById('step-' + index);
     el?.scrollIntoView({ behavior: 'smooth' });
   }
