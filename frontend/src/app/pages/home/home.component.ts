@@ -334,13 +334,14 @@ export class HomeComponent implements OnInit {
         const cy = parseFloat(ty) - 5; // shift up from baseline to visual center
 
         // Determine symbol from original label
+        // Single-choice branches are labeled with just the method name (no &{ prefix),
+        // so default to & for all intermediate nodes — most states are branch points.
         const t = rawLabel.trim();
         let symbol: string;
         if (t.includes('\u22a4')) symbol = '\u22a4';
         else if (t.includes('\u22a5')) symbol = '\u22a5';
-        else if (t.includes('&amp;{') || t.includes('&{')) symbol = '&amp;';
         else if (t.includes('+{') || t.includes('\u2295{')) symbol = '\u2295';
-        else symbol = '\u00b7';
+        else symbol = '&amp;';
 
         // Keep title element
         const titleMatch = body.match(/<title>[^<]*<\/title>/);
