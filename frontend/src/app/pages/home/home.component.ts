@@ -139,15 +139,11 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
-      overflow-x: clip;
-    }
-
-    /* Hero — full-width breakout */
+    /* Hero — full-width breakout from .main-content */
     .hero {
       width: 100vw;
       margin-left: calc(-50vw + 50%);
+      margin-top: -24px;   /* negate parent padding-top */
       background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary-light));
       color: #fff;
       padding: 64px 24px 32px;
@@ -208,17 +204,20 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       min-height: 200px;
     }
 
-    /* Invert SVG colors for dark background */
+    /* Style SVG for dark background */
     .hero-diagram ::ng-deep svg text {
       fill: #fff;
     }
-    .hero-diagram ::ng-deep svg polygon,
-    .hero-diagram ::ng-deep svg ellipse {
+    .hero-diagram ::ng-deep svg .node circle {
       fill: rgba(255, 255, 255, 0.15);
       stroke: #fff;
     }
-    .hero-diagram ::ng-deep svg path {
-      stroke: rgba(255, 255, 255, 0.7);
+    .hero-diagram ::ng-deep svg .edge path {
+      stroke: rgba(255, 255, 255, 0.5);
+    }
+    .hero-diagram ::ng-deep svg .edge polygon {
+      fill: rgba(255, 255, 255, 0.5);
+      stroke: rgba(255, 255, 255, 0.5);
     }
 
     .hero-stats {
@@ -316,23 +315,38 @@ export class HomeComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   /**
-   * Simplify SVG for hero display: replace verbose node labels with
-   * symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
+   * Simplify SVG for hero display: replace box nodes with small circles
+   * bearing symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
    */
   private simplifyHeroSvg(svg: string): string {
-    // Simplify node labels: match <g> groups with class="node"
+    // Process node groups: replace shapes with circles and simplify labels
     let result = svg.replace(
       /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
-        const simplified = body.replace(/>([^<]+)<\/text>/g, (_m, text: string) => {
-          const t = text.trim();
-          if (t.includes('\u22a4')) return '>\u22a4</text>';       // ⊤ top
-          if (t.includes('\u22a5')) return '>\u22a5</text>';       // ⊥ bottom
-          if (t.includes('&amp;{') || t.includes('&{')) return '>&amp;</text>';  // & branch
-          if (t.includes('+{') || t.includes('\u2295{')) return '>\u2295</text>'; // ⊕ selection
-          return '>\u00b7</text>';                                // · other
-        });
-        return open + simplified + close;
+        // Extract text position and label
+        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>([^<]*)<\/text>/);
+        if (!textMatch) return open + body + close;
+
+        const [, tx, ty, rawLabel] = textMatch;
+        const cx = parseFloat(tx);
+        const cy = parseFloat(ty) - 5; // shift up from baseline to visual center
+
+        // Determine symbol from original label
+        const t = rawLabel.trim();
+        let symbol: string;
+        if (t.includes('\u22a4')) symbol = '\u22a4';
+        else if (t.includes('\u22a5')) symbol = '\u22a5';
+        else if (t.includes('&amp;{') || t.includes('&{')) symbol = '&amp;';
+        else if (t.includes('+{') || t.includes('\u2295{')) symbol = '\u2295';
+        else symbol = '\u00b7';
+
+        // Keep title element
+        const titleMatch = body.match(/<title>[^<]*<\/title>/);
+        const title = titleMatch ? titleMatch[0] + '\n' : '';
+
+        // Rebuild node as circle + centered symbol
+        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="1.5"/>\n<text text-anchor="middle" dominant-baseline="central" x="${cx}" y="${cy}" font-family="Helvetica" font-size="13.00" fill="white">${symbol}</text>`;
+        return open + rebuilt + close;
       }
     );
 
