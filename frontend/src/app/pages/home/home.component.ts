@@ -375,13 +375,17 @@ export class HomeComponent implements OnInit {
         });
         this.loading.set(false);
 
-        // Hero diagram: Two-Buyer protocol (parallel product lattice)
-        const twoBuyer = benchmarks.find((b) => b.name === 'Two-Buyer');
-        if (twoBuyer?.svgHtml) {
-          this.showcaseSvg.set(this.simplifyHeroSvg(twoBuyer.svgHtml));
-        } else {
-          this.showBenchmarkFallback(benchmarks);
-        }
+        // Hero diagram: the symmetric 3×3 product lattice (a.b.end || c.d.end)
+        this.api.analyze('(a.b.end || c.d.end)').subscribe({
+          next: (result) => {
+            if (result.svgHtml) {
+              this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
+            } else {
+              this.showBenchmarkFallback(benchmarks);
+            }
+          },
+          error: () => this.showBenchmarkFallback(benchmarks),
+        });
       },
       error: () => {
         this.statsError.set(true);
