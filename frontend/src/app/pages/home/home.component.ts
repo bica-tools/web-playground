@@ -5,11 +5,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
 import { HomeStats } from '../../models/api.models';
+import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule, HasseDiagramComponent],
   template: `
     <!-- Hero -->
     <section class="hero">
@@ -28,21 +29,9 @@ import { HomeStats } from '../../models/api.models';
           </div>
         </div>
         <div class="hero-diagram">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 204" class="hero-lattice">
-            <!-- Edges -->
-            <line x1="100" y1="14" x2="52" y2="58" /><line x1="100" y1="14" x2="148" y2="58" />
-            <line x1="52" y1="58" x2="4" y2="102" /><line x1="52" y1="58" x2="100" y2="102" />
-            <line x1="148" y1="58" x2="100" y2="102" /><line x1="148" y1="58" x2="196" y2="102" />
-            <line x1="4" y1="102" x2="52" y2="146" /><line x1="100" y1="102" x2="52" y2="146" />
-            <line x1="100" y1="102" x2="148" y2="146" /><line x1="196" y1="102" x2="148" y2="146" />
-            <line x1="52" y1="146" x2="100" y2="190" /><line x1="148" y1="146" x2="100" y2="190" />
-            <!-- Nodes -->
-            <circle cx="100" cy="14" r="10" />
-            <circle cx="52" cy="58" r="10" /><circle cx="148" cy="58" r="10" />
-            <circle cx="4" cy="102" r="10" /><circle cx="100" cy="102" r="10" /><circle cx="196" cy="102" r="10" />
-            <circle cx="52" cy="146" r="10" /><circle cx="148" cy="146" r="10" />
-            <circle cx="100" cy="190" r="10" />
-          </svg>
+          @if (showcaseSvg()) {
+            <app-hasse-diagram [svgHtml]="showcaseSvg()"></app-hasse-diagram>
+          }
         </div>
       </div>
       <div class="hero-stats">
@@ -212,21 +201,7 @@ import { HomeStats } from '../../models/api.models';
       align-items: center;
       justify-content: center;
       min-height: 200px;
-    }
-
-    .hero-lattice {
-      width: 100%;
-      max-width: 180px;
-      height: auto;
-    }
-    .hero-lattice line {
-      stroke: rgba(255,255,255,0.7);
-      stroke-width: 1.2;
-    }
-    .hero-lattice circle {
-      fill: rgba(255,255,255,0.15);
-      stroke: rgba(255,255,255,0.7);
-      stroke-width: 1.5;
+      max-height: 280px;
     }
 
     .hero-stats {
@@ -319,10 +294,55 @@ export class HomeComponent implements OnInit {
   readonly stats = signal<HomeStats | null>(null);
   readonly loading = signal(true);
   readonly statsError = signal(false);
+  readonly showcaseSvg = signal('');
+
   constructor(private api: ApiService) {}
 
-  ngOnInit(): void {
+  /**
+   * Simplify SVG for hero display: replace box nodes with small unlabeled
+   * circles and strip edge labels, recolored white for dark background.
+   */
+  private simplifyHeroSvg(svg: string): string {
+    // Remove graphviz white background polygon
+    let result = svg.replace(/<polygon fill="white"[^/]*\/>/,'');
 
+    // Replace node shapes with circles (no labels)
+    result = result.replace(
+      /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
+      (_match, open: string, body: string, close: string) => {
+        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>[^<]*<\/text>/);
+        if (!textMatch) return open + body + close;
+
+        const cx = parseFloat(textMatch[1]);
+        const cy = parseFloat(textMatch[2]) - 5;
+
+        const titleMatch = body.match(/<title>[^<]*<\/title>/);
+        const title = titleMatch ? titleMatch[0] + '\n' : '';
+
+        const nc = 'rgba(255,255,255,0.7)';
+        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nc}" stroke-width="1.5"/>`;
+        return open + rebuilt + close;
+      }
+    );
+
+    // Strip edge labels and recolor edges white
+    result = result.replace(
+      /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
+      (_match, open: string, body: string, close: string) => {
+        let fixed = body;
+        const c = 'rgba(255,255,255,0.7)';
+        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
+        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
+        return open + fixed + close;
+      }
+    );
+
+    return result;
+  }
+
+  ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
         this.stats.set({
@@ -332,6 +352,15 @@ export class HomeComponent implements OnInit {
           allLattice: benchmarks.every((b) => b.isLattice),
         });
         this.loading.set(false);
+
+        // Hero diagram: Two-Buyer protocol (product lattice from ∥)
+        const showcase = benchmarks.find((b) => b.name === 'Two-Buyer')
+          ?? benchmarks.find((b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml)
+          ?? benchmarks.find((b) => b.svgHtml)
+          ?? null;
+        if (showcase?.svgHtml) {
+          this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
+        }
       },
       error: () => {
         this.statsError.set(true);
