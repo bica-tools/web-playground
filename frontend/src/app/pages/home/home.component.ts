@@ -201,7 +201,8 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       align-items: center;
       justify-content: center;
       min-height: 200px;
-      max-height: 280px;
+      transform: scale(0.75);
+      transform-origin: center center;
     }
 
     .hero-stats {
