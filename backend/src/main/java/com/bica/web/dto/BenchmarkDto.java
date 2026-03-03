@@ -11,6 +11,7 @@ public record BenchmarkDto(
         boolean isLattice,
         boolean usesParallel,
         String svgHtml,
+        String heroSvgHtml,
         String toolUrl,
         int numTests
 ) {}

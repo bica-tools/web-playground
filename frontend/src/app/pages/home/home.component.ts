@@ -31,6 +31,12 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
         <div class="hero-diagram">
           @if (showcaseSvg()) {
             <app-hasse-diagram [svgHtml]="showcaseSvg()"></app-hasse-diagram>
+          } @else {
+            <div class="hero-diagram-fallback">
+              <span class="fallback-top">&top;</span>
+              <span class="fallback-mid">&vellip;</span>
+              <span class="fallback-bottom">&perp;</span>
+            </div>
           }
         </div>
       </div>
@@ -143,10 +149,11 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     .hero {
       width: 100vw;
       margin-left: calc(-50vw + 50%);
-      margin-top: -24px;   /* negate parent padding-top */
+      margin-top: calc(-1 * var(--content-padding-top, 24px));
       background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary-light));
       color: #fff;
       padding: 64px 24px 32px;
+      overflow-x: clip;
     }
 
     .hero-inner {
@@ -203,7 +210,17 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       min-height: 200px;
     }
 
-    /* SVG colors are set directly in simplifyHeroSvg — no ::ng-deep needed */
+    .hero-diagram-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-size: 32px;
+      opacity: 0.5;
+    }
+    .hero-diagram-fallback .fallback-mid {
+      font-size: 20px;
+    }
 
     .hero-stats {
       max-width: 1200px;
@@ -299,64 +316,6 @@ export class HomeComponent implements OnInit {
 
   constructor(private api: ApiService) {}
 
-  /**
-   * Simplify SVG for hero display: replace box nodes with small circles
-   * bearing symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
-   */
-  private simplifyHeroSvg(svg: string): string {
-    // Remove graphviz white background (first polygon with fill="white")
-    let result = svg.replace(/<polygon fill="white"[^/]*\/>/, '');
-
-    // Process node groups: replace shapes with circles and simplify labels
-    result = result.replace(
-      /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        // Extract text position and label
-        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>([^<]*)<\/text>/);
-        if (!textMatch) return open + body + close;
-
-        const [, tx, ty, rawLabel] = textMatch;
-        const cx = parseFloat(tx);
-        const cy = parseFloat(ty) - 5; // shift up from baseline to visual center
-
-        // Determine symbol from original label
-        // Single-choice branches are labeled with just the method name (no &{ prefix),
-        // so default to & for all intermediate nodes — most states are branch points.
-        const t = rawLabel.trim();
-        let symbol: string;
-        if (t.includes('\u22a4')) symbol = '\u22a4';
-        else if (t.includes('\u22a5')) symbol = '\u22a5';
-        else if (t.includes('+{') || t.includes('\u2295{')) symbol = '\u2295';
-        else symbol = '&amp;';
-
-        // Keep title element
-        const titleMatch = body.match(/<title>[^<]*<\/title>/);
-        const title = titleMatch ? titleMatch[0] + '\n' : '';
-
-        // Rebuild node as circle + centered symbol
-        const nodeColor = 'rgba(255,255,255,0.7)';
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nodeColor}" stroke-width="1.5"/>\n<text text-anchor="middle" dominant-baseline="central" x="${cx}" y="${cy}" font-family="Helvetica" font-size="13.00" fill="${nodeColor}">${symbol}</text>`;
-        return open + rebuilt + close;
-      }
-    );
-
-    // Strip edge labels and recolor edges white for dark background
-    result = result.replace(
-      /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        let fixed = body;
-        const c = 'rgba(255,255,255,0.7)';
-        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
-        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        return open + fixed + close;
-      }
-    );
-
-    return result;
-  }
-
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
@@ -369,10 +328,10 @@ export class HomeComponent implements OnInit {
 
         // Pick a showcase benchmark: parallel with moderate states (5-15)
         const showcase = benchmarks.find(
-          (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml
-        ) ?? benchmarks.find((b) => b.svgHtml) ?? null;
+          (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.heroSvgHtml
+        ) ?? benchmarks.find((b) => b.heroSvgHtml) ?? null;
         if (showcase) {
-          this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
+          this.showcaseSvg.set(showcase.heroSvgHtml);
         }
 
         this.loading.set(false);

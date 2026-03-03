@@ -44,6 +44,7 @@ export interface BenchmarkDto {
   isLattice: boolean;
   usesParallel: boolean;
   svgHtml: string;
+  heroSvgHtml: string;
   toolUrl: string;
   numTests: number;
 }
