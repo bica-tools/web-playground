@@ -195,7 +195,6 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     }
 
     .hero-diagram {
-      background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       padding: 16px;
       display: flex;
@@ -319,8 +318,11 @@ export class HomeComponent implements OnInit {
    * bearing symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
    */
   private simplifyHeroSvg(svg: string): string {
+    // Remove graphviz white background (first polygon with fill="white")
+    let result = svg.replace(/<polygon fill="white"[^/]*\/>/, '');
+
     // Process node groups: replace shapes with circles and simplify labels
-    let result = svg.replace(
+    result = result.replace(
       /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
         // Extract text position and label
