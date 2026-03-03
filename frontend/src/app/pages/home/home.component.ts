@@ -5,12 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
 import { HomeStats } from '../../models/api.models';
-import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule, HasseDiagramComponent],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule],
   template: `
     <!-- Hero -->
     <section class="hero">
@@ -29,9 +28,21 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
           </div>
         </div>
         <div class="hero-diagram">
-          @if (showcaseSvg()) {
-            <app-hasse-diagram [svgHtml]="showcaseSvg()"></app-hasse-diagram>
-          }
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 204" class="hero-lattice">
+            <!-- Edges -->
+            <line x1="100" y1="14" x2="52" y2="58" /><line x1="100" y1="14" x2="148" y2="58" />
+            <line x1="52" y1="58" x2="4" y2="102" /><line x1="52" y1="58" x2="100" y2="102" />
+            <line x1="148" y1="58" x2="100" y2="102" /><line x1="148" y1="58" x2="196" y2="102" />
+            <line x1="4" y1="102" x2="52" y2="146" /><line x1="100" y1="102" x2="52" y2="146" />
+            <line x1="100" y1="102" x2="148" y2="146" /><line x1="196" y1="102" x2="148" y2="146" />
+            <line x1="52" y1="146" x2="100" y2="190" /><line x1="148" y1="146" x2="100" y2="190" />
+            <!-- Nodes -->
+            <circle cx="100" cy="14" r="10" />
+            <circle cx="52" cy="58" r="10" /><circle cx="148" cy="58" r="10" />
+            <circle cx="4" cy="102" r="10" /><circle cx="100" cy="102" r="10" /><circle cx="196" cy="102" r="10" />
+            <circle cx="52" cy="146" r="10" /><circle cx="148" cy="146" r="10" />
+            <circle cx="100" cy="190" r="10" />
+          </svg>
         </div>
       </div>
       <div class="hero-stats">
@@ -203,7 +214,20 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       min-height: 200px;
     }
 
-    /* SVG colors are set directly in simplifyHeroSvg — no ::ng-deep needed */
+    .hero-lattice {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+    }
+    .hero-lattice line {
+      stroke: rgba(255,255,255,0.7);
+      stroke-width: 1.2;
+    }
+    .hero-lattice circle {
+      fill: rgba(255,255,255,0.15);
+      stroke: rgba(255,255,255,0.7);
+      stroke-width: 1.5;
+    }
 
     .hero-stats {
       max-width: 1200px;
@@ -295,42 +319,9 @@ export class HomeComponent implements OnInit {
   readonly stats = signal<HomeStats | null>(null);
   readonly loading = signal(true);
   readonly statsError = signal(false);
-  readonly showcaseSvg = signal('');
-
   constructor(private api: ApiService) {}
 
-  /** Build the canonical 3×3 product lattice SVG with exact diamond coordinates. */
-  private buildHeroSvg(): string {
-    const c = 'rgba(255,255,255,0.7)';
-    const r = 10;
-    const sx = 48, sy = 44;
-    const midX = 100, topY = 14;
-    const nodes: [number, number][] = [
-      [midX, topY],                                                                // (a,c) — top
-      [midX - sx, topY + sy],       [midX + sx, topY + sy],                        // (a,d), (b,c)
-      [midX - 2*sx, topY + 2*sy],   [midX, topY + 2*sy],   [midX + 2*sx, topY + 2*sy],  // (a,end), (b,d), (end,c)
-      [midX - sx, topY + 3*sy],     [midX + sx, topY + 3*sy],                      // (b,end), (end,d)
-      [midX, topY + 4*sy],                                                          // end — bottom
-    ];
-    const edges: [number, number][] = [
-      [0,1],[0,2], [1,3],[1,4], [2,4],[2,5],
-      [3,6], [4,6],[4,7], [5,7], [6,8],[7,8],
-    ];
-    const w = midX * 2;
-    const h = topY + 4 * sy + r + 4;
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">`;
-    for (const [a, b] of edges) {
-      svg += `<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}" stroke="${c}" stroke-width="1.2"/>`;
-    }
-    for (const [nx, ny] of nodes) {
-      svg += `<circle cx="${nx}" cy="${ny}" r="${r}" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.5"/>`;
-    }
-    svg += '</svg>';
-    return svg;
-  }
-
   ngOnInit(): void {
-    this.showcaseSvg.set(this.buildHeroSvg());
 
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
