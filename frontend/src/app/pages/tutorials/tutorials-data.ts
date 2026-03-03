@@ -15,11 +15,111 @@ export interface Tutorial {
 
 export const TUTORIALS: Tutorial[] = [
   // ────────────────────────────────────────────────────────────
-  // 1. Your First Session Type
+  // 1. Quick Start
+  // ────────────────────────────────────────────────────────────
+  {
+    id: 'quick-start',
+    number: 1,
+    title: 'Quick Start',
+    subtitle:
+      'Get up and running in 5 minutes with Python, Java, or the web analyzer.',
+    steps: [
+      {
+        title: 'Python: Install Reticulate',
+        prose:
+          'Clone the repository and run directly. You need Python 3.11+ with no extra dependencies:',
+        code: `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
+cd SessionTypesResearch/reticulate
+python3 -m reticulate "end"`,
+        codeLabel: 'bash',
+      },
+      {
+        title: 'Python: Define and analyze a protocol',
+        prose:
+          'Use the Python API to parse a session type, build its state space, and check lattice properties:',
+        code: `from reticulate import parse, build_statespace, check_lattice, pretty
+
+# Parse a session type
+ast = parse("open . &{read: close . end, write: close . end}")
+print(pretty(ast))
+
+# Build the state space
+ss = build_statespace(ast)
+print(f"{len(ss.states)} states, {len(ss.transitions)} transitions")
+
+# Check lattice properties
+result = check_lattice(ss)
+print(f"Is lattice: {result.is_lattice}")  # True`,
+        codeLabel: 'python',
+      },
+      {
+        title: 'Python: CLI usage',
+        prose:
+          'The command-line interface runs the full pipeline in one command:',
+        code: `# Analyze a session type
+python3 -m reticulate "open . &{read: close . end, write: close . end}"
+
+# Generate a Hasse diagram
+python3 -m reticulate --hasse diagram.svg "open . &{read: close . end, write: close . end}"`,
+        codeLabel: 'bash',
+      },
+      {
+        title: 'Java: Add BICA Reborn dependency',
+        prose:
+          'Add the Maven dependency to your project. The annotation processor runs automatically during compilation:',
+        code: `<dependency>
+    <groupId>com.zuacaldeira.bica</groupId>
+    <artifactId>bica-reborn</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>`,
+        codeLabel: 'pom.xml',
+      },
+      {
+        title: 'Java: Annotate your class',
+        prose:
+          'Write the protocol as a <code>&#64;Session</code> string. The compiler verifies that every client uses the object correctly:',
+        code: `import com.bica.reborn.annotation.Session;
+
+@Session("open . &{read: close . end, write: close . end}")
+public class FileHandle {
+    public void open() { /* ... */ }
+    public String read() { /* ... */ }
+    public void write(String data) { /* ... */ }
+    public void close() { /* ... */ }
+}`,
+        codeLabel: 'java',
+      },
+      {
+        title: 'Java: Compile-time checking',
+        prose:
+          'Protocol violations become <strong>compile errors</strong>. Calling a method out of order is caught before runtime:',
+        code: `# Compile — the processor runs automatically
+mvn compile
+
+# Bad client code — calls read() after close()
+FileHandle f = new FileHandle();
+f.open();
+f.close();
+f.read();  // COMPILE ERROR: Method 'read' not enabled in state 3`,
+        codeLabel: 'java',
+      },
+      {
+        title: 'Web: Browser analyzer',
+        prose:
+          'No installation required. Open the <a href="/tools/analyzer">interactive analyzer</a>, ' +
+          'type or paste a session type, and click <strong>Analyze</strong>. ' +
+          'You&rsquo;ll see the state space metrics, lattice verdict, Hasse diagram, and optionally generated JUnit 5 tests. ' +
+          'Select from the benchmark dropdown to load one of the <a href="/benchmarks">34 verified protocols</a>.',
+      },
+    ],
+  },
+
+  // ────────────────────────────────────────────────────────────
+  // 2. Your First Session Type
   // ────────────────────────────────────────────────────────────
   {
     id: 'first-session-type',
-    number: 1,
+    number: 2,
     title: 'Your First Session Type',
     subtitle:
       'Write a simple protocol, understand the grammar, and see the state space visualized.',
@@ -85,11 +185,11 @@ Lattice:      \u2713 yes`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 2. Branching and Selection
+  // 3. Branching and Selection
   // ────────────────────────────────────────────────────────────
   {
     id: 'branching-selection',
-    number: 2,
+    number: 3,
     title: 'Branching and Selection',
     subtitle:
       'Model an ATM with external choice (&) and internal choice (+), and understand the diamond pattern.',
@@ -148,11 +248,11 @@ Lattice:      \u2713 yes`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 3. Recursive Protocols
+  // 4. Recursive Protocols
   // ────────────────────────────────────────────────────────────
   {
     id: 'recursive-protocols',
-    number: 3,
+    number: 4,
     title: 'Recursive Protocols',
     subtitle:
       'Build an iterator with rec, understand cycles and SCC quotient, and check termination.',
@@ -215,11 +315,11 @@ Lattice:      \u2713 yes`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 4. The Parallel Constructor
+  // 5. The Parallel Constructor
   // ────────────────────────────────────────────────────────────
   {
     id: 'parallel-constructor',
-    number: 4,
+    number: 5,
     title: 'The Parallel Constructor',
     subtitle:
       'Model concurrent access with \u2225, understand product lattices and WF-Par.',
@@ -284,11 +384,11 @@ Lattice:      \u2713 yes`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 5. Lattice Properties Explained
+  // 6. Lattice Properties Explained
   // ────────────────────────────────────────────────────────────
   {
     id: 'lattice-properties',
-    number: 5,
+    number: 6,
     title: 'Lattice Properties Explained',
     subtitle:
       'Walk through meet, join, top, and bottom on real benchmarks; understand counterexamples.',
@@ -356,11 +456,11 @@ Lattice:      \u2713 yes`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 6. Morphisms Between Protocols
+  // 7. Morphisms Between Protocols
   // ────────────────────────────────────────────────────────────
   {
     id: 'morphisms',
-    number: 6,
+    number: 7,
     title: 'Morphisms Between Protocols',
     subtitle:
       'Compare two protocol versions using isomorphism, embedding, projection, and Galois connections.',
@@ -428,11 +528,11 @@ print(result.kind)  # embedding, projection, or homomorphism`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 7. Modeling Real Protocols
+  // 8. Modeling Real Protocols
   // ────────────────────────────────────────────────────────────
   {
     id: 'modeling-real-protocols',
-    number: 7,
+    number: 8,
     title: 'Modeling Real Protocols',
     subtitle:
       'Step-by-step walkthrough of encoding SMTP as a session type.',
@@ -492,11 +592,11 @@ print(result.kind)  # embedding, projection, or homomorphism`,
   },
 
   // ────────────────────────────────────────────────────────────
-  // 8. Test Generation from Session Types
+  // 9. Test Generation from Session Types
   // ────────────────────────────────────────────────────────────
   {
     id: 'test-generation',
-    number: 8,
+    number: 9,
     title: 'Test Generation from Session Types',
     subtitle:
       'Generate JUnit 5 tests automatically: valid paths, violations, and incomplete prefixes.',
@@ -572,11 +672,11 @@ switch (result) {
   },
 
   // ────────────────────────────────────────────────────────────
-  // 9. Using BICA Reborn Annotations
+  // 10. Using BICA Reborn Annotations
   // ────────────────────────────────────────────────────────────
   {
     id: 'bica-annotations',
-    number: 9,
+    number: 10,
     title: 'Using BICA Reborn Annotations',
     subtitle:
       'Annotate a Java class with @Session, @Shared, @ReadOnly, @Exclusive and run the processor.',
@@ -673,11 +773,11 @@ public class MyIterator<T> {
   },
 
   // ────────────────────────────────────────────────────────────
-  // 10. From Hasse Diagram to Protocol Understanding
+  // 11. From Hasse Diagram to Protocol Understanding
   // ────────────────────────────────────────────────────────────
   {
     id: 'hasse-diagrams',
-    number: 10,
+    number: 11,
     title: 'From Hasse Diagram to Protocol Understanding',
     subtitle:
       'Read and interpret Hasse diagrams; use visualization to debug protocol designs.',
