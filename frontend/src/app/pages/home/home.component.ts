@@ -203,21 +203,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       min-height: 200px;
     }
 
-    /* Style SVG for dark background */
-    .hero-diagram ::ng-deep svg text {
-      fill: #fff;
-    }
-    .hero-diagram ::ng-deep svg .node circle {
-      fill: rgba(255, 255, 255, 0.15);
-      stroke: #fff;
-    }
-    .hero-diagram ::ng-deep svg .edge path {
-      stroke: rgba(255, 255, 255, 0.5);
-    }
-    .hero-diagram ::ng-deep svg .edge polygon {
-      fill: rgba(255, 255, 255, 0.5);
-      stroke: rgba(255, 255, 255, 0.5);
-    }
+    /* SVG colors are set directly in simplifyHeroSvg — no ::ng-deep needed */
 
     .hero-stats {
       max-width: 1200px;
@@ -353,12 +339,19 @@ export class HomeComponent implements OnInit {
       }
     );
 
-    // Strip edge labels for a clean illustrative look
+    // Strip edge labels and recolor edges white for dark background
     result = result.replace(
       /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
-        const stripped = body.replace(/<text[^>]*>[^<]*<\/text>/g, '');
-        return open + stripped + close;
+        let fixed = body;
+        // Remove text labels
+        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
+        // Recolor edge paths (lines): stroke black → white
+        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, '$1stroke="rgba(255,255,255,0.7)"');
+        // Recolor arrowhead polygons: fill/stroke black → white
+        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, '$1fill="rgba(255,255,255,0.7)"');
+        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, '$1stroke="rgba(255,255,255,0.7)"');
+        return open + fixed + close;
       }
     );
 
