@@ -33,6 +33,7 @@ export const routes: Routes = [
   },
   {
     path: 'tutorials',
+    pathMatch: 'full',
     loadComponent: () =>
       import('./pages/tutorials/tutorials-list.component').then(
         (m) => m.TutorialsListComponent,
