@@ -33,6 +33,28 @@ export interface HomeStats {
   allLattice: boolean;
 }
 
+export interface TutorialSummaryDto {
+  id: string;
+  number: number;
+  title: string;
+  subtitle: string;
+}
+
+export interface TutorialStepDto {
+  title: string;
+  prose: string;
+  code: string | null;
+  codeLabel: string | null;
+}
+
+export interface TutorialDto {
+  id: string;
+  number: number;
+  title: string;
+  subtitle: string;
+  steps: TutorialStepDto[];
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

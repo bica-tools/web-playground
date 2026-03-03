@@ -7,6 +7,8 @@ import {
   TestGenRequest,
   TestGenResponse,
   BenchmarkDto,
+  TutorialSummaryDto,
+  TutorialDto,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -27,5 +29,13 @@ export class ApiService {
 
   getBenchmarks(): Observable<BenchmarkDto[]> {
     return this.http.get<BenchmarkDto[]>(`${this.baseUrl}/benchmarks`);
+  }
+
+  getTutorials(): Observable<TutorialSummaryDto[]> {
+    return this.http.get<TutorialSummaryDto[]>(`${this.baseUrl}/tutorials`);
+  }
+
+  getTutorial(id: string): Observable<TutorialDto> {
+    return this.http.get<TutorialDto>(`${this.baseUrl}/tutorials/${id}`);
   }
 }

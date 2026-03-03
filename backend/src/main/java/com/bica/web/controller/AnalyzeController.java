@@ -2,6 +2,7 @@ package com.bica.web.controller;
 
 import com.bica.web.dto.*;
 import com.bica.web.service.AnalysisService;
+import com.bica.web.service.TutorialService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +14,11 @@ import java.util.Map;
 public class AnalyzeController {
 
     private final AnalysisService analysisService;
+    private final TutorialService tutorialService;
 
-    public AnalyzeController(AnalysisService analysisService) {
+    public AnalyzeController(AnalysisService analysisService, TutorialService tutorialService) {
         this.analysisService = analysisService;
+        this.tutorialService = tutorialService;
     }
 
     @PostMapping("/analyze")
@@ -60,5 +63,19 @@ public class AnalyzeController {
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();
+    }
+
+    @GetMapping("/tutorials")
+    public List<TutorialSummaryDto> tutorials() {
+        return tutorialService.getTutorials();
+    }
+
+    @GetMapping("/tutorials/{id}")
+    public ResponseEntity<?> tutorial(@PathVariable String id) {
+        TutorialDto tutorial = tutorialService.getTutorial(id);
+        if (tutorial == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(tutorial);
     }
 }
