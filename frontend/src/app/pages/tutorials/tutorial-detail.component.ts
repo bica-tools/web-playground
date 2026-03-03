@@ -1,37 +1,31 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription, forkJoin } from 'rxjs';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 import { ApiService } from '../../services/api.service';
 import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 
 @Component({
-  selector: 'app-tutorials',
+  selector: 'app-tutorial-detail',
   standalone: true,
-  imports: [CodeBlockComponent],
+  imports: [CodeBlockComponent, RouterLink],
   template: `
-    <header class="page-header">
-      <h1>Tutorials</h1>
-      <p>Step-by-step guides to session types, reticulates, and tooling.</p>
-    </header>
-
     <div class="tut-layout">
       <!-- Sticky sidebar -->
       <aside class="tut-sidebar">
         <nav class="sidebar-nav">
-          <h3>Contents</h3>
-          <ul>
-            @for (tut of tutorials; track tut.id) {
-              <li [class.active]="activeTutorialId === tut.id && activeStepIndex === -1">
-                <a (click)="selectTutorial(tut.id)">{{ tut.number }}. {{ tut.title }}</a>
-              </li>
-              @if (activeTutorialId === tut.id && activeTutorial) {
-                @for (step of activeTutorial.steps; track step.title; let i = $index) {
-                  <li class="sub" [class.active]="activeStepIndex === i">
-                    <a (click)="scrollToStep(i)">{{ step.title }}</a>
-                  </li>
-                }
+          <a class="back-link" routerLink="/tutorials">&larr; All Tutorials</a>
+
+          @if (tutorial) {
+            <h3>Steps</h3>
+            <ul>
+              @for (step of tutorial.steps; track step.title; let i = $index) {
+                <li [class.active]="activeStepIndex === i">
+                  <a (click)="scrollToStep(i)">{{ step.title }}</a>
+                </li>
               }
-            }
-          </ul>
+            </ul>
+          }
         </nav>
       </aside>
 
@@ -39,12 +33,12 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       <div class="tut-content">
         @if (loading) {
           <div class="loading">Loading...</div>
-        } @else if (activeTutorial) {
+        } @else if (tutorial) {
           <section class="tutorial-section">
-            <h2>Tutorial {{ activeTutorial.number }}: {{ activeTutorial.title }}</h2>
-            <p class="subtitle">{{ activeTutorial.subtitle }}</p>
+            <h2>Tutorial {{ tutorial.number }}: {{ tutorial.title }}</h2>
+            <p class="subtitle">{{ tutorial.subtitle }}</p>
 
-            @for (step of activeTutorial.steps; track step.title; let i = $index) {
+            @for (step of tutorial.steps; track step.title; let i = $index) {
               <div class="tutorial-step" [id]="'step-' + i">
                 <h3>{{ step.title }}</h3>
                 <p [innerHTML]="step.prose"></p>
@@ -55,42 +49,30 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
             }
 
             <div class="tutorial-nav">
-              @if (activeTutorial.number > 1) {
-                <a class="nav-prev" (click)="selectTutorialByNumber(activeTutorial.number - 1)">&larr; Previous</a>
+              @if (prevTutorial) {
+                <a class="nav-prev" [routerLink]="['/tutorials', prevTutorial.id]">&larr; {{ prevTutorial.title }}</a>
               }
               <span class="nav-spacer"></span>
-              @if (activeTutorial.number < tutorials.length) {
-                <a class="nav-next" (click)="selectTutorialByNumber(activeTutorial.number + 1)">Next &rarr;</a>
+              @if (nextTutorial) {
+                <a class="nav-next" [routerLink]="['/tutorials', nextTutorial.id]">{{ nextTutorial.title }} &rarr;</a>
               }
             </div>
           </section>
         } @else {
           <div class="empty-state">
-            <p>Select a tutorial from the sidebar to get started.</p>
+            <p>Tutorial not found.</p>
           </div>
         }
       </div>
     </div>
   `,
   styles: [`
-    .page-header {
-      padding: 24px 0 16px;
-    }
-    .page-header h1 {
-      font-size: 24px;
-      font-weight: 500;
-      margin: 0 0 8px;
-    }
-    .page-header p {
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0;
-    }
-
     /* Sidebar layout */
     .tut-layout {
       display: flex;
       gap: 32px;
       align-items: flex-start;
+      padding-top: 16px;
     }
 
     .tut-sidebar {
@@ -100,6 +82,18 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       flex-shrink: 0;
       max-height: calc(100vh - 100px);
       overflow-y: auto;
+    }
+
+    .back-link {
+      display: block;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: var(--brand-primary, #4338ca);
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+    .back-link:hover {
+      text-decoration: underline;
     }
 
     .sidebar-nav h3 {
@@ -129,11 +123,6 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       cursor: pointer;
       transition: all 0.15s;
     }
-    .sidebar-nav li.sub a {
-      padding-left: 24px;
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.55);
-    }
     .sidebar-nav li a:hover {
       color: var(--brand-primary, #4338ca);
       background: rgba(67, 56, 202, 0.04);
@@ -143,9 +132,6 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       border-left-color: var(--brand-primary, #4338ca);
       font-weight: 500;
       background: rgba(67, 56, 202, 0.06);
-    }
-    .sidebar-nav li.active.sub a {
-      font-weight: 500;
     }
 
     .tut-content {
@@ -170,7 +156,7 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 
     /* Content styles */
     .tutorial-section {
-      margin: 16px 0 40px;
+      margin: 0 0 40px;
     }
     .tutorial-section h2 {
       font-size: 22px;
@@ -209,15 +195,22 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       padding: 24px 0;
       border-top: 1px solid rgba(0, 0, 0, 0.08);
       margin-top: 32px;
+      gap: 16px;
     }
     .tutorial-nav a {
       color: var(--brand-primary, #4338ca);
       text-decoration: none;
-      font-size: 15px;
-      cursor: pointer;
+      font-size: 14px;
     }
     .tutorial-nav a:hover {
       text-decoration: underline;
+    }
+    .nav-prev {
+      max-width: 45%;
+    }
+    .nav-next {
+      max-width: 45%;
+      text-align: right;
     }
     .nav-spacer {
       flex: 1;
@@ -241,44 +234,57 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
     }
   `],
 })
-export class TutorialsComponent implements OnInit {
+export class TutorialDetailComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
+  private route = inject(ActivatedRoute);
+  private sub: Subscription | null = null;
 
-  tutorials: TutorialSummaryDto[] = [];
-  activeTutorial: TutorialDto | null = null;
-  activeTutorialId: string | null = null;
+  tutorial: TutorialDto | null = null;
+  allTutorials: TutorialSummaryDto[] = [];
+  prevTutorial: TutorialSummaryDto | null = null;
+  nextTutorial: TutorialSummaryDto | null = null;
   activeStepIndex = -1;
   loading = false;
 
   ngOnInit(): void {
-    this.api.getTutorials().subscribe((list) => {
-      this.tutorials = list;
-      if (list.length > 0) {
-        this.selectTutorial(list[0].id);
+    this.sub = this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id) {
+        this.loadTutorial(id);
       }
     });
   }
 
-  selectTutorial(id: string): void {
-    if (this.activeTutorialId === id && this.activeTutorial) {
-      return;
-    }
-    this.activeTutorialId = id;
-    this.activeTutorial = null;
-    this.activeStepIndex = -1;
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private loadTutorial(id: string): void {
     this.loading = true;
-    this.api.getTutorial(id).subscribe((tut) => {
-      this.activeTutorial = tut;
-      this.loading = false;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.tutorial = null;
+    this.activeStepIndex = -1;
+
+    forkJoin({
+      tutorial: this.api.getTutorial(id),
+      list: this.api.getTutorials(),
+    }).subscribe({
+      next: ({ tutorial, list }) => {
+        this.tutorial = tutorial;
+        this.allTutorials = list;
+        this.computePrevNext(tutorial, list);
+        this.loading = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+      error: () => {
+        this.loading = false;
+      },
     });
   }
 
-  selectTutorialByNumber(num: number): void {
-    const tut = this.tutorials.find((t) => t.number === num);
-    if (tut) {
-      this.selectTutorial(tut.id);
-    }
+  private computePrevNext(tutorial: TutorialDto, list: TutorialSummaryDto[]): void {
+    const idx = list.findIndex((t) => t.id === tutorial.id);
+    this.prevTutorial = idx > 0 ? list[idx - 1] : null;
+    this.nextTutorial = idx < list.length - 1 ? list[idx + 1] : null;
   }
 
   scrollToStep(index: number): void {

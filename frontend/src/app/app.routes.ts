@@ -33,12 +33,24 @@ export const routes: Routes = [
   },
   {
     path: 'tutorials',
-    loadComponent: () =>
-      import('./pages/tutorials/tutorials.component').then(
-        (m) => m.TutorialsComponent,
-      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/tutorials/tutorials-list.component').then(
+            (m) => m.TutorialsListComponent,
+          ),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/tutorials/tutorial-detail.component').then(
+            (m) => m.TutorialDetailComponent,
+          ),
+      },
+    ],
   },
-  { path: 'quickstart', redirectTo: 'tutorials' },
+  { path: 'quickstart', redirectTo: 'tutorials/quick-start' },
   {
     path: 'faq',
     loadComponent: () =>
