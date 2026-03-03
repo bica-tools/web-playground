@@ -74,33 +74,33 @@ import { HomeStats } from '../../models/api.models';
               <text x="228" y="342">b</text>
             </g>
             <!-- Nodes (labels inside) -->
-            <g font-family="Inter,sans-serif" font-size="8" text-anchor="middle" dominant-baseline="central">
+            <g font-family="Inter,sans-serif" font-size="7" text-anchor="middle" dominant-baseline="central">
               <!-- Top: (⊤₁, ⊤₂) — blue tint -->
-              <circle cx="170" cy="24" r="24" fill="rgba(147,197,253,0.3)" stroke="rgba(191,219,254,0.8)" stroke-width="1.5"/>
+              <circle cx="170" cy="24" r="18" fill="rgba(147,197,253,0.3)" stroke="rgba(191,219,254,0.8)" stroke-width="1.5"/>
               <text x="170" y="24" fill="rgba(255,255,255,0.95)">(⊤₁, ⊤₂)</text>
               <!-- Row 2 left: (sₐ, ⊤₂) -->
-              <circle cx="70" cy="114" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="70" cy="114" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="70" y="114" fill="rgba(255,255,255,0.9)">(sₐ, ⊤₂)</text>
               <!-- Row 2 right: (⊤₁, s_c) -->
-              <circle cx="270" cy="114" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="270" cy="114" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="270" y="114" fill="rgba(255,255,255,0.9)">(⊤₁, s꜀)</text>
               <!-- Row 3 left: (⊥₁, ⊤₂) -->
-              <circle cx="20" cy="204" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="20" cy="204" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="20" y="204" fill="rgba(255,255,255,0.9)">(⊥₁, ⊤₂)</text>
               <!-- Row 3 center: (sₐ, s_c) -->
-              <circle cx="170" cy="204" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="170" cy="204" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="170" y="204" fill="rgba(255,255,255,0.9)">(sₐ, s꜀)</text>
               <!-- Row 3 right: (⊤₁, ⊥₂) -->
-              <circle cx="320" cy="204" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="320" cy="204" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="320" y="204" fill="rgba(255,255,255,0.9)">(⊤₁, ⊥₂)</text>
               <!-- Row 4 left: (⊥₁, s_c) -->
-              <circle cx="70" cy="294" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="70" cy="294" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="70" y="294" fill="rgba(255,255,255,0.9)">(⊥₁, s꜀)</text>
               <!-- Row 4 right: (sₐ, ⊥₂) -->
-              <circle cx="270" cy="294" r="24" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <circle cx="270" cy="294" r="18" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
               <text x="270" y="294" fill="rgba(255,255,255,0.9)">(sₐ, ⊥₂)</text>
               <!-- Bottom: (⊥₁, ⊥₂) — green tint -->
-              <circle cx="170" cy="384" r="24" fill="rgba(134,239,172,0.25)" stroke="rgba(187,247,208,0.8)" stroke-width="1.5"/>
+              <circle cx="170" cy="384" r="18" fill="rgba(134,239,172,0.25)" stroke="rgba(187,247,208,0.8)" stroke-width="1.5"/>
               <text x="170" y="384" fill="rgba(255,255,255,0.95)">(⊥₁, ⊥₂)</text>
             </g>
             <!-- Caption -->
