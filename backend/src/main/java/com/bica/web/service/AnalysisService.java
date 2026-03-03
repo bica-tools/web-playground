@@ -172,15 +172,6 @@ public class AnalysisService {
         LatticeResult latticeResult = LatticeChecker.checkLattice(ss);
         String dotSource = BicaCli.buildDot(ss, latticeResult, null, true, true);
         String svgHtml = renderSvg(dotSource);
-
-        String heroDotSource = BicaCli.buildHeroDot(ss);
-        String heroSvgHtml;
-        try {
-            heroSvgHtml = renderSvg(heroDotSource);
-        } catch (Exception e) {
-            heroSvgHtml = "";
-        }
-
         String toolUrl = "/tools/analyzer?type=" + URLEncoder.encode(def.typeString(), StandardCharsets.UTF_8);
 
         var enumConfig = new TestGenConfig(def.name(), null, "obj", 2, 100, ViolationStyle.CALL_ANYWAY);
@@ -200,7 +191,6 @@ public class AnalysisService {
                 latticeResult.isLattice(),
                 def.usesParallel(),
                 svgHtml,
-                heroSvgHtml,
                 toolUrl,
                 numTests
         );

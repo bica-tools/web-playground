@@ -54,19 +54,6 @@ class AnalysisServiceTest {
     }
 
     @Test
-    void parallelBenchmarkHasHeroSvg() {
-        service.initBenchmarkCache();
-        var benchmarks = service.getBenchmarks();
-        var parallel = benchmarks.stream()
-                .filter(b -> b.usesParallel())
-                .findFirst()
-                .orElseThrow();
-        assertNotNull(parallel.heroSvgHtml());
-        assertFalse(parallel.heroSvgHtml().isEmpty());
-        assertTrue(parallel.heroSvgHtml().contains("<svg"));
-    }
-
-    @Test
     void analyzeBadInput() {
         assertThrows(Exception.class, () -> service.analyze("not valid }{"));
     }
