@@ -300,28 +300,39 @@ export class HomeComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   /**
-   * Simplify SVG for hero display: replace box nodes with small unlabeled
-   * circles and strip edge labels, recolored white for dark background.
+   * Simplify SVG for hero display: replace box nodes with labeled circles,
+   * strip edge labels, recolored white for dark background.
    */
   private simplifyHeroSvg(svg: string): string {
     // Remove graphviz white background polygon
     let result = svg.replace(/<polygon fill="white"[^/]*\/>/,'');
 
-    // Replace node shapes with circles (no labels)
+    // Replace node shapes with circles + labels
     result = result.replace(
       /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
-        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>[^<]*<\/text>/);
+        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>([^<]*)<\/text>/);
         if (!textMatch) return open + body + close;
 
         const cx = parseFloat(textMatch[1]);
         const cy = parseFloat(textMatch[2]) - 5;
+        const rawLabel = textMatch[3].trim();
+
+        // Extract display label from node text (e.g. "⊤ hasNext" → "hasNext", "+{TRUE, FALSE}" → "select")
+        let label = rawLabel;
+        const isTop = rawLabel.includes('\u22A4');
+        const isBottom = rawLabel.includes('\u22A5');
+        if (isTop) label = 'top';
+        else if (isBottom) label = 'bottom';
+        else if (rawLabel.startsWith('+{')) label = 'select';
+        else if (rawLabel.startsWith('&{')) label = 'branch';
 
         const titleMatch = body.match(/<title>[^<]*<\/title>/);
         const title = titleMatch ? titleMatch[0] + '\n' : '';
 
         const nc = 'rgba(255,255,255,0.7)';
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nc}" stroke-width="1.5"/>`;
+        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nc}" stroke-width="1.5"/>`
+          + `<text x="${cx}" y="${cy + 28}" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="11">${label}</text>`;
         return open + rebuilt + close;
       }
     );

@@ -3,7 +3,6 @@ import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/ro
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -16,7 +15,6 @@ import { filter } from 'rxjs/operators';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule,
   ],
   template: `
     <mat-toolbar color="primary" class="navbar">
@@ -44,14 +42,10 @@ import { filter } from 'rxjs/operators';
         <a mat-button routerLink="/pipeline" routerLinkActive="active">Pipeline</a>
         <a mat-button routerLink="/publications" routerLinkActive="active">Publications</a>
         <a mat-button routerLink="/tutorials" routerLinkActive="active">Tutorials</a>
-        <a mat-button [matMenuTriggerFor]="moreMenu">More</a>
+        <a mat-button routerLink="/documentation" routerLinkActive="active">Docs</a>
+        <a mat-button routerLink="/faq" routerLinkActive="active">FAQ</a>
+        <a mat-button routerLink="/about" routerLinkActive="active">About</a>
       </nav>
-
-      <mat-menu #moreMenu="matMenu">
-        <a mat-menu-item routerLink="/documentation">Documentation</a>
-        <a mat-menu-item routerLink="/faq">FAQ</a>
-        <a mat-menu-item routerLink="/about">About</a>
-      </mat-menu>
 
       <!-- Mobile hamburger -->
       <button mat-icon-button class="mobile-menu-btn" (click)="toggleMenu()">

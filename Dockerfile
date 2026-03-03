@@ -23,6 +23,16 @@ RUN cd web/backend && mvn dependency:go-offline -B || true
 COPY web/backend/ web/backend/
 COPY --from=frontend /app/frontend/dist/frontend/browser/ web/backend/src/main/resources/static/
 
+# Copy publication PDFs into static resources
+COPY papers/step5-lattice/main.pdf web/backend/src/main/resources/static/papers/step5-lattice.pdf
+COPY papers/ice-2026/main.pdf web/backend/src/main/resources/static/papers/ice-2026.pdf
+COPY papers/ice-2026-oral/main.pdf web/backend/src/main/resources/static/papers/ice-2026-oral.pdf
+COPY papers/reticulate-tool/main.pdf web/backend/src/main/resources/static/papers/reticulate-tool.pdf
+COPY papers/bica-reborn/main.pdf web/backend/src/main/resources/static/papers/bica-reborn.pdf
+COPY papers/pipeline-article/main.pdf web/backend/src/main/resources/static/papers/pipeline-article.pdf
+COPY papers/presentation/slides.pdf web/backend/src/main/resources/static/papers/slides.pdf
+COPY papers/definitions/definitions.pdf web/backend/src/main/resources/static/papers/definitions.pdf
+
 # Build Spring Boot fat JAR
 RUN cd web/backend && mvn package -DskipTests -B
 
