@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
-import { HomeStats } from '../../models/api.models';
+import { BenchmarkDto, HomeStats } from '../../models/api.models';
 import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
@@ -357,16 +357,16 @@ export class HomeComponent implements OnInit {
     return result;
   }
 
-  ngOnInit(): void {
-    // Hero diagram: the canonical 3×3 product lattice from the paper (§4.4.1)
-    this.api.analyze('(a.b.end || c.d.end)').subscribe({
-      next: (result) => {
-        if (result.svgHtml) {
-          this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
-        }
-      },
-    });
+  private showBenchmarkFallback(benchmarks: BenchmarkDto[]): void {
+    const showcase = benchmarks.find(
+      (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml
+    ) ?? benchmarks.find((b) => b.svgHtml) ?? null;
+    if (showcase) {
+      this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
+    }
+  }
 
+  ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
         this.stats.set({
@@ -376,6 +376,18 @@ export class HomeComponent implements OnInit {
           allLattice: benchmarks.every((b) => b.isLattice),
         });
         this.loading.set(false);
+
+        // Hero diagram: the canonical 3×3 product lattice from the paper (§4.4.1)
+        this.api.analyze('(a.b.end || c.d.end)').subscribe({
+          next: (result) => {
+            if (result.svgHtml) {
+              this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
+            } else {
+              this.showBenchmarkFallback(benchmarks);
+            }
+          },
+          error: () => this.showBenchmarkFallback(benchmarks),
+        });
       },
       error: () => {
         this.statsError.set(true);
