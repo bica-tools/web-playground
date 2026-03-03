@@ -146,7 +146,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       margin-top: -24px;   /* negate parent padding-top */
       background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary-light));
       color: #fff;
-      padding: 64px 24px 32px;
+      padding: 40px 24px 32px;
     }
 
     .hero-inner {
