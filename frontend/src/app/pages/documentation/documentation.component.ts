@@ -16,7 +16,7 @@ interface TocEntry {
   template: `
     <header class="page-header">
       <h1>Documentation</h1>
-      <p>Theory, tutorials, and frequently asked questions.</p>
+      <p>Theory and frequently asked questions. Looking for hands-on guides? See the <a routerLink="/tutorials">tutorials</a>.</p>
     </header>
 
     <div class="doc-layout">
@@ -181,149 +181,6 @@ interface TocEntry {
               <li><strong>Projection</strong> &mdash; surjective, order-preserving.</li>
               <li><strong>Galois connection</strong> &mdash; an adjunction &alpha;(x) &le; y &hArr; x &le; &gamma;(y).</li>
             </ol>
-          </div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- TUTORIALS                                                        -->
-        <!-- ================================================================ -->
-        <section class="doc-section" id="tutorials">
-          <h2>Tutorials</h2>
-
-          <div id="tutorial-1">
-            <h3>Tutorial 1: Typechecking with <code>&#64;Session</code></h3>
-            <p>
-              BICA Reborn is a Java annotation processor that enforces communication protocols
-              at <strong>compile time</strong>. You annotate a class with <code>&#64;Session</code>,
-              write the protocol as a session type string, and the compiler checks that every
-              client uses the object correctly.
-            </p>
-
-            <div class="tutorial-step">
-              <h4>Step 1: Add the Dependency</h4>
-              <p>Clone the repository and install it to your local Maven cache:</p>
-              <app-code-block [code]="tut1Install" label="bash"></app-code-block>
-              <p>Then add the dependency to your project:</p>
-              <app-code-block [code]="tut1Dep" label="pom.xml"></app-code-block>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 2: Annotate Your Class</h4>
-              <app-code-block [code]="tut1Annotate" label="FileHandle.java"></app-code-block>
-              <p>
-                This type says: first call <code>open</code>, then choose either
-                <code>read</code> or <code>write</code>, then call <code>close</code>,
-                then the protocol ends.
-              </p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 3: Implement the Protocol</h4>
-              <app-code-block [code]="tut1Implement" label="FileHandle.java (full)"></app-code-block>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 4: Write Correct Client Code</h4>
-              <app-code-block [code]="tut1Client" label="Client.java"></app-code-block>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 5: See Compile-Time Errors</h4>
-              <app-code-block [code]="tut1BadClient" label="BadClient.java"></app-code-block>
-              <p>The error message tells you exactly which methods are available in the current state.</p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 6: Add Concurrency Annotations</h4>
-              <p>
-                When your session type uses <code>&parallel;</code>, methods in concurrent branches
-                need concurrency annotations:
-              </p>
-              <ul>
-                <li><code>&#64;Shared</code> &mdash; safe for concurrent access</li>
-                <li><code>&#64;ReadOnly</code> &mdash; read-only access</li>
-                <li><code>&#64;Exclusive</code> &mdash; exclusive access</li>
-              </ul>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 7: Generate Tests Automatically</h4>
-              <p>
-                BICA can generate JUnit 5 test suites from a session type covering valid paths,
-                violations, and incomplete prefixes.
-              </p>
-              <app-code-block [code]="tut1TestGen" label="bash"></app-code-block>
-              <p>
-                You can also generate tests from the
-                <a routerLink="/tools/analyzer">interactive tool</a> by entering a class name.
-              </p>
-            </div>
-          </div>
-
-          <div id="tutorial-2">
-            <h3>Tutorial 2: Reticulate CLI</h3>
-            <p>
-              Reticulate is a Python command-line tool that takes a session type string and
-              performs the full analysis pipeline: <strong>parse</strong>, <strong>build</strong>
-              the state space, <strong>check</strong> lattice properties, and optionally
-              <strong>visualize</strong> the Hasse diagram.
-            </p>
-
-            <div class="tutorial-step">
-              <h4>Step 1: Install Reticulate</h4>
-              <app-code-block [code]="tut2Install" label="bash"></app-code-block>
-              <p>You only need Python 3.11+ and the standard library.
-                The optional <code>graphviz</code> Python package is needed for Hasse diagrams.</p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 2: Your First Analysis</h4>
-              <app-code-block code='python -m reticulate "a . b . end"' label="bash"></app-code-block>
-              <p>Output:</p>
-              <app-code-block [code]="tut2Output" label="output"></app-code-block>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 3: Branches and Selections</h4>
-              <app-code-block [code]="tut2Branch" label="bash"></app-code-block>
-              <p>
-                This gives a 4-state diamond: the initial state branches into <code>read</code>
-                and <code>write</code>, both merging at <code>close</code>.
-              </p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 4: Recursion</h4>
-              <app-code-block [code]="tut2Rec" label="bash"></app-code-block>
-              <p>
-                The SCC quotient collapses cyclic states. The Recursion Lemma guarantees that
-                if the quotient is a lattice, so is the original.
-              </p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 5: The Parallel Constructor</h4>
-              <app-code-block code='python -m reticulate "(a.end || b.end)"' label="bash"></app-code-block>
-              <p>
-                The state space is the product lattice L(S1) &times; L(S2),
-                ordered componentwise.
-              </p>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 6: Visualize with <code>--dot</code> and <code>--hasse</code></h4>
-              <app-code-block [code]="tut2Viz" label="bash"></app-code-block>
-            </div>
-
-            <div class="tutorial-step">
-              <h4>Step 7: Real-World Protocols</h4>
-              <app-code-block [code]="tut2RealWorld" label="bash"></app-code-block>
-              <p>
-                The project includes <strong>34 benchmark protocols</strong>.
-                Browse them in the <a routerLink="/benchmarks">benchmarks gallery</a> or paste any
-                protocol into the <a routerLink="/tools/analyzer">interactive analyzer</a>.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -520,25 +377,6 @@ interface TocEntry {
       border: 1px solid rgba(67, 56, 202, 0.15);
     }
 
-    .tutorial-step {
-      margin-bottom: 24px;
-    }
-    .tutorial-step h4 {
-      font-size: 15px;
-      font-weight: 500;
-      margin: 0 0 8px;
-    }
-    .tutorial-step p {
-      line-height: 1.7;
-      margin: 8px 0;
-    }
-    .tutorial-step a {
-      color: var(--brand-primary, #4338ca);
-      text-decoration: none;
-    }
-    .tutorial-step a:hover {
-      text-decoration: underline;
-    }
   `],
 })
 export class DocumentationComponent implements OnInit, OnDestroy {
@@ -554,9 +392,6 @@ export class DocumentationComponent implements OnInit, OnDestroy {
     { id: 'lattice-properties', label: 'Lattice Properties', level: 2 },
     { id: 'parallel-constructor', label: 'Parallel Constructor', level: 2 },
     { id: 'morphisms', label: 'Morphism Hierarchy', level: 2 },
-    { id: 'tutorials', label: 'Tutorials', level: 1 },
-    { id: 'tutorial-1', label: 'Tutorial 1: @Session', level: 2 },
-    { id: 'tutorial-2', label: 'Tutorial 2: Reticulate CLI', level: 2 },
     { id: 'faq', label: 'FAQ', level: 1 },
   ];
 
@@ -590,99 +425,6 @@ export class DocumentationComponent implements OnInit, OnDestroy {
      |  X                                \u2014 variable
      |  end                              \u2014 terminated
      |  S\u2081 . S\u2082                          \u2014 sequencing`;
-
-  readonly tut1Install = `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
-cd SessionTypesResearch/bica
-mvn install`;
-
-  readonly tut1Dep = `<dependency>
-    <groupId>com.bica</groupId>
-    <artifactId>bica-reborn</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
-    <scope>provided</scope>
-</dependency>`;
-
-  readonly tut1Annotate = `import com.bica.reborn.annotation.Session;
-
-@Session("open . &{read: close . end, write: close . end}")
-public class FileHandle {
-    // ...
-}`;
-
-  readonly tut1Implement = `import com.bica.reborn.annotation.Session;
-
-@Session("open . &{read: close . end, write: close . end}")
-public class FileHandle {
-    private enum State { INITIAL, OPENED, PENDING_CLOSE, CLOSED }
-    private State state = State.INITIAL;
-
-    public void open() {
-        requireState(State.INITIAL);
-        state = State.OPENED;
-    }
-
-    public void read() {
-        requireState(State.OPENED);
-        state = State.PENDING_CLOSE;
-    }
-
-    public void write() {
-        requireState(State.OPENED);
-        state = State.PENDING_CLOSE;
-    }
-
-    public void close() {
-        requireState(State.PENDING_CLOSE);
-        state = State.CLOSED;
-    }
-
-    private void requireState(State expected) {
-        if (state != expected)
-            throw new IllegalStateException(
-                "Expected " + expected + ", got " + state);
-    }
-}`;
-
-  readonly tut1Client = `public class Client {
-    void use() {
-        FileHandle f = new FileHandle();
-        f.open();
-        f.read();
-        f.close();
-        // Compiles \u2014 follows protocol: open \u2192 read \u2192 close \u2192 end
-    }
-}`;
-
-  readonly tut1BadClient = `public class BadClient {
-    void use() {
-        FileHandle f = new FileHandle();
-        f.read();   // ERROR: 'read' not enabled in state 0 (enabled: [open])
-        f.close();
-    }
-}`;
-
-  readonly tut1TestGen = `java -jar bica.jar --test-gen --class-name FileHandle \\
-    "open . &{read: close . end, write: close . end}"`;
-
-  readonly tut2Install = `git clone https://github.com/zuacaldeira/SessionTypesResearch.git
-cd SessionTypesResearch/reticulate
-python -m reticulate "end"`;
-
-  readonly tut2Output = `Session type: a . b . end
-States:       3
-Transitions:  2
-SCCs:         3
-Lattice:      \u2713 yes`;
-
-  readonly tut2Branch = `python -m reticulate "&{read: close . end, write: close . end}"`;
-
-  readonly tut2Rec = `python -m reticulate "rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}"`;
-
-  readonly tut2Viz = `python -m reticulate --dot "a . b . end"
-python -m reticulate --dot "a . b . end" | dot -Tpng -o diagram.png
-python -m reticulate --hasse diagram "a . b . end"`;
-
-  readonly tut2RealWorld = `python -m reticulate "connect . ehlo . rec X . &{mail: rcpt . data . +{OK: X, ERR: X}, quit: end}"`;
 
   readonly faqItems = [
     {

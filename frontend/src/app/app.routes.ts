@@ -32,12 +32,13 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'quickstart',
+    path: 'tutorials',
     loadComponent: () =>
-      import('./pages/quickstart/quickstart.component').then(
-        (m) => m.QuickstartComponent,
+      import('./pages/tutorials/tutorials.component').then(
+        (m) => m.TutorialsComponent,
       ),
   },
+  { path: 'quickstart', redirectTo: 'tutorials' },
   {
     path: 'documentation',
     loadComponent: () =>

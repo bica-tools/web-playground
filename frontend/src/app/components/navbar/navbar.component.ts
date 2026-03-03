@@ -34,11 +34,11 @@ import { filter } from 'rxjs/operators';
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
         <a mat-button routerLink="/pipeline" routerLinkActive="active">Pipeline</a>
         <a mat-button routerLink="/publications" routerLinkActive="active">Publications</a>
+        <a mat-button routerLink="/tutorials" routerLinkActive="active">Tutorials</a>
         <a mat-button [matMenuTriggerFor]="moreMenu">More</a>
       </nav>
 
       <mat-menu #moreMenu="matMenu">
-        <a mat-menu-item routerLink="/quickstart">Quick Start</a>
         <a mat-menu-item routerLink="/documentation">Documentation</a>
         <a mat-menu-item routerLink="/about">About</a>
       </mat-menu>
@@ -57,7 +57,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
         <a routerLink="/pipeline" routerLinkActive="active" (click)="closeMenu()">Pipeline</a>
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
-        <a routerLink="/quickstart" routerLinkActive="active" (click)="closeMenu()">Quick Start</a>
+        <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()">Tutorials</a>
         <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()">Documentation</a>
         <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
       </nav>
