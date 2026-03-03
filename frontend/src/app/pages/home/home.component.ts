@@ -346,8 +346,7 @@ export class HomeComponent implements OnInit {
       (_match, open: string, body: string, close: string) => {
         let fixed = body;
         const c = 'rgba(255,255,255,0.7)';
-        // Add fill to <text> if missing, or replace existing
-        fixed = fixed.replace(/<text /g, `<text fill="${c}" `);
+        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
         fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
         fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
         fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
