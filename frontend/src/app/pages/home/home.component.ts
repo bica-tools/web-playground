@@ -331,9 +331,9 @@ export class HomeComponent implements OnInit {
         const titleMatch = body.match(/<title>[^<]*<\/title>/);
         const title = titleMatch ? titleMatch[0] + '\n' : '';
 
-        // Rebuild node as circle + centered symbol
+        // Rebuild node as plain circle (no label)
         const nodeColor = 'rgba(255,255,255,0.7)';
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nodeColor}" stroke-width="1.5"/>\n<text text-anchor="middle" dominant-baseline="central" x="${cx}" y="${cy}" font-family="Helvetica" font-size="13.00" fill="${nodeColor}">${symbol}</text>`;
+        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nodeColor}" stroke-width="1.5"/>`;
         return open + rebuilt + close;
       }
     );
