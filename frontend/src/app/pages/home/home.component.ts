@@ -146,7 +146,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       margin-top: -24px;   /* negate parent padding-top */
       background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary-light));
       color: #fff;
-      padding: 0 24px 32px;
+      padding: 0 24px 16px;
     }
 
     .hero-inner {
@@ -154,14 +154,14 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 24px;
       align-items: center;
     }
 
     .hero-text h1 {
       font-size: 36px;
       font-weight: 600;
-      margin: 0 0 16px;
+      margin: 0 0 8px;
       line-height: 1.2;
     }
 
@@ -174,7 +174,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     .hero-text .institution-line {
       font-size: 14px;
       opacity: 0.7;
-      margin: 0 0 28px;
+      margin: 0 0 16px;
     }
 
     .hero-cta {
@@ -207,7 +207,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
 
     .hero-stats {
       max-width: 1200px;
-      margin: 24px auto 0;
+      margin: 8px auto 0;
       text-align: center;
       font-size: 14px;
       opacity: 0.8;
