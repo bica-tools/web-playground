@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,12 +25,12 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     <header class="page-header">
       <h1>Benchmarks</h1>
       <p>
-        {{ benchmarks.length }} real-world and classic protocols expressed as session types,
+        {{ benchmarks().length }} real-world and classic protocols expressed as session types,
         verified through the full reticulate pipeline.
       </p>
     </header>
 
-    @if (loading) {
+    @if (loading()) {
       <div class="loading">
         <mat-spinner diameter="32"></mat-spinner>
         <span>Loading benchmarks&hellip;</span>
@@ -38,11 +38,11 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     } @else {
       <!-- Summary stats -->
       <p class="stats-line">
-        {{ benchmarks.length }} protocols &middot;
-        {{ parallelCount }} use &parallel; &middot;
-        {{ latticeCount }} are lattices &middot;
-        {{ totalStates }} total states &middot;
-        {{ totalTests }} tests generated
+        {{ benchmarks().length }} protocols &middot;
+        {{ parallelCount() }} use &parallel; &middot;
+        {{ latticeCount() }} are lattices &middot;
+        {{ totalStates() }} total states &middot;
+        {{ totalTests() }} tests generated
       </p>
 
       <!-- Benchmark table -->
@@ -62,7 +62,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
             </tr>
           </thead>
           <tbody>
-            @for (b of benchmarks; track b.name; let i = $index) {
+            @for (b of benchmarks(); track b.name; let i = $index) {
               <tr>
                 <td>{{ i + 1 }}</td>
                 <td class="protocol-name">{{ b.name }}</td>
@@ -174,27 +174,27 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
   `],
 })
 export class BenchmarksComponent implements OnInit {
-  benchmarks: BenchmarkDto[] = [];
-  loading = true;
-  parallelCount = 0;
-  latticeCount = 0;
-  totalStates = 0;
-  totalTests = 0;
+  readonly benchmarks = signal<BenchmarkDto[]>([]);
+  readonly loading = signal(true);
+  readonly parallelCount = signal(0);
+  readonly latticeCount = signal(0);
+  readonly totalStates = signal(0);
+  readonly totalTests = signal(0);
 
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (data) => {
-        this.benchmarks = data;
-        this.parallelCount = data.filter((b) => b.usesParallel).length;
-        this.latticeCount = data.filter((b) => b.isLattice).length;
-        this.totalStates = data.reduce((s, b) => s + b.numStates, 0);
-        this.totalTests = data.reduce((s, b) => s + b.numTests, 0);
-        this.loading = false;
+        this.benchmarks.set(data);
+        this.parallelCount.set(data.filter((b) => b.usesParallel).length);
+        this.latticeCount.set(data.filter((b) => b.isLattice).length);
+        this.totalStates.set(data.reduce((s, b) => s + b.numStates, 0));
+        this.totalTests.set(data.reduce((s, b) => s + b.numTests, 0));
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
       },
     });
   }

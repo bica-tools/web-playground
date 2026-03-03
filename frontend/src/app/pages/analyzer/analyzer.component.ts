@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -41,7 +41,8 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Session type</mat-label>
         <textarea matInput
-                  [(ngModel)]="typeString"
+                  [ngModel]="typeString()"
+                  (ngModelChange)="typeString.set($event)"
                   rows="3"
                   placeholder="e.g. rec X . &{read: X, done: end}"
                   (keydown.control.enter)="analyze()"></textarea>
@@ -53,7 +54,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
           <mat-label>Load benchmark</mat-label>
           <mat-select (selectionChange)="onBenchmarkSelect($event.value)">
             <mat-option value="">-- Select --</mat-option>
-            @for (b of benchmarks; track b.name) {
+            @for (b of benchmarks(); track b.name) {
               <mat-option [value]="b.typeString">{{ b.name }}</mat-option>
             }
           </mat-select>
@@ -61,15 +62,15 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
 
         <mat-form-field appearance="outline" class="class-name-input">
           <mat-label>Class name (for test generation)</mat-label>
-          <input matInput [(ngModel)]="className" placeholder="e.g. FileHandle">
+          <input matInput [ngModel]="className()" (ngModelChange)="className.set($event)" placeholder="e.g. FileHandle">
         </mat-form-field>
 
         <button mat-flat-button
                 color="primary"
                 class="analyze-btn"
-                [disabled]="analyzing || !typeString.trim()"
+                [disabled]="analyzing() || !typeString().trim()"
                 (click)="analyze()">
-          @if (analyzing) {
+          @if (analyzing()) {
             <mat-spinner diameter="20"></mat-spinner>
           } @else {
             Analyze
@@ -79,46 +80,46 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     </section>
 
     <!-- Error -->
-    @if (error) {
+    @if (error()) {
       <section class="error-card">
         <mat-icon>error_outline</mat-icon>
-        <span>{{ error }}</span>
+        <span>{{ error() }}</span>
       </section>
     }
 
     <!-- Results -->
-    @if (result) {
+    @if (result()) {
       <section class="results" #resultsSection>
         <h2>Analysis Result</h2>
 
         <!-- Pretty-printed type -->
         <h3>Session Type</h3>
-        <app-code-block [code]="result.pretty" label="Pretty-printed"></app-code-block>
+        <app-code-block [code]="result()!.pretty" label="Pretty-printed"></app-code-block>
 
         <!-- Metrics -->
         <h3>State Space</h3>
         <table class="metrics-table">
           <tbody>
-            <tr><td>States</td><td>{{ result.numStates }}</td></tr>
-            <tr><td>Transitions</td><td>{{ result.numTransitions }}</td></tr>
-            <tr><td>SCCs (after quotienting)</td><td>{{ result.numSccs }}</td></tr>
+            <tr><td>States</td><td>{{ result()!.numStates }}</td></tr>
+            <tr><td>Transitions</td><td>{{ result()!.numTransitions }}</td></tr>
+            <tr><td>SCCs (after quotienting)</td><td>{{ result()!.numSccs }}</td></tr>
           </tbody>
         </table>
 
         <!-- Lattice verdict -->
         <h3>Lattice Check</h3>
-        @if (result.isLattice) {
+        @if (result()!.isLattice) {
           <p class="verdict pass">&#x2713; The state space IS a lattice</p>
         } @else {
           <p class="verdict fail">&#x2717; The state space is NOT a lattice</p>
         }
-        @if (result.counterexample) {
-          <p class="verdict fail">Counterexample: {{ result.counterexample }}</p>
+        @if (result()!.counterexample) {
+          <p class="verdict fail">Counterexample: {{ result()!.counterexample }}</p>
         }
 
         <!-- Termination -->
         <h3>Termination</h3>
-        @if (result.terminates) {
+        @if (result()!.terminates) {
           <p class="verdict pass">&#x2713; All recursive branches terminate</p>
         } @else {
           <p class="verdict fail">&#x2717; Non-terminating recursive branches detected</p>
@@ -126,42 +127,42 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
 
         <!-- WF-Par -->
         <h3>Well-Formed Parallel</h3>
-        @if (result.wfParallel) {
+        @if (result()!.wfParallel) {
           <p class="verdict pass">&#x2713; Parallel composition is well-formed</p>
         } @else {
           <p class="verdict fail">&#x2717; WF-Par violations detected</p>
         }
 
         <!-- Hasse diagram -->
-        @if (result.svgHtml) {
+        @if (result()!.svgHtml) {
           <h3>Hasse Diagram</h3>
-          <app-hasse-diagram [svgHtml]="result.svgHtml"></app-hasse-diagram>
+          <app-hasse-diagram [svgHtml]="result()!.svgHtml"></app-hasse-diagram>
         }
 
         <!-- DOT source -->
-        @if (result.dotSource) {
+        @if (result()!.dotSource) {
           <mat-expansion-panel>
             <mat-expansion-panel-header>
               <mat-panel-title>DOT Source</mat-panel-title>
             </mat-expansion-panel-header>
-            <app-code-block [code]="result.dotSource" label="DOT"></app-code-block>
+            <app-code-block [code]="result()!.dotSource" label="DOT"></app-code-block>
           </mat-expansion-panel>
         }
 
         <!-- Test generation (only show when className is provided) -->
-        @if (className.trim()) {
+        @if (className().trim()) {
           <mat-expansion-panel class="test-gen-panel">
             <mat-expansion-panel-header>
               <mat-panel-title>Test Generation</mat-panel-title>
             </mat-expansion-panel-header>
-            @if (testSource) {
-              <app-code-block [code]="testSource" label="JUnit 5"></app-code-block>
+            @if (testSource()) {
+              <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
             } @else {
               <div class="test-gen-form">
                 <button mat-stroked-button
-                        [disabled]="generatingTests"
+                        [disabled]="generatingTests()"
                         (click)="generateTests()">
-                  @if (generatingTests) {
+                  @if (generatingTests()) {
                     <mat-spinner diameter="18"></mat-spinner>
                   } @else {
                     Generate Tests
@@ -293,14 +294,14 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
 export class AnalyzerComponent implements OnInit {
   @ViewChild('resultsSection') resultsSection?: ElementRef;
 
-  typeString = '';
-  className = '';
-  benchmarks: BenchmarkDto[] = [];
-  result: AnalyzeResponse | null = null;
-  testSource = '';
-  error = '';
-  analyzing = false;
-  generatingTests = false;
+  readonly typeString = signal('');
+  readonly className = signal('');
+  readonly benchmarks = signal<BenchmarkDto[]>([]);
+  readonly result = signal<AnalyzeResponse | null>(null);
+  readonly testSource = signal('');
+  readonly error = signal('');
+  readonly analyzing = signal(false);
+  readonly generatingTests = signal(false);
 
   readonly grammarRef = `S  ::=  &{ m\u2081 : S\u2081 , ... , m\u2099 : S\u2099 }    -- branch (external choice)
      |  +{ l\u2081 : S\u2081 , ... , l\u2099 : S\u2099 }    -- selection (internal choice)
@@ -320,34 +321,34 @@ export class AnalyzerComponent implements OnInit {
     // Pre-fill from URL param and auto-analyze
     this.route.queryParams.subscribe((params) => {
       if (params['type']) {
-        this.typeString = params['type'];
+        this.typeString.set(params['type']);
         setTimeout(() => this.analyze(), 0);
       }
     });
 
     // Load benchmarks for dropdown
     this.api.getBenchmarks().subscribe({
-      next: (b) => (this.benchmarks = b),
+      next: (b) => this.benchmarks.set(b),
     });
   }
 
   onBenchmarkSelect(value: string): void {
     if (value) {
-      this.typeString = value;
+      this.typeString.set(value);
     }
   }
 
   analyze(): void {
-    if (!this.typeString.trim()) return;
-    this.analyzing = true;
-    this.result = null;
-    this.testSource = '';
-    this.error = '';
+    if (!this.typeString().trim()) return;
+    this.analyzing.set(true);
+    this.result.set(null);
+    this.testSource.set('');
+    this.error.set('');
 
-    this.api.analyze(this.typeString).subscribe({
+    this.api.analyze(this.typeString()).subscribe({
       next: (res) => {
-        this.result = res;
-        this.analyzing = false;
+        this.result.set(res);
+        this.analyzing.set(false);
         setTimeout(() => {
           this.resultsSection?.nativeElement.scrollIntoView({
             behavior: 'smooth',
@@ -355,25 +356,25 @@ export class AnalyzerComponent implements OnInit {
         }, 100);
       },
       error: (err) => {
-        this.error = err.error?.error || err.message || 'Analysis failed';
-        this.analyzing = false;
+        this.error.set(err.error?.error || err.message || 'Analysis failed');
+        this.analyzing.set(false);
       },
     });
   }
 
   generateTests(): void {
-    if (!this.typeString.trim() || !this.className.trim()) return;
-    this.generatingTests = true;
+    if (!this.typeString().trim() || !this.className().trim()) return;
+    this.generatingTests.set(true);
 
     const request: TestGenRequest = {
-      typeString: this.typeString,
-      className: this.className,
+      typeString: this.typeString(),
+      className: this.className(),
     };
 
     this.api.generateTests(request).subscribe({
       next: (res) => {
-        this.testSource = res.testSource;
-        this.generatingTests = false;
+        this.testSource.set(res.testSource);
+        this.generatingTests.set(false);
       },
       error: (err) => {
         this.snackBar.open(
@@ -381,7 +382,7 @@ export class AnalyzerComponent implements OnInit {
           'Dismiss',
           { duration: 5000 },
         );
-        this.generatingTests = false;
+        this.generatingTests.set(false);
       },
     });
   }

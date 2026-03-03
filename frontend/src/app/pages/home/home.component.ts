@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -44,23 +44,23 @@ import { HomeStats } from '../../models/api.models';
     </section>
 
     <!-- Stats line -->
-    @if (loading) {
+    @if (loading()) {
       <div class="stats-line">
         <mat-spinner diameter="18"></mat-spinner>
         <span>Loading benchmarks&hellip;</span>
       </div>
-    } @else if (stats) {
+    } @else if (stats()) {
       <p class="stats-line">
-        {{ stats.numBenchmarks }} benchmarks &middot;
-        {{ stats.totalStates }} states analyzed &middot;
-        {{ stats.totalTests }} tests generated &middot;
-        @if (stats.allLattice) {
+        {{ stats()!.numBenchmarks }} benchmarks &middot;
+        {{ stats()!.totalStates }} states analyzed &middot;
+        {{ stats()!.totalTests }} tests generated &middot;
+        @if (stats()!.allLattice) {
           All lattices &#x2713;
         } @else {
           Some non-lattices
         }
       </p>
-    } @else if (statsError) {
+    } @else if (statsError()) {
       <p class="stats-line stats-error">Could not load benchmark stats</p>
     }
 
@@ -207,26 +207,26 @@ import { HomeStats } from '../../models/api.models';
   `],
 })
 export class HomeComponent implements OnInit {
-  stats: HomeStats | null = null;
-  loading = true;
-  statsError = false;
+  readonly stats = signal<HomeStats | null>(null);
+  readonly loading = signal(true);
+  readonly statsError = signal(false);
 
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
-        this.stats = {
+        this.stats.set({
           numBenchmarks: benchmarks.length,
           totalStates: benchmarks.reduce((sum, b) => sum + b.numStates, 0),
           totalTests: benchmarks.reduce((sum, b) => sum + b.numTests, 0),
           allLattice: benchmarks.every((b) => b.isLattice),
-        };
-        this.loading = false;
+        });
+        this.loading.set(false);
       },
       error: () => {
-        this.statsError = true;
-        this.loading = false;
+        this.statsError.set(true);
+        this.loading.set(false);
       },
     });
   }
