@@ -16,7 +16,7 @@ import { TutorialSummaryDto } from '../../models/api.models';
     @if (tutorials().length === 0) {
       <div class="loading">Loading tutorials...</div>
     } @else {
-      <div class="card-grid" @fadeIn>
+      <div class="card-grid">
         @for (tut of tutorials(); track tut.id) {
           <div class="tutorial-card" (click)="openTutorial(tut.id)" tabindex="0" (keydown.enter)="openTutorial(tut.id)">
             <span class="card-number">{{ tut.number }}</span>
@@ -107,7 +107,6 @@ import { TutorialSummaryDto } from '../../models/api.models';
       }
     }
   `],
-  animations: [],
 })
 export class TutorialsListComponent implements OnInit {
   private api = inject(ApiService);
