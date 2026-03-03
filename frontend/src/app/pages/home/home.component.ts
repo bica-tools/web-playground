@@ -222,7 +222,7 @@ import { HomeStats } from '../../models/api.models';
       margin-top: -24px;   /* negate parent padding-top */
       background: linear-gradient(135deg, var(--brand-primary-dark), var(--brand-primary-light));
       color: #fff;
-      padding: 0 24px 16px;
+      padding: 48px 24px 32px;
     }
 
     .hero-inner {
