@@ -320,13 +320,11 @@ export class HomeComponent implements OnInit {
         const cy = parseFloat(ty) - 5; // shift up from baseline to visual center
 
         // Determine symbol from original label
-        // Single-choice branches are labeled with just the method name (no &{ prefix),
-        // so default to & for all intermediate nodes — most states are branch points.
         const t = rawLabel.trim();
         let symbol: string;
-        if (t.includes('\u22a4')) symbol = '\u22a4';
-        else if (t.includes('\u22a5')) symbol = '\u22a5';
+        if (t.includes('\u22a5')) symbol = '\u22a5';
         else if (t.includes('+{') || t.includes('\u2295{')) symbol = '\u2295';
+        else if (/^\(?⊤?\s*\(/.test(t) || /^⊤\s*\(/.test(t) || (t.includes('(') && t.includes(','))) symbol = '\u2225';
         else symbol = '&amp;';
 
         // Keep title element
@@ -377,17 +375,13 @@ export class HomeComponent implements OnInit {
         });
         this.loading.set(false);
 
-        // Hero diagram: the canonical 3×3 product lattice from the paper (§4.4.1)
-        this.api.analyze('(a.b.end || c.d.end)').subscribe({
-          next: (result) => {
-            if (result.svgHtml) {
-              this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
-            } else {
-              this.showBenchmarkFallback(benchmarks);
-            }
-          },
-          error: () => this.showBenchmarkFallback(benchmarks),
-        });
+        // Hero diagram: Two-Buyer protocol (parallel product lattice)
+        const twoBuyer = benchmarks.find((b) => b.name === 'Two-Buyer');
+        if (twoBuyer?.svgHtml) {
+          this.showcaseSvg.set(this.simplifyHeroSvg(twoBuyer.svgHtml));
+        } else {
+          this.showBenchmarkFallback(benchmarks);
+        }
       },
       error: () => {
         this.statsError.set(true);
