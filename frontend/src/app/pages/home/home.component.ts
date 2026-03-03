@@ -345,11 +345,12 @@ export class HomeComponent implements OnInit {
       /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
         let fixed = body;
-        const edgeColor = 'rgba(255,255,255,0.7)';
-        fixed = fixed.replace(/(<text[^>]*?)fill="[^"]*"/g, `$1fill="${edgeColor}"`);
-        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${edgeColor}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${edgeColor}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${edgeColor}"`);
+        const c = 'rgba(255,255,255,0.7)';
+        // Add fill to <text> if missing, or replace existing
+        fixed = fixed.replace(/<text /g, `<text fill="${c}" `);
+        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
         return open + fixed + close;
       }
     );
