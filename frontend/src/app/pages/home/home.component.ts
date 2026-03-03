@@ -344,8 +344,8 @@ export class HomeComponent implements OnInit {
       /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
         let fixed = body;
-        // Remove text labels
-        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
+        // Recolor edge labels white
+        fixed = fixed.replace(/(<text[^>]*?)fill="[^"]*"/g, '$1fill="rgba(255,255,255,0.85)"');
         // Recolor edge paths (lines): stroke black → white
         fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, '$1stroke="rgba(255,255,255,0.7)"');
         // Recolor arrowhead polygons: fill/stroke black → white
