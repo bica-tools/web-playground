@@ -334,7 +334,8 @@ export class HomeComponent implements OnInit {
         const title = titleMatch ? titleMatch[0] + '\n' : '';
 
         // Rebuild node as circle + centered symbol
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="1.5"/>\n<text text-anchor="middle" dominant-baseline="central" x="${cx}" y="${cy}" font-family="Helvetica" font-size="13.00" fill="white">${symbol}</text>`;
+        const nodeColor = 'rgba(255,255,255,0.7)';
+        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nodeColor}" stroke-width="1.5"/>\n<text text-anchor="middle" dominant-baseline="central" x="${cx}" y="${cy}" font-family="Helvetica" font-size="13.00" fill="${nodeColor}">${symbol}</text>`;
         return open + rebuilt + close;
       }
     );
@@ -344,13 +345,11 @@ export class HomeComponent implements OnInit {
       /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
       (_match, open: string, body: string, close: string) => {
         let fixed = body;
-        // Recolor edge labels white
-        fixed = fixed.replace(/(<text[^>]*?)fill="[^"]*"/g, '$1fill="rgba(255,255,255,0.85)"');
-        // Recolor edge paths (lines): stroke black → white
-        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, '$1stroke="rgba(255,255,255,0.7)"');
-        // Recolor arrowhead polygons: fill/stroke black → white
-        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, '$1fill="rgba(255,255,255,0.7)"');
-        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, '$1stroke="rgba(255,255,255,0.7)"');
+        const edgeColor = 'rgba(255,255,255,0.7)';
+        fixed = fixed.replace(/(<text[^>]*?)fill="[^"]*"/g, `$1fill="${edgeColor}"`);
+        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${edgeColor}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${edgeColor}"`);
+        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${edgeColor}"`);
         return open + fixed + close;
       }
     );
