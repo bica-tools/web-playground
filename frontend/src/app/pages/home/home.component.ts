@@ -5,12 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
 import { HomeStats } from '../../models/api.models';
-import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule, HasseDiagramComponent],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule],
   template: `
     <!-- Hero -->
     <section class="hero">
@@ -29,9 +28,86 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
           </div>
         </div>
         <div class="hero-diagram">
-          @if (showcaseSvg()) {
-            <app-hasse-diagram [svgHtml]="showcaseSvg()"></app-hasse-diagram>
-          }
+          <!-- Figure 1: Product lattice for a.b.end ∥ c.d.end (3×3 = 9 states) -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 440" class="hero-lattice-svg">
+            <defs>
+              <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,0.5)"/>
+              </marker>
+            </defs>
+            <!-- Edges (drawn first, behind nodes) -->
+            <g class="edges" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" fill="none" marker-end="url(#ah)">
+              <!-- From top (⊤₁,⊤₂) -->
+              <line x1="170" y1="38" x2="80" y2="98"/>
+              <line x1="170" y1="38" x2="260" y2="98"/>
+              <!-- From (sₐ,⊤₂) -->
+              <line x1="70" y1="128" x2="30" y2="188"/>
+              <line x1="70" y1="128" x2="170" y2="188"/>
+              <!-- From (⊤₁,s_c) -->
+              <line x1="270" y1="128" x2="170" y2="188"/>
+              <line x1="270" y1="128" x2="310" y2="188"/>
+              <!-- From (⊥₁,⊤₂) -->
+              <line x1="20" y1="218" x2="70" y2="278"/>
+              <!-- From (sₐ,s_c) -->
+              <line x1="170" y1="218" x2="70" y2="278"/>
+              <line x1="170" y1="218" x2="270" y2="278"/>
+              <!-- From (⊤₁,⊥₂) -->
+              <line x1="320" y1="218" x2="270" y2="278"/>
+              <!-- From (⊥₁,s_c) -->
+              <line x1="70" y1="308" x2="170" y2="368"/>
+              <!-- From (sₐ,⊥₂) -->
+              <line x1="270" y1="308" x2="170" y2="368"/>
+            </g>
+            <!-- Edge labels -->
+            <g fill="rgba(255,255,255,0.55)" font-family="Inter,sans-serif" font-size="11" font-style="italic">
+              <text x="112" y="63">a</text>
+              <text x="222" y="63">c</text>
+              <text x="38" y="156">b</text>
+              <text x="128" y="156">c</text>
+              <text x="212" y="156">a</text>
+              <text x="298" y="156">d</text>
+              <text x="30" y="252">c</text>
+              <text x="108" y="252">b</text>
+              <text x="230" y="252">d</text>
+              <text x="306" y="252">a</text>
+              <text x="108" y="342">d</text>
+              <text x="228" y="342">b</text>
+            </g>
+            <!-- Nodes -->
+            <g font-family="Inter,sans-serif" font-size="11" text-anchor="middle">
+              <!-- Top: (⊤₁, ⊤₂) — blue tint -->
+              <circle cx="170" cy="24" r="14" fill="rgba(147,197,253,0.3)" stroke="rgba(191,219,254,0.8)" stroke-width="1.5"/>
+              <text x="170" y="58" fill="rgba(255,255,255,0.9)" font-size="10">(⊤₁, ⊤₂)</text>
+              <!-- Row 2 left: (sₐ, ⊤₂) -->
+              <circle cx="70" cy="114" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="70" y="144" fill="rgba(255,255,255,0.8)" font-size="10">(sₐ, ⊤₂)</text>
+              <!-- Row 2 right: (⊤₁, s_c) -->
+              <circle cx="270" cy="114" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="270" y="144" fill="rgba(255,255,255,0.8)" font-size="10">(⊤₁, s꜀)</text>
+              <!-- Row 3 left: (⊥₁, ⊤₂) -->
+              <circle cx="20" cy="204" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="20" y="234" fill="rgba(255,255,255,0.8)" font-size="10">(⊥₁, ⊤₂)</text>
+              <!-- Row 3 center: (sₐ, s_c) -->
+              <circle cx="170" cy="204" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="170" y="234" fill="rgba(255,255,255,0.8)" font-size="10">(sₐ, s꜀)</text>
+              <!-- Row 3 right: (⊤₁, ⊥₂) -->
+              <circle cx="320" cy="204" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="320" y="234" fill="rgba(255,255,255,0.8)" font-size="10">(⊤₁, ⊥₂)</text>
+              <!-- Row 4 left: (⊥₁, s_c) -->
+              <circle cx="70" cy="294" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="70" y="324" fill="rgba(255,255,255,0.8)" font-size="10">(⊥₁, s꜀)</text>
+              <!-- Row 4 right: (sₐ, ⊥₂) -->
+              <circle cx="270" cy="294" r="14" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+              <text x="270" y="324" fill="rgba(255,255,255,0.8)" font-size="10">(sₐ, ⊥₂)</text>
+              <!-- Bottom: (⊥₁, ⊥₂) — green tint -->
+              <circle cx="170" cy="384" r="14" fill="rgba(134,239,172,0.25)" stroke="rgba(187,247,208,0.8)" stroke-width="1.5"/>
+              <text x="170" y="414" fill="rgba(255,255,255,0.9)" font-size="10">(⊥₁, ⊥₂)</text>
+            </g>
+            <!-- Caption -->
+            <text x="170" y="438" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-family="Inter,sans-serif" font-size="10">
+              a.b.end ∥ c.d.end — 3×3 product lattice
+            </text>
+          </svg>
         </div>
       </div>
       <div class="hero-stats">
@@ -195,14 +271,15 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     }
 
     .hero-diagram {
-      border-radius: 12px;
-      padding: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 200px;
-      transform: scale(0.75);
-      transform-origin: center center;
+    }
+    .hero-lattice-svg {
+      width: 100%;
+      max-width: 340px;
+      height: auto;
     }
 
     .hero-stats {
@@ -295,64 +372,8 @@ export class HomeComponent implements OnInit {
   readonly stats = signal<HomeStats | null>(null);
   readonly loading = signal(true);
   readonly statsError = signal(false);
-  readonly showcaseSvg = signal('');
 
   constructor(private api: ApiService) {}
-
-  /**
-   * Simplify SVG for hero display: replace box nodes with labeled circles,
-   * strip edge labels, recolored white for dark background.
-   */
-  private simplifyHeroSvg(svg: string): string {
-    // Remove graphviz white background polygon
-    let result = svg.replace(/<polygon fill="white"[^/]*\/>/,'');
-
-    // Replace node shapes with circles + labels
-    result = result.replace(
-      /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>([^<]*)<\/text>/);
-        if (!textMatch) return open + body + close;
-
-        const cx = parseFloat(textMatch[1]);
-        const cy = parseFloat(textMatch[2]) - 5;
-        const rawLabel = textMatch[3].trim();
-
-        // Extract display label from node text (e.g. "⊤ hasNext" → "hasNext", "+{TRUE, FALSE}" → "select")
-        let label = rawLabel;
-        const isTop = rawLabel.includes('\u22A4');
-        const isBottom = rawLabel.includes('\u22A5');
-        if (isTop) label = 'top';
-        else if (isBottom) label = 'bottom';
-        else if (rawLabel.startsWith('+{')) label = 'select';
-        else if (rawLabel.startsWith('&{')) label = 'branch';
-
-        const titleMatch = body.match(/<title>[^<]*<\/title>/);
-        const title = titleMatch ? titleMatch[0] + '\n' : '';
-
-        const nc = 'rgba(255,255,255,0.7)';
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nc}" stroke-width="1.5"/>`
-          + `<text x="${cx}" y="${cy + 28}" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="Inter,sans-serif" font-size="11">${label}</text>`;
-        return open + rebuilt + close;
-      }
-    );
-
-    // Strip edge labels and recolor edges white
-    result = result.replace(
-      /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        let fixed = body;
-        const c = 'rgba(255,255,255,0.7)';
-        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
-        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        return open + fixed + close;
-      }
-    );
-
-    return result;
-  }
 
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({
@@ -364,15 +385,6 @@ export class HomeComponent implements OnInit {
           allLattice: benchmarks.every((b) => b.isLattice),
         });
         this.loading.set(false);
-
-        // Hero diagram: Java Iterator (classic recursive session type)
-        const showcase = benchmarks.find((b) => b.name === 'Java Iterator')
-          ?? benchmarks.find((b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml)
-          ?? benchmarks.find((b) => b.svgHtml)
-          ?? null;
-        if (showcase?.svgHtml) {
-          this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
-        }
       },
       error: () => {
         this.statsError.set(true);
