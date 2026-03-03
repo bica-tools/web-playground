@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
-import { BenchmarkDto, HomeStats } from '../../models/api.models';
+import { HomeStats } from '../../models/api.models';
 import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
@@ -300,71 +300,42 @@ export class HomeComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   /**
-   * Simplify SVG for hero display: replace box nodes with small circles
-   * bearing symbolic markers (⊤, ⊥, &, ⊕, ·) and strip edge labels.
+   * Hand-crafted SVG for the canonical 3×3 product lattice (a.b.end ∥ c.d.end).
+   * Perfect diamond symmetry — no graphviz heuristics.
    */
-  private simplifyHeroSvg(svg: string): string {
-    // Remove graphviz white background (first polygon with fill="white")
-    let result = svg.replace(/<polygon fill="white"[^/]*\/>/, '');
-
-    // Process node groups: replace shapes with circles and simplify labels
-    result = result.replace(
-      /(<g\s+id="node\d+"[^>]*class="node"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        // Extract text position and label
-        const textMatch = body.match(/<text[^>]*?\bx="([^"]*)"[^>]*?\by="([^"]*)"[^>]*>([^<]*)<\/text>/);
-        if (!textMatch) return open + body + close;
-
-        const [, tx, ty, rawLabel] = textMatch;
-        const cx = parseFloat(tx);
-        const cy = parseFloat(ty) - 5; // shift up from baseline to visual center
-
-        // Determine symbol from original label
-        const t = rawLabel.trim();
-        let symbol: string;
-        if (t.includes('\u22a5')) symbol = '\u22a5';
-        else if (t.includes('+{') || t.includes('\u2295{')) symbol = '\u2295';
-        else if (/^\(?⊤?\s*\(/.test(t) || /^⊤\s*\(/.test(t) || (t.includes('(') && t.includes(','))) symbol = '\u2225';
-        else symbol = '&amp;';
-
-        // Keep title element
-        const titleMatch = body.match(/<title>[^<]*<\/title>/);
-        const title = titleMatch ? titleMatch[0] + '\n' : '';
-
-        // Rebuild node as plain circle (no label)
-        const nodeColor = 'rgba(255,255,255,0.7)';
-        const rebuilt = `${title}<circle cx="${cx}" cy="${cy}" r="16" fill="rgba(255,255,255,0.15)" stroke="${nodeColor}" stroke-width="1.5"/>`;
-        return open + rebuilt + close;
-      }
-    );
-
-    // Strip edge labels and recolor edges white for dark background
-    result = result.replace(
-      /(<g\s+id="edge\d+"[^>]*class="edge"[^>]*>)([\s\S]*?)(<\/g>)/g,
-      (_match, open: string, body: string, close: string) => {
-        let fixed = body;
-        const c = 'rgba(255,255,255,0.7)';
-        fixed = fixed.replace(/<text[^>]*>[^<]*<\/text>/g, '');
-        fixed = fixed.replace(/(<path[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)fill="[^"]*"/g, `$1fill="${c}"`);
-        fixed = fixed.replace(/(<polygon[^>]*?)stroke="[^"]*"/g, `$1stroke="${c}"`);
-        return open + fixed + close;
-      }
-    );
-
-    return result;
-  }
-
-  private showBenchmarkFallback(benchmarks: BenchmarkDto[]): void {
-    const showcase = benchmarks.find(
-      (b) => b.usesParallel && b.numStates >= 5 && b.numStates <= 15 && b.svgHtml
-    ) ?? benchmarks.find((b) => b.svgHtml) ?? null;
-    if (showcase) {
-      this.showcaseSvg.set(this.simplifyHeroSvg(showcase.svgHtml));
+  private static readonly HERO_SVG = (() => {
+    const c = 'rgba(255,255,255,0.7)';
+    const r = 10;
+    const sx = 48, sy = 44;
+    // Diamond grid: (i,j) → x = (i-j)*sx + cx, y = (i+j)*sy + top
+    const cx = 100, top = 14;
+    const nodes: [number, number][] = [
+      [cx, top],                                           // (a,c) — top
+      [cx - sx, top + sy],     [cx + sx, top + sy],        // (a,d), (b,c)
+      [cx - 2*sx, top + 2*sy], [cx, top + 2*sy], [cx + 2*sx, top + 2*sy],  // (a,end), (b,d), (end,c)
+      [cx - sx, top + 3*sy],   [cx + sx, top + 3*sy],      // (b,end), (end,d)
+      [cx, top + 4*sy],                                    // end — bottom
+    ];
+    // Edges: each (i,j) connects to (i+1,j) and (i,j+1) in the product grid
+    const edges: [number, number][] = [
+      [0,1],[0,2],  [1,3],[1,4],  [2,4],[2,5],
+      [3,6],  [4,6],[4,7],  [5,7],  [6,8],[7,8],
+    ];
+    const w = cx * 2, h = top + 4 * sy + r + 4;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">`;
+    for (const [a, b] of edges) {
+      svg += `<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}" stroke="${c}" stroke-width="1.2"/>`;
     }
-  }
+    for (const [x, y] of nodes) {
+      svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.5"/>`;
+    }
+    svg += '</svg>';
+    return svg;
+  })();
 
   ngOnInit(): void {
+    this.showcaseSvg.set(HomeComponent.HERO_SVG);
+
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
         this.stats.set({
@@ -374,18 +345,6 @@ export class HomeComponent implements OnInit {
           allLattice: benchmarks.every((b) => b.isLattice),
         });
         this.loading.set(false);
-
-        // Hero diagram: the symmetric 3×3 product lattice (a.b.end || c.d.end)
-        this.api.analyze('(a.b.end || c.d.end)').subscribe({
-          next: (result) => {
-            if (result.svgHtml) {
-              this.showcaseSvg.set(this.simplifyHeroSvg(result.svgHtml));
-            } else {
-              this.showBenchmarkFallback(benchmarks);
-            }
-          },
-          error: () => this.showBenchmarkFallback(benchmarks),
-        });
       },
       error: () => {
         this.statsError.set(true);
