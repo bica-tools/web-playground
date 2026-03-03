@@ -40,6 +40,11 @@ export const routes: Routes = [
   },
   { path: 'quickstart', redirectTo: 'tutorials' },
   {
+    path: 'faq',
+    loadComponent: () =>
+      import('./pages/faq/faq.component').then((m) => m.FaqComponent),
+  },
+  {
     path: 'documentation',
     loadComponent: () =>
       import('./pages/documentation/documentation.component').then(

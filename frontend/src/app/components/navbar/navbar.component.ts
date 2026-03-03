@@ -40,6 +40,7 @@ import { filter } from 'rxjs/operators';
 
       <mat-menu #moreMenu="matMenu">
         <a mat-menu-item routerLink="/documentation">Documentation</a>
+        <a mat-menu-item routerLink="/faq">FAQ</a>
         <a mat-menu-item routerLink="/about">About</a>
       </mat-menu>
 
@@ -59,6 +60,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
         <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()">Tutorials</a>
         <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()">Documentation</a>
+        <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a>
         <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
       </nav>
     }
