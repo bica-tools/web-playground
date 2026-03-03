@@ -216,7 +216,7 @@ import { HomeStats } from '../../models/api.models';
 
     .hero-lattice {
       width: 100%;
-      max-width: 280px;
+      max-width: 180px;
       height: auto;
     }
     .hero-lattice line {
