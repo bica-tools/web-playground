@@ -299,42 +299,38 @@ export class HomeComponent implements OnInit {
 
   constructor(private api: ApiService) {}
 
-  /**
-   * Hand-crafted SVG for the canonical 3×3 product lattice (a.b.end ∥ c.d.end).
-   * Perfect diamond symmetry — no graphviz heuristics.
-   */
-  private static readonly HERO_SVG = (() => {
+  /** Build the canonical 3×3 product lattice SVG with exact diamond coordinates. */
+  private buildHeroSvg(): string {
     const c = 'rgba(255,255,255,0.7)';
     const r = 10;
     const sx = 48, sy = 44;
-    // Diamond grid: (i,j) → x = (i-j)*sx + cx, y = (i+j)*sy + top
-    const cx = 100, top = 14;
+    const midX = 100, topY = 14;
     const nodes: [number, number][] = [
-      [cx, top],                                           // (a,c) — top
-      [cx - sx, top + sy],     [cx + sx, top + sy],        // (a,d), (b,c)
-      [cx - 2*sx, top + 2*sy], [cx, top + 2*sy], [cx + 2*sx, top + 2*sy],  // (a,end), (b,d), (end,c)
-      [cx - sx, top + 3*sy],   [cx + sx, top + 3*sy],      // (b,end), (end,d)
-      [cx, top + 4*sy],                                    // end — bottom
+      [midX, topY],                                                                // (a,c) — top
+      [midX - sx, topY + sy],       [midX + sx, topY + sy],                        // (a,d), (b,c)
+      [midX - 2*sx, topY + 2*sy],   [midX, topY + 2*sy],   [midX + 2*sx, topY + 2*sy],  // (a,end), (b,d), (end,c)
+      [midX - sx, topY + 3*sy],     [midX + sx, topY + 3*sy],                      // (b,end), (end,d)
+      [midX, topY + 4*sy],                                                          // end — bottom
     ];
-    // Edges: each (i,j) connects to (i+1,j) and (i,j+1) in the product grid
     const edges: [number, number][] = [
-      [0,1],[0,2],  [1,3],[1,4],  [2,4],[2,5],
-      [3,6],  [4,6],[4,7],  [5,7],  [6,8],[7,8],
+      [0,1],[0,2], [1,3],[1,4], [2,4],[2,5],
+      [3,6], [4,6],[4,7], [5,7], [6,8],[7,8],
     ];
-    const w = cx * 2, h = top + 4 * sy + r + 4;
+    const w = midX * 2;
+    const h = topY + 4 * sy + r + 4;
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">`;
     for (const [a, b] of edges) {
       svg += `<line x1="${nodes[a][0]}" y1="${nodes[a][1]}" x2="${nodes[b][0]}" y2="${nodes[b][1]}" stroke="${c}" stroke-width="1.2"/>`;
     }
-    for (const [x, y] of nodes) {
-      svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.5"/>`;
+    for (const [nx, ny] of nodes) {
+      svg += `<circle cx="${nx}" cy="${ny}" r="${r}" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.5"/>`;
     }
     svg += '</svg>';
     return svg;
-  })();
+  }
 
   ngOnInit(): void {
-    this.showcaseSvg.set(HomeComponent.HERO_SVG);
+    this.showcaseSvg.set(this.buildHeroSvg());
 
     this.api.getBenchmarks().subscribe({
       next: (benchmarks) => {
