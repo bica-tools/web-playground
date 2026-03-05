@@ -9,8 +9,6 @@ import { Component } from '@angular/core';
         <span>BICA Reborn &mdash; Session Types as Algebraic Reticulates</span>
         <span class="separator">|</span>
         <span>Alexandre Zua Caldeira &mdash; LASIGE/FCUL, University of Lisbon</span>
-        <span class="separator">|</span>
-        <span>Supervisor: Prof. Vasco T. Vasconcelos</span>
       </div>
     </footer>
   `,

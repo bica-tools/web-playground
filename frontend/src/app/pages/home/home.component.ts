@@ -16,7 +16,7 @@ import { HomeStats } from '../../models/api.models';
       <div class="hero-inner">
         <div class="hero-text">
           <h1>Session Types as<br>Algebraic Reticulates</h1>
-          <p class="author-line">Alexandre Zua Caldeira &middot; Vasco T. Vasconcelos</p>
+          <p class="author-line">Alexandre Zua Caldeira</p>
           <p class="institution-line">LASIGE, Faculty of Sciences, University of Lisbon</p>
           <div class="hero-cta">
             <a mat-flat-button routerLink="/tools/analyzer" class="hero-btn-primary">

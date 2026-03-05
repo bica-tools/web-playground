@@ -27,39 +27,11 @@ import { MatCardModule } from '@angular/material/card';
           </p>
           <p>
             The Reticulate project is Alexandre's doctoral research, developing the theory
-            and toolchain for session types as algebraic reticulates under the supervision
-            of Prof. Vasco T. Vasconcelos.
+            and toolchain for session types as algebraic reticulates.
           </p>
           <div class="person-links">
             <a href="https://www.zuacaldeira.com" target="_blank" rel="noopener">Website</a>
             <a href="https://github.com/zuacaldeira" target="_blank" rel="noopener">GitHub</a>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </section>
-
-    <!-- Supervisor -->
-    <section class="about-section">
-      <h2>Supervisor</h2>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Prof. Vasco T. Vasconcelos</mat-card-title>
-          <mat-card-subtitle>Full Professor, FCUL</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            Vasco T. Vasconcelos is a Full Professor at the Department of Informatics,
-            Faculty of Sciences, University of Lisbon. He is a leading researcher in
-            session types, with foundational contributions to the theory of behavioural
-            types for concurrent and distributed systems.
-          </p>
-          <p>
-            His work includes the original BICA project (2009), which pioneered
-            annotation-based session type checking for Java objects &mdash; the direct
-            predecessor to BICA Reborn.
-          </p>
-          <div class="person-links">
-            <a href="https://www.di.fc.ul.pt/~vv/" target="_blank" rel="noopener">Homepage</a>
           </div>
         </mat-card-content>
       </mat-card>

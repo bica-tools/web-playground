@@ -17,7 +17,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">Session Type State Spaces Form Lattices</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">Target: CONCUR 2026, Liverpool, Sep 1&ndash;4</em><br>
         <span class="pub-links">
           [<a href="/papers/step5-lattice.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -27,7 +27,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">Session Type State Spaces Form Lattices (Extended Abstract)</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">ICE 2026, Urbino, Jun 12 (DisCoTec satellite workshop)</em><br>
         <span class="pub-links">
           [<a href="/papers/ice-2026.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -36,7 +36,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">Reticulate: A Tool for Lattice Analysis of Session Type State Spaces</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">ICE 2026 Oral Communication, Urbino, Jun 12</em><br>
         <span class="pub-links">
           [<a href="/papers/ice-2026-oral.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -50,7 +50,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">Reticulate: A Lattice-Theoretic Toolkit for Session Types</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">Target: TACAS 2027 (~Oct 2026) &mdash; Python library, 9 modules, 383 tests</em><br>
         <span class="pub-links">
           [<a href="/papers/reticulate-tool.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -59,7 +59,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">BICA Reborn: Annotation-Based Session Type Checking for Java</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">Target: OOPSLA 2027 R1 (~Oct 2026) &mdash; Java 21, 13 packages, 1,052 tests</em><br>
         <span class="pub-links">
           [<a href="/papers/bica-reborn.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -91,7 +91,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <li>
         <span class="pub-title">Formal Definitions</span>
         <span class="badge-draft">Draft</span><br>
-        <span class="pub-authors">Alexandre Zua Caldeira, Vasco T. Vasconcelos</span><br>
+        <span class="pub-authors">Alexandre Zua Caldeira</span><br>
         <em class="pub-venue">Glossary &mdash; 40+ definitions, internal reference document</em><br>
         <span class="pub-links">
           [<a href="/papers/definitions.pdf" target="_blank" rel="noopener">PDF</a>]
@@ -174,10 +174,10 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
 })
 export class PublicationsComponent {
   readonly bibtex = `@inproceedings{caldeira2026reticulate,
-  author       = {Caldeira, Alexandre Zua and Vasconcelos, Vasco T.},
+  author       = {Caldeira, Alexandre Zua},
   title        = {Session Type State Spaces Form Lattices},
   year         = {2026},
   institution  = {LASIGE, FCUL, University of Lisbon},
-  note         = {PhD research --- session types as algebraic reticulates}
+  note         = {Draft --- PhD research --- session types as algebraic reticulates}
 }`;
 }
