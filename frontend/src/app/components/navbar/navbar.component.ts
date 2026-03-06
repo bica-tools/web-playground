@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,6 +48,9 @@ import { filter } from 'rxjs/operators';
         <a mat-icon-button routerLink="/dashboard" routerLinkActive="active" class="dashboard-btn" title="Dashboard">
           <mat-icon>dashboard</mat-icon>
         </a>
+        <button mat-icon-button class="logout-btn" title="Logout" (click)="logoutClicked.emit()">
+          <mat-icon>logout</mat-icon>
+        </button>
       </nav>
 
       <!-- Mobile hamburger -->
@@ -69,6 +72,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a>
         <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
         <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+        <a (click)="closeMenu(); logoutClicked.emit()" style="cursor:pointer">Logout</a>
       </nav>
     }
   `,
@@ -108,6 +112,13 @@ import { filter } from 'rxjs/operators';
     .dashboard-btn:hover, .dashboard-btn.active {
       opacity: 1;
     }
+    .logout-btn {
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+    .logout-btn:hover {
+      opacity: 1;
+    }
     .mobile-menu-btn {
       display: none;
       color: inherit;
@@ -145,6 +156,7 @@ import { filter } from 'rxjs/operators';
   `],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  @Output() logoutClicked = new EventEmitter<void>();
   isMenuOpen = false;
   private routerSub?: Subscription;
 
