@@ -1,0 +1,95 @@
+export interface ModuleStatus {
+  name: string;
+  description: string;
+  tests: number;
+  status: 'complete' | 'in-progress' | 'planned';
+}
+
+export interface PaperStatus {
+  title: string;
+  shortName: string;
+  target: string;
+  deadline: string | null;
+  status: 'draft' | 'submitted' | 'under-review' | 'accepted' | 'published';
+  pages: number;
+}
+
+export interface MilestoneStatus {
+  label: string;
+  date: string;
+  done: boolean;
+}
+
+export interface LeanStatus {
+  name: string;
+  description: string;
+  sorryCount: number;
+  status: 'complete' | 'in-progress' | 'planned';
+}
+
+export const RETICULATE_MODULES: ModuleStatus[] = [
+  { name: 'parser', description: 'AST nodes, tokenizer, recursive-descent parser', tests: 68, status: 'complete' },
+  { name: 'statespace', description: 'State-space construction from session types', tests: 50, status: 'complete' },
+  { name: 'product', description: 'Product construction for parallel (∥)', tests: 0, status: 'complete' },
+  { name: 'lattice', description: 'Lattice property checking (meets, joins)', tests: 53, status: 'complete' },
+  { name: 'termination', description: 'Termination checking + WF-Par', tests: 56, status: 'complete' },
+  { name: 'morphism', description: 'Morphism hierarchy (iso, embedding, projection, Galois)', tests: 38, status: 'complete' },
+  { name: 'visualize', description: 'Hasse diagram generation (DOT/graphviz)', tests: 26, status: 'complete' },
+  { name: 'testgen', description: 'Test generation from state spaces', tests: 62, status: 'complete' },
+  { name: 'cli', description: 'CLI entry point (argparse)', tests: 27, status: 'complete' },
+];
+
+export const BICA_PHASES: ModuleStatus[] = [
+  { name: 'Phase 1: AST + Parser', description: 'Sealed AST, tokenizer, parser, pretty-printer', tests: 118, status: 'complete' },
+  { name: 'Phase 2: StateSpace + Lattice', description: 'State space builder, lattice checker, termination', tests: 170, status: 'complete' },
+  { name: 'Phase 3: Concurrency + Annotations', description: 'Thread safety, @Session/@Shared/@ReadOnly/@Exclusive', tests: 173, status: 'complete' },
+  { name: 'Phase 4: Morphisms', description: 'Morphism hierarchy between state spaces', tests: 88, status: 'complete' },
+  { name: 'Phase 5: CLI', description: 'Standalone CLI tool with DOT output', tests: 75, status: 'complete' },
+  { name: 'Phase 6: Typestate', description: 'Typestate checking with selection auto-advance', tests: 48, status: 'complete' },
+  { name: 'Phase 7: Test Generation', description: 'JUnit 5 test generation from @Session', tests: 90, status: 'complete' },
+];
+
+export const LEAN_PROOFS: LeanStatus[] = [
+  { name: 'Bottom Absorption (Lemma 5)', description: 'L\'(D) is a lattice when D absorbs bottom', sorryCount: 0, status: 'complete' },
+  { name: 'Recursion Lemma (Lemma 6)', description: 'SCC quotient preserves lattice structure', sorryCount: 0, status: 'complete' },
+  { name: 'Main Theorem', description: 'Session type state spaces form lattices', sorryCount: -1, status: 'planned' },
+];
+
+export const PAPERS: PaperStatus[] = [
+  { title: 'State-Space Construction for Finite Binary Session Types', shortName: 'Step 1', target: 'arXiv', deadline: null, status: 'draft', pages: 25 },
+  { title: 'Session Type State Spaces Form Lattices', shortName: 'Step 5', target: 'CONCUR 2026', deadline: '2026-04-27', status: 'draft', pages: 15 },
+  { title: 'Reticulate: Lattice Analysis of Session Type State Spaces', shortName: 'ICE oral', target: 'ICE 2026', deadline: '2026-04-02', status: 'draft', pages: 8 },
+  { title: 'Reticulate: A Lattice Verification Tool for Session Types', shortName: 'Tool paper', target: 'TACAS 2027', deadline: '2026-10-15', status: 'draft', pages: 7 },
+  { title: 'BICA Reborn: Annotation-Based Session Type Checker for Java', shortName: 'BICA paper', target: 'OOPSLA 2027', deadline: '2026-10-15', status: 'draft', pages: 10 },
+  { title: 'Definitions and Glossary', shortName: 'Glossary', target: 'Internal', deadline: null, status: 'draft', pages: 12 },
+];
+
+export const MILESTONES: MilestoneStatus[] = [
+  { label: 'Reticulate Python library complete', date: '2026-02', done: true },
+  { label: 'BICA Reborn Java complete (7 phases)', date: '2026-02', done: true },
+  { label: 'Lean 4: Bottom Absorption proved', date: '2026-02', done: true },
+  { label: 'Lean 4: Recursion Lemma proved', date: '2026-03', done: true },
+  { label: '34 benchmarks validated', date: '2026-03', done: true },
+  { label: 'Website live (bica.zuacaldeira.com)', date: '2026-03', done: true },
+  { label: 'ICE 2026 submission', date: '2026-04-02', done: false },
+  { label: 'CONCUR 2026 abstract', date: '2026-04-20', done: false },
+  { label: 'CONCUR 2026 full paper', date: '2026-04-27', done: false },
+  { label: 'LICS/FLOC 2026 attend (Lisbon)', date: '2026-07-20', done: false },
+  { label: 'Lean 4: Main Theorem', date: '2026-06', done: false },
+  { label: 'TACAS 2027 tool paper', date: '2026-10', done: false },
+  { label: 'OOPSLA 2027 BICA paper', date: '2026-10', done: false },
+];
+
+export const SUMMARY = {
+  totalPythonTests: 761,
+  totalJavaTests: 1059,
+  totalBenchmarks: 34,
+  benchmarksWithParallel: 13,
+  leanSorryCount: 0,
+  pythonModules: 9,
+  javaPackages: 13,
+  javaSourceFiles: 52,
+  javaSourceLines: 4800,
+  javaTestLines: 8500,
+  generatedTests: 4350,
+};

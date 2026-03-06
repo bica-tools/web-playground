@@ -45,6 +45,9 @@ import { filter } from 'rxjs/operators';
         <a mat-button routerLink="/documentation" routerLinkActive="active">Docs</a>
         <a mat-button routerLink="/faq" routerLinkActive="active">FAQ</a>
         <a mat-button routerLink="/about" routerLinkActive="active">About</a>
+        <a mat-icon-button routerLink="/dashboard" routerLinkActive="active" class="dashboard-btn" title="Dashboard">
+          <mat-icon>dashboard</mat-icon>
+        </a>
       </nav>
 
       <!-- Mobile hamburger -->
@@ -65,6 +68,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()">Documentation</a>
         <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a>
         <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
       </nav>
     }
   `,
@@ -96,6 +100,13 @@ import { filter } from 'rxjs/operators';
     }
     .nav-links a.active {
       border-bottom: 2px solid white;
+    }
+    .dashboard-btn {
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+    .dashboard-btn:hover, .dashboard-btn.active {
+      opacity: 1;
     }
     .mobile-menu-btn {
       display: none;

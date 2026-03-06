@@ -21,7 +21,7 @@ import { MatCardModule } from '@angular/material/card';
         </mat-card-header>
         <mat-card-content>
           <p>
-            Independent researcher based in Lisbon, Portugal.
+            Independent researcher based in Berlin, Germany.
             Research focus: session types, type theory, and programming language design.
           </p>
           <p>
