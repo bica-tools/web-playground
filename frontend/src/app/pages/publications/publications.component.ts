@@ -177,7 +177,6 @@ export class PublicationsComponent {
   author       = {Caldeira, Alexandre Zua},
   title        = {Session Type State Spaces Form Lattices},
   year         = {2026},
-  institution  = {LASIGE, FCUL, University of Lisbon},
-  note         = {Draft --- PhD research --- session types as algebraic reticulates}
+  note         = {Draft --- session types as algebraic reticulates}
 }`;
 }

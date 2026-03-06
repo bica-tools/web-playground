@@ -17,49 +17,20 @@ import { MatCardModule } from '@angular/material/card';
       <mat-card>
         <mat-card-header>
           <mat-card-title>Alexandre Zua Caldeira</mat-card-title>
-          <mat-card-subtitle>PhD Researcher</mat-card-subtitle>
+          <mat-card-subtitle>Independent Researcher</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <p>
-            PhD student at the Faculty of Sciences, University of Lisbon (FCUL),
-            affiliated with LASIGE (Large-Scale Informatics Systems Laboratory).
+            Independent researcher based in Lisbon, Portugal.
             Research focus: session types, type theory, and programming language design.
           </p>
           <p>
-            The Reticulate project is Alexandre's doctoral research, developing the theory
+            The Reticulate project develops the theory
             and toolchain for session types as algebraic reticulates.
           </p>
           <div class="person-links">
             <a href="https://www.zuacaldeira.com" target="_blank" rel="noopener">Website</a>
             <a href="https://github.com/zuacaldeira" target="_blank" rel="noopener">GitHub</a>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </section>
-
-    <!-- Institution -->
-    <section class="about-section">
-      <h2>Institution</h2>
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>LASIGE &mdash; University of Lisbon</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            <strong>LASIGE</strong> (Large-Scale Informatics Systems Laboratory) is a research
-            unit of the Faculty of Sciences, University of Lisbon (FCUL). Rated "Excellent"
-            by the Portuguese Foundation for Science and Technology (FCT), LASIGE conducts
-            research in areas including dependable and secure computing, data and systems
-            intelligence, and software engineering.
-          </p>
-          <p>
-            The Reticulate project is developed within LASIGE's software engineering and
-            programming languages research line.
-          </p>
-          <div class="person-links">
-            <a href="https://www.lasige.pt" target="_blank" rel="noopener">LASIGE</a>
-            <a href="https://ciencias.ulisboa.pt" target="_blank" rel="noopener">FCUL</a>
-            <a href="https://www.ulisboa.pt" target="_blank" rel="noopener">University of Lisbon</a>
           </div>
         </mat-card-content>
       </mat-card>

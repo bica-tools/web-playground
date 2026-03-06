@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
       <div class="footer-content">
         <span>BICA Reborn &mdash; Session Types as Algebraic Reticulates</span>
         <span class="separator">|</span>
-        <span>Alexandre Zua Caldeira &mdash; LASIGE/FCUL, University of Lisbon</span>
+        <span>Alexandre Zua Caldeira &mdash; Independent Researcher</span>
       </div>
     </footer>
   `,
