@@ -1,8 +1,10 @@
 package com.bica.web.service;
 
-import com.bica.reborn.ast.Parallel;
-import com.bica.reborn.ast.SessionType;
+import com.bica.reborn.ast.*;
 import com.bica.reborn.cli.BicaCli;
+import com.bica.reborn.concurrency.ConcurrencyLevel;
+import com.bica.reborn.concurrency.MethodClassifier;
+import com.bica.reborn.concurrency.ThreadSafetyChecker;
 import com.bica.reborn.lattice.LatticeChecker;
 import com.bica.reborn.lattice.LatticeResult;
 import com.bica.reborn.parser.ParseError;
@@ -29,9 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AnalysisService {
@@ -180,6 +180,13 @@ public class AnalysisService {
                 + enumResult.violations().size()
                 + enumResult.incompletePrefixes().size();
 
+        boolean isRecursive = containsRec(ast);
+        int depth = recDepth(ast);
+        Set<String> methodSet = ThreadSafetyChecker.extractMethods(ast);
+        List<String> methods = new ArrayList<>(methodSet);
+        Collections.sort(methods);
+        boolean threadSafe = computeThreadSafe(ast, methodSet);
+
         return new BenchmarkDto(
                 def.name(),
                 def.description(),
@@ -192,7 +199,15 @@ public class AnalysisService {
                 def.usesParallel(),
                 svgHtml,
                 toolUrl,
-                numTests
+                numTests,
+                isRecursive,
+                depth,
+                methods.size(),
+                methods,
+                threadSafe,
+                enumResult.validPaths().size(),
+                enumResult.violations().size(),
+                enumResult.incompletePrefixes().size()
         );
     }
 
@@ -219,6 +234,20 @@ public class AnalysisService {
             counterexample = "States " + cx.a() + " and " + cx.b() + " have " + kind;
         }
 
+        boolean usesParallel = containsParallel(ast);
+        boolean isRecursive = containsRec(ast);
+        int depth = recDepth(ast);
+        Set<String> methodSet = ThreadSafetyChecker.extractMethods(ast);
+        List<String> methods = new ArrayList<>(methodSet);
+        Collections.sort(methods);
+        boolean threadSafe = computeThreadSafe(ast, methodSet);
+
+        var enumConfig = new TestGenConfig("Analysis", null, "obj", 2, 100, ViolationStyle.CALL_ANYWAY);
+        var enumResult = PathEnumerator.enumerate(ss, enumConfig);
+        int numTests = enumResult.validPaths().size()
+                + enumResult.violations().size()
+                + enumResult.incompletePrefixes().size();
+
         return new AnalyzeResponse(
                 pretty,
                 ss.states().size(),
@@ -229,7 +258,17 @@ public class AnalysisService {
                 termResult.isTerminating(),
                 wfResult.isWellFormed(),
                 svgHtml,
-                dotSource
+                dotSource,
+                usesParallel,
+                isRecursive,
+                depth,
+                methods,
+                methods.size(),
+                threadSafe,
+                numTests,
+                enumResult.validPaths().size(),
+                enumResult.violations().size(),
+                enumResult.incompletePrefixes().size()
         );
     }
 
@@ -258,5 +297,52 @@ public class AnalysisService {
 
     private String renderSvg(String dotSource) {
         return Graphviz.fromString(dotSource).render(Format.SVG).toString();
+    }
+
+    // --- AST helper methods ---
+
+    private static boolean containsParallel(SessionType type) {
+        return switch (type) {
+            case End e -> false;
+            case Var v -> false;
+            case Branch b -> b.choices().stream().anyMatch(c -> containsParallel(c.body()));
+            case Select s -> s.choices().stream().anyMatch(c -> containsParallel(c.body()));
+            case Parallel p -> true;
+            case Rec r -> containsParallel(r.body());
+            case Sequence seq -> containsParallel(seq.left()) || containsParallel(seq.right());
+        };
+    }
+
+    private static boolean containsRec(SessionType type) {
+        return switch (type) {
+            case End e -> false;
+            case Var v -> false;
+            case Branch b -> b.choices().stream().anyMatch(c -> containsRec(c.body()));
+            case Select s -> s.choices().stream().anyMatch(c -> containsRec(c.body()));
+            case Parallel p -> containsRec(p.left()) || containsRec(p.right());
+            case Rec r -> true;
+            case Sequence seq -> containsRec(seq.left()) || containsRec(seq.right());
+        };
+    }
+
+    private static int recDepth(SessionType type) {
+        return switch (type) {
+            case End e -> 0;
+            case Var v -> 0;
+            case Branch b -> b.choices().stream().mapToInt(c -> recDepth(c.body())).max().orElse(0);
+            case Select s -> s.choices().stream().mapToInt(c -> recDepth(c.body())).max().orElse(0);
+            case Parallel p -> Math.max(recDepth(p.left()), recDepth(p.right()));
+            case Rec r -> 1 + recDepth(r.body());
+            case Sequence seq -> Math.max(recDepth(seq.left()), recDepth(seq.right()));
+        };
+    }
+
+    private static boolean computeThreadSafe(SessionType ast, Set<String> methodSet) {
+        Map<String, ConcurrencyLevel> defaultLevels = new LinkedHashMap<>();
+        for (String m : methodSet) {
+            defaultLevels.put(m, ConcurrencyLevel.SHARED);
+        }
+        var tsResult = ThreadSafetyChecker.check(ast, MethodClassifier.fromMap(defaultLevels));
+        return tsResult.isSafe();
     }
 }

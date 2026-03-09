@@ -1,5 +1,7 @@
 package com.bica.web.dto;
 
+import java.util.List;
+
 public record BenchmarkDto(
         String name,
         String description,
@@ -12,5 +14,13 @@ public record BenchmarkDto(
         boolean usesParallel,
         String svgHtml,
         String toolUrl,
-        int numTests
+        int numTests,
+        boolean isRecursive,
+        int recDepth,
+        int numMethods,
+        List<String> methods,
+        boolean threadSafe,
+        int numValidPaths,
+        int numViolations,
+        int numIncomplete
 ) {}
