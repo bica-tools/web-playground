@@ -561,13 +561,22 @@ export class AnalyzerComponent implements OnInit {
   onBenchmarkSelect(value: string): void {
     if (value) {
       this.typeString.set(value);
+      const benchmark = this.benchmarks().find(b => b.typeString === value);
+      if (benchmark) {
+        this.className.set(this.toClassName(benchmark.name));
+      }
       this.analyze();
     }
   }
 
   loadExample(example: QuickExample): void {
     this.typeString.set(example.typeString);
+    this.className.set(this.toClassName(example.label));
     this.analyze();
+  }
+
+  private toClassName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9]/g, '') + 'Test';
   }
 
   analyze(): void {
@@ -581,6 +590,9 @@ export class AnalyzerComponent implements OnInit {
       next: (res) => {
         this.result.set(res);
         this.analyzing.set(false);
+        if (this.className().trim()) {
+          this.generateTests();
+        }
       },
       error: (err) => {
         this.error.set(err.error?.error || err.message || 'Analysis failed');
