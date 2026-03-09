@@ -11,6 +11,16 @@ export interface AnalyzeResponse {
   counterexample: string | null;
   terminates: boolean;
   wfParallel: boolean;
+  usesParallel: boolean;
+  isRecursive: boolean;
+  recDepth: number;
+  methods: string[];
+  numMethods: number;
+  threadSafe: boolean;
+  numTests: number;
+  numValidPaths: number;
+  numViolations: number;
+  numIncomplete: number;
   svgHtml: string;
   dotSource: string;
 }
@@ -65,6 +75,14 @@ export interface BenchmarkDto {
   numSccs: number;
   isLattice: boolean;
   usesParallel: boolean;
+  isRecursive: boolean;
+  recDepth: number;
+  numMethods: number;
+  methods: string[];
+  threadSafe: boolean;
+  numValidPaths: number;
+  numViolations: number;
+  numIncomplete: number;
   svgHtml: string;
   toolUrl: string;
   numTests: number;
