@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
 import { AnalyzeResponse, BenchmarkDto, TestGenRequest } from '../../models/api.models';
@@ -26,6 +27,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatIconModule,
+    MatChipsModule,
     MatSnackBarModule,
     CodeBlockComponent,
     HasseDiagramComponent,
@@ -61,7 +63,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="class-name-input">
-          <mat-label>Class name (for test generation)</mat-label>
+          <mat-label>Class name (for test gen)</mat-label>
           <input matInput [ngModel]="className()" (ngModelChange)="className.set($event)" placeholder="e.g. FileHandle">
         </mat-form-field>
 
@@ -90,47 +92,69 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     <!-- Results -->
     @if (result()) {
       <section class="results" #resultsSection>
-        <h2>Analysis Result</h2>
 
         <!-- Pretty-printed type -->
-        <h3>Session Type</h3>
+        <h2>Session Type</h2>
         <app-code-block [code]="result()!.pretty" label="Pretty-printed"></app-code-block>
 
-        <!-- Metrics -->
-        <h3>State Space</h3>
-        <table class="metrics-table">
-          <tbody>
-            <tr><td>States</td><td>{{ result()!.numStates }}</td></tr>
-            <tr><td>Transitions</td><td>{{ result()!.numTransitions }}</td></tr>
-            <tr><td>SCCs (after quotienting)</td><td>{{ result()!.numSccs }}</td></tr>
-          </tbody>
-        </table>
+        <!-- Verdict summary cards -->
+        <div class="verdict-grid">
+          <div class="verdict-card" [class.pass]="result()!.isLattice" [class.fail]="!result()!.isLattice">
+            <div class="verdict-icon">{{ result()!.isLattice ? '&#x2713;' : '&#x2717;' }}</div>
+            <div class="verdict-label">Lattice</div>
+          </div>
+          <div class="verdict-card" [class.pass]="result()!.terminates" [class.fail]="!result()!.terminates">
+            <div class="verdict-icon">{{ result()!.terminates ? '&#x2713;' : '&#x2717;' }}</div>
+            <div class="verdict-label">Terminates</div>
+          </div>
+          <div class="verdict-card" [class.pass]="result()!.wfParallel" [class.fail]="!result()!.wfParallel">
+            <div class="verdict-icon">{{ result()!.wfParallel ? '&#x2713;' : '&#x2717;' }}</div>
+            <div class="verdict-label">WF-Par</div>
+          </div>
+          @if (result()!.usesParallel) {
+            <div class="verdict-card" [class.pass]="result()!.threadSafe" [class.fail]="!result()!.threadSafe">
+              <div class="verdict-icon">{{ result()!.threadSafe ? '&#x2713;' : '&#x2717;' }}</div>
+              <div class="verdict-label">Thread Safe</div>
+            </div>
+          }
+        </div>
 
-        <!-- Lattice verdict -->
-        <h3>Lattice Check</h3>
-        @if (result()!.isLattice) {
-          <p class="verdict pass">&#x2713; The state space IS a lattice</p>
-        } @else {
-          <p class="verdict fail">&#x2717; The state space is NOT a lattice</p>
-        }
         @if (result()!.counterexample) {
-          <p class="verdict fail">Counterexample: {{ result()!.counterexample }}</p>
+          <p class="counterexample">Counterexample: {{ result()!.counterexample }}</p>
         }
 
-        <!-- Termination -->
-        <h3>Termination</h3>
-        @if (result()!.terminates) {
-          <p class="verdict pass">&#x2713; All recursive branches terminate</p>
-        } @else {
-          <p class="verdict fail">&#x2717; Non-terminating recursive branches detected</p>
-        }
+        <!-- Metrics table -->
+        <h3>State Space Metrics</h3>
+        <div class="metrics-grid">
+          <table class="metrics-table">
+            <tbody>
+              <tr><td>States</td><td>{{ result()!.numStates }}</td></tr>
+              <tr><td>Transitions</td><td>{{ result()!.numTransitions }}</td></tr>
+              <tr><td>SCCs</td><td>{{ result()!.numSccs }}</td></tr>
+              <tr><td>Methods</td><td>{{ result()!.numMethods }}</td></tr>
+            </tbody>
+          </table>
+          <table class="metrics-table">
+            <tbody>
+              <tr><td>Uses parallel</td><td>{{ result()!.usesParallel ? 'Yes' : 'No' }}</td></tr>
+              <tr><td>Recursive</td><td>{{ result()!.isRecursive ? 'Yes (depth ' + result()!.recDepth + ')' : 'No' }}</td></tr>
+              <tr><td>Test paths</td><td>{{ result()!.numTests }}</td></tr>
+              <tr>
+                <td>Breakdown</td>
+                <td>{{ result()!.numValidPaths }}v / {{ result()!.numViolations }}x / {{ result()!.numIncomplete }}i</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <!-- WF-Par -->
-        <h3>Well-Formed Parallel</h3>
-        @if (result()!.wfParallel) {
-          <p class="verdict pass">&#x2713; Parallel composition is well-formed</p>
-        } @else {
-          <p class="verdict fail">&#x2717; WF-Par violations detected</p>
+        <!-- Methods -->
+        @if (result()!.methods && result()!.methods.length > 0) {
+          <h3>Methods</h3>
+          <div class="methods-list">
+            @for (m of result()!.methods; track m) {
+              <span class="method-chip">{{ m }}</span>
+            }
+          </div>
         }
 
         <!-- Hasse diagram -->
@@ -149,11 +173,16 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
           </mat-expansion-panel>
         }
 
-        <!-- Test generation (only show when className is provided) -->
+        <!-- Test generation -->
         @if (className().trim()) {
           <mat-expansion-panel class="test-gen-panel">
             <mat-expansion-panel-header>
-              <mat-panel-title>Test Generation</mat-panel-title>
+              <mat-panel-title>
+                Test Generation
+                @if (result()!.numTests) {
+                  <span class="test-count-badge">{{ result()!.numTests }} tests</span>
+                }
+              </mat-panel-title>
             </mat-expansion-panel-header>
             @if (testSource()) {
               <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
@@ -189,7 +218,7 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .page-header p {
@@ -197,30 +226,17 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       margin: 0;
     }
 
-    .form-section {
-      margin-bottom: 24px;
-    }
-    .full-width {
-      width: 100%;
-    }
+    .form-section { margin-bottom: 24px; }
+    .full-width { width: 100%; }
     .form-row {
       display: flex;
       gap: 16px;
       align-items: flex-start;
       flex-wrap: wrap;
     }
-    .benchmark-select {
-      flex: 1;
-      min-width: 200px;
-    }
-    .class-name-input {
-      flex: 1;
-      min-width: 180px;
-    }
-    .analyze-btn {
-      height: 56px;
-      min-width: 120px;
-    }
+    .benchmark-select { flex: 1; min-width: 200px; }
+    .class-name-input { flex: 1; min-width: 180px; }
+    .analyze-btn { height: 56px; min-width: 120px; }
 
     .error-card {
       display: flex;
@@ -234,61 +250,118 @@ import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diag
       color: #b71c1c;
     }
 
-    .results {
-      margin: 24px 0;
-    }
+    /* Results */
+    .results { margin: 24px 0; }
     .results h2 {
-      font-size: 22px;
-      font-weight: 500;
-      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
     .results h3 {
-      font-size: 16px;
-      font-weight: 500;
-      margin: 20px 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+      margin: 24px 0 10px;
+      color: rgba(0,0,0,0.7);
     }
 
+    /* Verdict grid */
+    .verdict-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 20px 0 12px;
+    }
+    .verdict-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      border: 1px solid;
+    }
+    .verdict-card.pass {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+    .verdict-card.fail {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .verdict-icon { font-size: 18px; }
+    .verdict-label { font-size: 13px; }
+
+    .counterexample {
+      font-size: 13px;
+      color: #991b1b;
+      background: #fef2f2;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+      margin: 8px 0;
+    }
+
+    /* Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
     .metrics-table {
       width: 100%;
-      max-width: 400px;
       border-collapse: collapse;
     }
     .metrics-table td {
-      padding: 8px 16px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 7px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      font-size: 14px;
     }
     .metrics-table td:last-child {
       text-align: right;
       font-weight: 500;
     }
 
-    .verdict {
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 4px;
-      margin: 8px 0;
+    /* Methods */
+    .methods-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
-    .verdict.pass {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    .verdict.fail {
-      background: #fce4ec;
-      color: #c62828;
+    .method-chip {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(0,0,0,0.7);
     }
 
-    .test-gen-panel {
-      margin-top: 16px;
-    }
+    /* Test gen */
+    .test-gen-panel { margin-top: 16px; }
     .test-gen-form {
       display: flex;
       align-items: center;
       gap: 16px;
     }
-
-    .grammar-panel {
-      margin: 32px 0;
+    .test-count-badge {
+      font-size: 11px;
+      background: var(--brand-primary-light, #6366f1);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: 500;
     }
+
+    .grammar-panel { margin: 32px 0; }
   `],
 })
 export class AnalyzerComponent implements OnInit {
@@ -318,7 +391,6 @@ export class AnalyzerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Pre-fill from URL param and auto-analyze
     this.route.queryParams.subscribe((params) => {
       if (params['type']) {
         this.typeString.set(params['type']);
@@ -326,7 +398,6 @@ export class AnalyzerComponent implements OnInit {
       }
     });
 
-    // Load benchmarks for dropdown
     this.api.getBenchmarks().subscribe({
       next: (b) => this.benchmarks.set(b),
     });

@@ -26,7 +26,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       <h1>Benchmarks</h1>
       <p>
         {{ benchmarks().length }} real-world and classic protocols expressed as session types,
-        verified through the full reticulate pipeline.
+        verified through the full analysis pipeline.
       </p>
     </header>
 
@@ -37,13 +37,14 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       </div>
     } @else {
       <!-- Summary stats -->
-      <p class="stats-line">
-        {{ benchmarks().length }} protocols &middot;
-        {{ parallelCount() }} use &parallel; &middot;
-        {{ latticeCount() }} are lattices &middot;
-        {{ totalStates() }} total states &middot;
-        {{ totalTests() }} tests generated
-      </p>
+      <div class="stats-row">
+        <div class="stat-chip">{{ benchmarks().length }} protocols</div>
+        <div class="stat-chip">{{ parallelCount() }} use &#x2225;</div>
+        <div class="stat-chip">{{ recursiveCount() }} recursive</div>
+        <div class="stat-chip">{{ latticeCount() }} lattices</div>
+        <div class="stat-chip">{{ totalStates() }} total states</div>
+        <div class="stat-chip">{{ totalTests() }} tests generated</div>
+      </div>
 
       <!-- Benchmark table -->
       <div class="table-container">
@@ -55,7 +56,9 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
               <th>States</th>
               <th>Trans.</th>
               <th>SCCs</th>
-              <th>&parallel;</th>
+              <th>Methods</th>
+              <th>&#x2225;</th>
+              <th>rec</th>
               <th>Lattice</th>
               <th>Tests</th>
               <th></th>
@@ -64,22 +67,46 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
           <tbody>
             @for (b of benchmarks(); track b.name; let i = $index) {
               <tr>
-                <td>{{ i + 1 }}</td>
+                <td class="num-col">{{ i + 1 }}</td>
                 <td class="protocol-name">{{ b.name }}</td>
                 <td>{{ b.numStates }}</td>
                 <td>{{ b.numTransitions }}</td>
                 <td>{{ b.numSccs }}</td>
+                <td>{{ b.numMethods }}</td>
                 <td>@if (b.usesParallel) { &#x2713; }</td>
+                <td>@if (b.isRecursive) { &#x2713; }</td>
                 <td>@if (b.isLattice) { &#x2713; }</td>
                 <td>{{ b.numTests }}</td>
                 <td><a [routerLink]="['/tools/analyzer']" [queryParams]="{type: b.typeString}">analyze</a></td>
               </tr>
               <tr class="detail-row">
-                <td colspan="9">
+                <td colspan="11">
                   <details>
-                    <summary>Session type &amp; diagram</summary>
+                    <summary>{{ b.description }}</summary>
                     <div class="detail-content">
                       <app-code-block [code]="b.pretty" label="Session type"></app-code-block>
+                      <div class="detail-meta">
+                        <span class="meta-item">
+                          <strong>Rec depth:</strong> {{ b.recDepth }}
+                        </span>
+                        <span class="meta-item">
+                          <strong>Valid paths:</strong> {{ b.numValidPaths }}
+                        </span>
+                        <span class="meta-item">
+                          <strong>Violations:</strong> {{ b.numViolations }}
+                        </span>
+                        <span class="meta-item">
+                          <strong>Incomplete:</strong> {{ b.numIncomplete }}
+                        </span>
+                      </div>
+                      @if (b.methods && b.methods.length > 0) {
+                        <div class="detail-methods">
+                          <strong>Methods:</strong>
+                          @for (m of b.methods; track m) {
+                            <span class="method-chip">{{ m }}</span>
+                          }
+                        </div>
+                      }
                       @if (b.svgHtml) {
                         <app-hasse-diagram [svgHtml]="b.svgHtml"></app-hasse-diagram>
                       }
@@ -94,18 +121,9 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
   `,
   styles: [`
-    .page-header {
-      padding: 24px 0 16px;
-    }
-    .page-header h1 {
-      font-size: 24px;
-      font-weight: 500;
-      margin: 0 0 8px;
-    }
-    .page-header p {
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0;
-    }
+    .page-header { padding: 24px 0 16px; }
+    .page-header h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px; }
+    .page-header p { color: rgba(0, 0, 0, 0.6); margin: 0; }
 
     .loading {
       display: flex;
@@ -115,16 +133,24 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       padding: 48px 0;
     }
 
-    .stats-line {
-      text-align: center;
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.6);
-      padding: 16px 0;
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      padding: 16px 0 24px;
+    }
+    .stat-chip {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 20px;
+      font-size: 13px;
+      color: rgba(0,0,0,0.7);
     }
 
-    .table-container {
-      overflow-x: auto;
-    }
+    .table-container { overflow-x: auto; }
 
     .benchmark-table {
       width: 100%;
@@ -133,50 +159,82 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
     .benchmark-table th {
       text-align: left;
-      padding: 12px 16px;
-      font-weight: 500;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
       border-bottom: 2px solid rgba(0, 0, 0, 0.12);
       white-space: nowrap;
+      color: rgba(0,0,0,0.55);
     }
     .benchmark-table td {
-      padding: 8px 16px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     }
     .benchmark-table tbody tr:hover td {
       background: rgba(0, 0, 0, 0.02);
     }
-    .protocol-name {
-      font-weight: 500;
+    .num-col {
+      color: rgba(0,0,0,0.35);
+      font-size: 12px;
     }
+    .protocol-name { font-weight: 500; }
+
     .detail-row td {
-      padding: 0 16px;
+      padding: 0 12px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
-    .detail-row details {
-      margin: 4px 0;
-    }
+    .detail-row details { margin: 4px 0; }
     .detail-row summary {
       cursor: pointer;
       font-size: 13px;
-      color: rgba(0, 0, 0, 0.5);
+      color: rgba(0, 0, 0, 0.45);
       padding: 4px 0;
     }
-    .detail-content {
-      padding: 8px 0 16px;
+    .detail-content { padding: 8px 0 16px; }
+
+    .detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 10px 0;
+      font-size: 13px;
+      color: rgba(0,0,0,0.6);
     }
+
+    .detail-methods {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin: 8px 0 12px;
+      font-size: 13px;
+    }
+    .method-chip {
+      display: inline-block;
+      padding: 2px 10px;
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(0,0,0,0.65);
+    }
+
     .benchmark-table a {
       color: var(--brand-primary, #4338ca);
       text-decoration: none;
+      font-size: 13px;
     }
-    .benchmark-table a:hover {
-      text-decoration: underline;
-    }
+    .benchmark-table a:hover { text-decoration: underline; }
   `],
 })
 export class BenchmarksComponent implements OnInit {
   readonly benchmarks = signal<BenchmarkDto[]>([]);
   readonly loading = signal(true);
   readonly parallelCount = signal(0);
+  readonly recursiveCount = signal(0);
   readonly latticeCount = signal(0);
   readonly totalStates = signal(0);
   readonly totalTests = signal(0);
@@ -188,6 +246,7 @@ export class BenchmarksComponent implements OnInit {
       next: (data) => {
         this.benchmarks.set(data);
         this.parallelCount.set(data.filter((b) => b.usesParallel).length);
+        this.recursiveCount.set(data.filter((b) => b.isRecursive).length);
         this.latticeCount.set(data.filter((b) => b.isLattice).length);
         this.totalStates.set(data.reduce((s, b) => s + b.numStates, 0));
         this.totalTests.set(data.reduce((s, b) => s + b.numTests, 0));
