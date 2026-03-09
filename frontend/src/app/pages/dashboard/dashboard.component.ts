@@ -215,13 +215,13 @@ import {
       padding: 32px 24px;
     }
     .page-title {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 600;
-      margin: 0;
+      margin: 0 0 8px;
     }
     .page-subtitle {
       color: rgba(0,0,0,0.6);
-      margin: 4px 0 32px;
+      margin: 0 0 32px;
     }
 
     /* Summary row */
