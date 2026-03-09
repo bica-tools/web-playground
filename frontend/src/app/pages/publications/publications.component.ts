@@ -51,7 +51,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
         <span class="pub-title">Reticulate: A Lattice-Theoretic Toolkit for Session Types</span>
         <span class="badge-draft">Draft</span><br>
         <span class="pub-authors">Alexandre Zua Caldeira</span><br>
-        <em class="pub-venue">Target: TACAS 2027 (~Oct 2026) &mdash; Python library, 9 modules, 383 tests</em><br>
+        <em class="pub-venue">Target: TACAS 2027 (~Oct 2026) &mdash; Python library, 9 modules, 789 tests</em><br>
         <span class="pub-links">
           [<a href="/papers/reticulate-tool.pdf" target="_blank" rel="noopener">PDF</a>]
         </span>
@@ -110,7 +110,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .page-header p {
@@ -120,7 +120,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
 
     h2 {
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 32px 0 16px;
     }
 

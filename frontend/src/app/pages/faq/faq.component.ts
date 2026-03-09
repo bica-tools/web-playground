@@ -77,7 +77,7 @@ import { FAQ_DATA, FaqItem } from './faq-data';
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .page-header p {

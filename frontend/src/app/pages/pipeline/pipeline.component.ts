@@ -200,7 +200,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .stats-line {
@@ -252,7 +252,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
     .doc-section h2 {
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 12px;
     }
     .doc-section h3 {

@@ -40,26 +40,40 @@ import { MatCardModule } from '@angular/material/card';
     <section class="about-section">
       <h2>The Project</h2>
       <p>
-        <strong>Reticulate</strong> is a research project with three pillars:
+        <strong>Session Types as Algebraic Reticulates</strong> is a research project with three pillars:
       </p>
       <ol class="pillars-list">
         <li>
           <strong>Theory</strong> &mdash; Proving that session-type state spaces are lattices;
           developing the morphism hierarchy (isomorphism, embedding, projection, Galois connection);
-          connecting to bisimulation and abstract interpretation.
+          connecting to bisimulation and abstract interpretation. Two key lemmas formally
+          verified in Lean 4 with zero sorry.
         </li>
         <li>
-          <strong>Reticulate (tool)</strong> &mdash; A Python library and web tool that constructs
+          <strong>Reticulate</strong> &mdash; A Python library (9 modules, 789 tests) that constructs
           state spaces from session type definitions, checks lattice properties, computes
-          morphisms, and visualizes Hasse diagrams.
+          morphisms, generates tests, and visualizes Hasse diagrams.
         </li>
         <li>
-          <strong>BICA Reborn</strong> &mdash; A Java annotation-based session type checker for
-          objects, successor to the original BICA (2009). The key novelty is the
+          <strong>BICA Reborn</strong> &mdash; A Java 21 annotation-based session type checker
+          (13 packages, 1,052 tests), successor to the original BICA (2009). Key novelty: the
           <code>&parallel;</code> (parallel) constructor for concurrent access, which forces
           lattice structure.
         </li>
       </ol>
+    </section>
+
+    <!-- By the numbers -->
+    <section class="about-section">
+      <h2>By the Numbers</h2>
+      <div class="numbers-grid">
+        <div class="number-item"><span class="number-value">1,841</span><span class="number-label">Total tests</span></div>
+        <div class="number-item"><span class="number-value">34</span><span class="number-label">Benchmark protocols</span></div>
+        <div class="number-item"><span class="number-value">5,183</span><span class="number-label">Generated JUnit tests</span></div>
+        <div class="number-item"><span class="number-value">2</span><span class="number-label">Lean 4 proofs (0 sorry)</span></div>
+        <div class="number-item"><span class="number-value">7</span><span class="number-label">Pipeline stages</span></div>
+        <div class="number-item"><span class="number-value">6</span><span class="number-label">Papers in progress</span></div>
+      </div>
     </section>
 
     <!-- Contact -->
@@ -78,7 +92,7 @@ import { MatCardModule } from '@angular/material/card';
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .page-header p {
@@ -91,7 +105,7 @@ import { MatCardModule } from '@angular/material/card';
     }
     .about-section h2 {
       font-size: 20px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 16px;
     }
     .about-section p {
@@ -126,6 +140,31 @@ import { MatCardModule } from '@angular/material/card';
     .pillars-list li {
       margin-bottom: 12px;
       line-height: 1.7;
+    }
+
+    .numbers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .number-item {
+      text-align: center;
+      padding: 20px 12px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.01);
+    }
+    .number-value {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brand-primary, #4338ca);
+    }
+    .number-label {
+      display: block;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.55);
+      margin-top: 4px;
     }
   `],
 })

@@ -192,7 +192,7 @@ interface TocEntry {
     }
     .page-header h1 {
       font-size: 24px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 0 0 8px;
     }
     .page-header p {
@@ -288,7 +288,7 @@ interface TocEntry {
     }
     .doc-section h2 {
       font-size: 22px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 16px;
     }
     .doc-section h3 {
