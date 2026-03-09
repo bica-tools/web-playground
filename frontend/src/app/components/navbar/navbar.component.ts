@@ -36,15 +36,31 @@ import { filter } from 'rxjs/operators';
 
       <!-- Desktop nav -->
       <nav class="nav-links desktop-nav">
-        <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
         <a mat-button routerLink="/tools/analyzer" routerLinkActive="active">Analyzer</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
-        <a mat-button routerLink="/pipeline" routerLinkActive="active">Pipeline</a>
         <a mat-button routerLink="/publications" routerLinkActive="active">Publications</a>
-        <a mat-button routerLink="/tutorials" routerLinkActive="active">Tutorials</a>
-        <a mat-button routerLink="/documentation" routerLinkActive="active">Docs</a>
-        <a mat-button routerLink="/faq" routerLinkActive="active">FAQ</a>
+
+        <!-- Learn dropdown -->
+        <div class="nav-dropdown">
+          <button mat-button class="dropdown-trigger"
+                  [class.active]="isLearnActive"
+                  (mouseenter)="learnOpen = true"
+                  (mouseleave)="learnOpen = false">
+            Learn <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+          </button>
+          <div class="dropdown-menu"
+               [class.open]="learnOpen"
+               (mouseenter)="learnOpen = true"
+               (mouseleave)="learnOpen = false">
+            <a routerLink="/tutorials" routerLinkActive="active" (click)="learnOpen = false">Tutorials</a>
+            <a routerLink="/documentation" routerLinkActive="active" (click)="learnOpen = false">Documentation</a>
+            <a routerLink="/faq" routerLinkActive="active" (click)="learnOpen = false">FAQ</a>
+            <a routerLink="/pipeline" routerLinkActive="active" (click)="learnOpen = false">Pipeline</a>
+          </div>
+        </div>
+
         <a mat-button routerLink="/about" routerLinkActive="active">About</a>
+
         <a mat-icon-button routerLink="/dashboard" routerLinkActive="active" class="dashboard-btn" title="Dashboard">
           <mat-icon>dashboard</mat-icon>
         </a>
@@ -65,11 +81,12 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()">Analyzer</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
-        <a routerLink="/pipeline" routerLinkActive="active" (click)="closeMenu()">Pipeline</a>
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
-        <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()">Tutorials</a>
-        <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()">Documentation</a>
-        <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a>
+        <span class="mobile-section-label">Learn</span>
+        <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Tutorials</a>
+        <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Documentation</a>
+        <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">FAQ</a>
+        <a routerLink="/pipeline" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Pipeline</a>
         <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
         <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
         <a (click)="closeMenu(); logoutClicked.emit()" style="cursor:pointer">Logout</a>
@@ -81,6 +98,7 @@ import { filter } from 'rxjs/operators';
       position: sticky;
       top: 0;
       z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     .brand {
       display: flex;
@@ -105,6 +123,57 @@ import { filter } from 'rxjs/operators';
     .nav-links a.active {
       border-bottom: 2px solid white;
     }
+    /* Dropdown */
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-trigger {
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+    }
+    .dropdown-trigger.active {
+      border-bottom: 2px solid white;
+    }
+    .dropdown-arrow {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: -2px;
+      transition: transform 0.2s;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 180px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      padding: 6px 0;
+      z-index: 1001;
+    }
+    .dropdown-menu.open {
+      display: flex;
+      flex-direction: column;
+    }
+    .dropdown-menu a {
+      padding: 10px 20px;
+      color: rgba(0,0,0,0.8);
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+    .dropdown-menu a:hover {
+      background: rgba(0,0,0,0.04);
+    }
+    .dropdown-menu a.active {
+      color: var(--brand-primary, #4338ca);
+      font-weight: 500;
+    }
+
     .dashboard-btn {
       opacity: 0.7;
       margin-left: 4px;
@@ -141,6 +210,17 @@ import { filter } from 'rxjs/operators';
     .mobile-nav a:hover, .mobile-nav a.active {
       background: rgba(255, 255, 255, 0.1);
     }
+    .mobile-section-label {
+      padding: 10px 24px 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.5;
+      color: white;
+    }
+    .mobile-indent {
+      padding-left: 40px !important;
+    }
 
     @media (max-width: 768px) {
       .desktop-nav {
@@ -158,9 +238,16 @@ import { filter } from 'rxjs/operators';
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() logoutClicked = new EventEmitter<void>();
   isMenuOpen = false;
+  learnOpen = false;
   private routerSub?: Subscription;
 
   constructor(private router: Router) {}
+
+  get isLearnActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/tutorials') || url.startsWith('/documentation')
+        || url.startsWith('/faq') || url.startsWith('/pipeline');
+  }
 
   ngOnInit(): void {
     this.routerSub = this.router.events
