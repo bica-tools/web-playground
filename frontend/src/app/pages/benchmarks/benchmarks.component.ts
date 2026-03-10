@@ -77,7 +77,10 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
                 <td>@if (b.isRecursive) { &#x2713; }</td>
                 <td>@if (b.isLattice) { &#x2713; }</td>
                 <td>{{ b.numTests }}</td>
-                <td><a [routerLink]="['/tools/analyzer']" [queryParams]="{type: b.typeString}">analyze</a></td>
+                <td class="action-links">
+                  <a [routerLink]="['/tools/analyzer']" [queryParams]="{type: b.typeString}">analyze</a>
+                  <a [routerLink]="['/tools/test-generator']" [queryParams]="{type: b.typeString, class: toClassName(b.name)}">tests</a>
+                </td>
               </tr>
               <tr class="detail-row">
                 <td colspan="11">
@@ -222,6 +225,11 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       color: rgba(0,0,0,0.65);
     }
 
+    .action-links {
+      display: flex;
+      gap: 12px;
+      white-space: nowrap;
+    }
     .benchmark-table a {
       color: var(--brand-primary, #4338ca);
       text-decoration: none;
@@ -240,6 +248,10 @@ export class BenchmarksComponent implements OnInit {
   readonly totalTests = signal(0);
 
   constructor(private api: ApiService) {}
+
+  toClassName(name: string): string {
+    return name.replace(/[^a-zA-Z0-9]/g, '');
+  }
 
   ngOnInit(): void {
     this.api.getBenchmarks().subscribe({

@@ -3,13 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { BenchmarkDto, TestGenRequest } from '../../models/api.models';
+import { TestGenRequest } from '../../models/api.models';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 
 @Component({
@@ -19,7 +18,6 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
@@ -44,16 +42,6 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       </mat-form-field>
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="benchmark-select">
-          <mat-label>Load benchmark</mat-label>
-          <mat-select (selectionChange)="onBenchmarkSelect($event.value)">
-            <mat-option value="">-- Select --</mat-option>
-            @for (b of benchmarks(); track b.name) {
-              <mat-option [value]="b.name">{{ b.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
         <mat-form-field appearance="outline" class="class-name-input">
           <mat-label>Class name</mat-label>
           <input matInput
@@ -149,7 +137,6 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       align-items: flex-start;
       flex-wrap: wrap;
     }
-    .benchmark-select { flex: 1; min-width: 200px; }
     .class-name-input { flex: 1; min-width: 180px; }
     .generate-btn { height: 56px; min-width: 160px; }
 
@@ -237,7 +224,6 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
 export class TestGeneratorComponent implements OnInit {
   readonly typeString = signal('');
   readonly className = signal('');
-  readonly benchmarks = signal<BenchmarkDto[]>([]);
   readonly testSource = signal('');
   readonly error = signal('');
   readonly generating = signal(false);
@@ -257,23 +243,6 @@ export class TestGeneratorComponent implements OnInit {
         this.className.set(params['class']);
       }
     });
-
-    this.api.getBenchmarks().subscribe({
-      next: (b) => this.benchmarks.set(b),
-    });
-  }
-
-  onBenchmarkSelect(name: string): void {
-    if (!name) return;
-    const benchmark = this.benchmarks().find(b => b.name === name);
-    if (benchmark) {
-      this.typeString.set(benchmark.typeString);
-      this.className.set(this.toClassName(benchmark.name));
-    }
-  }
-
-  private toClassName(name: string): string {
-    return name.replace(/[^a-zA-Z0-9]/g, '');
   }
 
   generate(): void {

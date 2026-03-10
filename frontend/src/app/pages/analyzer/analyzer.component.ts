@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../services/api.service';
-import { AnalyzeResponse, BenchmarkDto } from '../../models/api.models';
+import { AnalyzeResponse } from '../../models/api.models';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
@@ -27,7 +26,6 @@ interface QuickExample {
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
@@ -57,16 +55,6 @@ interface QuickExample {
       </mat-form-field>
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="benchmark-select">
-          <mat-label>Load benchmark</mat-label>
-          <mat-select (selectionChange)="onBenchmarkSelect($event.value)">
-            <mat-option value="">-- Select --</mat-option>
-            @for (b of benchmarks(); track b.name) {
-              <mat-option [value]="b.typeString">{{ b.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
         <button mat-flat-button
                 color="primary"
                 class="analyze-btn"
@@ -263,7 +251,6 @@ interface QuickExample {
       align-items: flex-start;
       flex-wrap: wrap;
     }
-    .benchmark-select { flex: 1; min-width: 200px; }
     .analyze-btn { height: 56px; min-width: 120px; }
     .copy-link-btn { height: 56px; }
 
@@ -460,7 +447,6 @@ interface QuickExample {
 })
 export class AnalyzerComponent implements OnInit {
   readonly typeString = signal('');
-  readonly benchmarks = signal<BenchmarkDto[]>([]);
   readonly result = signal<AnalyzeResponse | null>(null);
   readonly error = signal('');
   readonly analyzing = signal(false);
@@ -495,17 +481,6 @@ export class AnalyzerComponent implements OnInit {
         setTimeout(() => this.analyze(), 0);
       }
     });
-
-    this.api.getBenchmarks().subscribe({
-      next: (b) => this.benchmarks.set(b),
-    });
-  }
-
-  onBenchmarkSelect(value: string): void {
-    if (value) {
-      this.typeString.set(value);
-      this.analyze();
-    }
   }
 
   loadExample(example: QuickExample): void {
