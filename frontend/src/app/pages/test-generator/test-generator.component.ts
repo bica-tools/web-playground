@@ -385,6 +385,8 @@ export class TestGeneratorComponent implements OnInit {
       next: (res) => {
         this.testSource.set(res.testSource);
         this.generating.set(false);
+        // Auto-load coverage storyboard
+        this.loadCoverage();
       },
       error: (err) => {
         this.error.set(err.error?.error || err.message || 'Test generation failed');
