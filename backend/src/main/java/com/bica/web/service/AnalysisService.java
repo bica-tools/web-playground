@@ -19,10 +19,12 @@ import com.bica.reborn.testgen.PathEnumerator;
 import com.bica.reborn.testgen.TestGenConfig;
 import com.bica.reborn.testgen.TestGenerator;
 import com.bica.reborn.testgen.ViolationStyle;
+import com.bica.reborn.globaltype.*;
 import com.bica.web.dto.AnalyzeResponse;
 import com.bica.web.dto.BenchmarkDto;
 import com.bica.web.dto.CoverageFrameDto;
 import com.bica.web.dto.CoverageStoryboardResponse;
+import com.bica.web.dto.GlobalAnalyzeResponse;
 import com.bica.web.dto.TestGenResponse;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
@@ -426,5 +428,99 @@ public class AnalysisService {
         }
         var tsResult = ThreadSafetyChecker.check(ast, MethodClassifier.fromMap(defaultLevels));
         return tsResult.isSafe();
+    }
+
+    // --- Global type analysis ---
+
+    public GlobalAnalyzeResponse analyzeGlobal(String typeString) {
+        GlobalType g = GlobalTypeParser.parse(typeString);
+        String pretty = GlobalTypePrettyPrinter.pretty(g);
+        Set<String> roles = GlobalTypeChecker.roles(g);
+        StateSpace ss = GlobalTypeChecker.buildStateSpace(g);
+        LatticeResult latticeResult = LatticeChecker.checkLattice(ss);
+
+        String dotSource = BicaCli.buildDot(ss, latticeResult, null, true, true);
+        String svgHtml;
+        try {
+            svgHtml = renderSvg(dotSource);
+        } catch (Exception e) {
+            svgHtml = "";
+        }
+
+        String counterexample = null;
+        if (latticeResult.counterexample() != null) {
+            var cx = latticeResult.counterexample();
+            String kind = "no_meet".equals(cx.kind()) ? "no meet" : "no join";
+            counterexample = "States " + cx.a() + " and " + cx.b() + " have " + kind;
+        }
+
+        boolean usesParallel = containsGlobalParallel(g);
+        boolean isRecursive = containsGlobalRec(g);
+
+        // Project onto each role
+        Map<String, GlobalAnalyzeResponse.ProjectionDto> projections = new LinkedHashMap<>();
+        for (String role : new TreeSet<>(roles)) {
+            try {
+                SessionType localType = Projection.project(g, role);
+                String localPretty = PrettyPrinter.pretty(localType);
+                StateSpace localSs = StateSpaceBuilder.build(localType);
+                LatticeResult localLr = LatticeChecker.checkLattice(localSs);
+
+                String localDot = BicaCli.buildDot(localSs, localLr, role, true, true);
+                String localSvg;
+                try {
+                    localSvg = renderSvg(localDot);
+                } catch (Exception e) {
+                    localSvg = "";
+                }
+
+                projections.put(role, new GlobalAnalyzeResponse.ProjectionDto(
+                        role, localPretty,
+                        localSs.states().size(), localSs.transitions().size(),
+                        localLr.isLattice(), localSvg));
+            } catch (ProjectionError e) {
+                projections.put(role, new GlobalAnalyzeResponse.ProjectionDto(
+                        role, "projection undefined: " + e.getMessage(),
+                        0, 0, false, ""));
+            }
+        }
+
+        return new GlobalAnalyzeResponse(
+                pretty,
+                ss.states().size(),
+                ss.transitions().size(),
+                latticeResult.numScc(),
+                latticeResult.isLattice(),
+                counterexample,
+                new ArrayList<>(new TreeSet<>(roles)),
+                roles.size(),
+                usesParallel,
+                isRecursive,
+                svgHtml,
+                dotSource,
+                projections
+        );
+    }
+
+    private static boolean containsGlobalParallel(GlobalType g) {
+        return switch (g) {
+            case GEnd e -> false;
+            case GVar v -> false;
+            case GMessage m -> m.choices().stream()
+                    .anyMatch(c -> containsGlobalParallel(c.body()));
+            case GParallel p -> true;
+            case GRec r -> containsGlobalParallel(r.body());
+        };
+    }
+
+    private static boolean containsGlobalRec(GlobalType g) {
+        return switch (g) {
+            case GEnd e -> false;
+            case GVar v -> false;
+            case GMessage m -> m.choices().stream()
+                    .anyMatch(c -> containsGlobalRec(c.body()));
+            case GParallel p -> containsGlobalRec(p.left()) || containsGlobalRec(p.right());
+            case GRec r -> true;
+        };
     }
 }

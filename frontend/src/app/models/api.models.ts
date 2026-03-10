@@ -79,6 +79,35 @@ export interface CoverageStoryboardResponse {
   frames: CoverageFrameDto[];
 }
 
+export interface GlobalAnalyzeRequest {
+  typeString: string;
+}
+
+export interface ProjectionDto {
+  role: string;
+  localType: string;
+  localStates: number;
+  localTransitions: number;
+  localIsLattice: boolean;
+  localSvgHtml: string;
+}
+
+export interface GlobalAnalyzeResponse {
+  pretty: string;
+  numStates: number;
+  numTransitions: number;
+  numSccs: number;
+  isLattice: boolean;
+  counterexample: string | null;
+  roles: string[];
+  numRoles: number;
+  usesParallel: boolean;
+  isRecursive: boolean;
+  svgHtml: string;
+  dotSource: string;
+  projections: { [role: string]: ProjectionDto };
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

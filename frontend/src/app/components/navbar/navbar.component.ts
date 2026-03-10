@@ -49,6 +49,7 @@ import { filter } from 'rxjs/operators';
                (mouseenter)="toolsOpen = true"
                (mouseleave)="toolsOpen = false">
             <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="toolsOpen = false">Analyzer</a>
+            <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="toolsOpen = false">Global Types</a>
             <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="toolsOpen = false">Test Generator</a>
           </div>
         </div>
@@ -96,6 +97,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
         <span class="mobile-section-label">Tools</span>
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Analyzer</a>
+        <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Global Types</a>
         <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Test Generator</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>

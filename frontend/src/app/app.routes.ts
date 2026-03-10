@@ -11,6 +11,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tools/global-analyzer',
+    loadComponent: () =>
+      import('./pages/global-analyzer/global-analyzer.component').then(
+        (m) => m.GlobalAnalyzerComponent,
+      ),
+  },
+  {
     path: 'tools/test-generator',
     loadComponent: () =>
       import('./pages/test-generator/test-generator.component').then(

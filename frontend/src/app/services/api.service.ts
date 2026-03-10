@@ -10,6 +10,8 @@ import {
   BenchmarkDto,
   TutorialSummaryDto,
   TutorialDto,
+  GlobalAnalyzeRequest,
+  GlobalAnalyzeResponse,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -44,5 +46,11 @@ export class ApiService {
 
   getTutorial(id: string): Observable<TutorialDto> {
     return this.http.get<TutorialDto>(`${this.baseUrl}/tutorials/${id}`);
+  }
+
+  analyzeGlobal(typeString: string): Observable<GlobalAnalyzeResponse> {
+    return this.http.post<GlobalAnalyzeResponse>(`${this.baseUrl}/analyze-global`, {
+      typeString,
+    } as GlobalAnalyzeRequest);
   }
 }

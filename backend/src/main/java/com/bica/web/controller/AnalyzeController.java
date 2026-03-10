@@ -76,6 +76,21 @@ public class AnalyzeController {
         }
     }
 
+    @PostMapping("/analyze-global")
+    public ResponseEntity<?> analyzeGlobal(@RequestBody GlobalAnalyzeRequest request) {
+        if (request.typeString() == null || request.typeString().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "typeString is required"));
+        }
+        try {
+            GlobalAnalyzeResponse response = analysisService.analyzeGlobal(request.typeString().trim());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();
