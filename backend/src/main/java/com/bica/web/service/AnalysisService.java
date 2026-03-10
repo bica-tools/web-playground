@@ -19,8 +19,13 @@ import com.bica.reborn.testgen.PathEnumerator;
 import com.bica.reborn.testgen.TestGenConfig;
 import com.bica.reborn.testgen.TestGenerator;
 import com.bica.reborn.testgen.ViolationStyle;
+import com.bica.reborn.contextfree.ContextFreeChecker;
+import com.bica.reborn.duality.DualityChecker;
 import com.bica.reborn.globaltype.*;
+import com.bica.reborn.recursion.RecursionChecker;
+import com.bica.reborn.subtyping.SubtypingChecker;
 import com.bica.web.dto.AnalyzeResponse;
+import com.bica.web.dto.CompareResponse;
 import com.bica.web.dto.BenchmarkDto;
 import com.bica.web.dto.CoverageFrameDto;
 import com.bica.web.dto.CoverageStoryboardResponse;
@@ -428,6 +433,63 @@ public class AnalysisService {
         }
         var tsResult = ThreadSafetyChecker.check(ast, MethodClassifier.fromMap(defaultLevels));
         return tsResult.isSafe();
+    }
+
+    // --- Type comparison ---
+
+    public CompareResponse compareTypes(String type1Str, String type2Str) {
+        SessionType ast1 = Parser.parse(type1Str);
+        SessionType ast2 = Parser.parse(type2Str);
+        String pretty1 = PrettyPrinter.pretty(ast1);
+        String pretty2 = PrettyPrinter.pretty(ast2);
+
+        // Subtyping
+        boolean sub12 = SubtypingChecker.isSubtype(ast1, ast2);
+        boolean sub21 = SubtypingChecker.isSubtype(ast2, ast1);
+        String subtypingRelation;
+        if (sub12 && sub21) subtypingRelation = "equivalent";
+        else if (sub12) subtypingRelation = "type1 <: type2";
+        else if (sub21) subtypingRelation = "type2 <: type1";
+        else subtypingRelation = "unrelated";
+
+        // Duality
+        SessionType dual1 = DualityChecker.dual(ast1);
+        SessionType dual2 = DualityChecker.dual(ast2);
+        String dualStr1 = PrettyPrinter.pretty(dual1);
+        String dualStr2 = PrettyPrinter.pretty(dual2);
+        // Check if type1 and type2 are duals of each other (dual(type1) == type2)
+        boolean areDuals = SubtypingChecker.isSubtype(dual1, ast2)
+                && SubtypingChecker.isSubtype(ast2, dual1);
+
+        // State spaces
+        StateSpace ss1 = StateSpaceBuilder.build(ast1);
+        StateSpace ss2 = StateSpaceBuilder.build(ast2);
+        LatticeResult lr1 = LatticeChecker.checkLattice(ss1);
+        LatticeResult lr2 = LatticeChecker.checkLattice(ss2);
+        String dot1 = BicaCli.buildDot(ss1, lr1, null, true, true);
+        String dot2 = BicaCli.buildDot(ss2, lr2, null, true, true);
+        String svg1, svg2;
+        try { svg1 = renderSvg(dot1); } catch (Exception e) { svg1 = ""; }
+        try { svg2 = renderSvg(dot2); } catch (Exception e) { svg2 = ""; }
+
+        // Chomsky
+        var chomsky1 = ContextFreeChecker.classifyChomsky(ast1);
+        var chomsky2 = ContextFreeChecker.classifyChomsky(ast2);
+
+        // Recursion
+        var rec1 = RecursionChecker.analyzeRecursion(ast1);
+        var rec2 = RecursionChecker.analyzeRecursion(ast2);
+
+        return new CompareResponse(
+                pretty1, pretty2,
+                sub12, sub21, subtypingRelation,
+                dualStr1, dualStr2, areDuals,
+                ss1.states().size(), ss1.transitions().size(), lr1.isLattice(), svg1,
+                ss2.states().size(), ss2.transitions().size(), lr2.isLattice(), svg2,
+                chomsky1.level(), chomsky2.level(),
+                rec1.numRecBinders() > 0, rec1.isGuarded(), rec1.isContractive(), rec1.isTailRecursive(),
+                rec2.numRecBinders() > 0, rec2.isGuarded(), rec2.isContractive(), rec2.isTailRecursive()
+        );
     }
 
     // --- Global type analysis ---

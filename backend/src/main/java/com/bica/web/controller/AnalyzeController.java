@@ -91,6 +91,23 @@ public class AnalyzeController {
         }
     }
 
+    @PostMapping("/compare")
+    public ResponseEntity<?> compare(@RequestBody CompareRequest request) {
+        if (request.type1() == null || request.type1().isBlank()
+                || request.type2() == null || request.type2().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Both type1 and type2 are required"));
+        }
+        try {
+            CompareResponse response = analysisService.compareTypes(
+                    request.type1().trim(), request.type2().trim());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();

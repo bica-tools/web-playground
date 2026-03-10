@@ -51,6 +51,7 @@ import { filter } from 'rxjs/operators';
             <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="toolsOpen = false">Analyzer</a>
             <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="toolsOpen = false">Global Types</a>
             <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="toolsOpen = false">Test Generator</a>
+            <a routerLink="/tools/compare" routerLinkActive="active" (click)="toolsOpen = false">Compare</a>
           </div>
         </div>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
@@ -99,6 +100,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Analyzer</a>
         <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Global Types</a>
         <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Test Generator</a>
+        <a routerLink="/tools/compare" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Compare</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
         <span class="mobile-section-label">Learn</span>

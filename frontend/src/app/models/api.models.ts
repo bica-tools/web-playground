@@ -108,6 +108,40 @@ export interface GlobalAnalyzeResponse {
   projections: { [role: string]: ProjectionDto };
 }
 
+export interface CompareRequest {
+  type1: string;
+  type2: string;
+}
+
+export interface CompareResponse {
+  pretty1: string;
+  pretty2: string;
+  type1SubtypeOfType2: boolean;
+  type2SubtypeOfType1: boolean;
+  subtypingRelation: string;
+  dual1: string;
+  dual2: string;
+  areDuals: boolean;
+  states1: number;
+  transitions1: number;
+  isLattice1: boolean;
+  svgHtml1: string;
+  states2: number;
+  transitions2: number;
+  isLattice2: boolean;
+  svgHtml2: string;
+  chomsky1: string;
+  chomsky2: string;
+  isRecursive1: boolean;
+  isGuarded1: boolean;
+  isContractive1: boolean;
+  isTailRecursive1: boolean;
+  isRecursive2: boolean;
+  isGuarded2: boolean;
+  isContractive2: boolean;
+  isTailRecursive2: boolean;
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

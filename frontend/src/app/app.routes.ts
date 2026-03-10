@@ -25,6 +25,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tools/compare',
+    loadComponent: () =>
+      import('./pages/compare/compare.component').then(
+        (m) => m.CompareComponent,
+      ),
+  },
+  {
     path: 'benchmarks',
     loadComponent: () =>
       import('./pages/benchmarks/benchmarks.component').then(

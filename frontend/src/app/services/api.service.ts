@@ -12,6 +12,8 @@ import {
   TutorialDto,
   GlobalAnalyzeRequest,
   GlobalAnalyzeResponse,
+  CompareRequest,
+  CompareResponse,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +48,13 @@ export class ApiService {
 
   getTutorial(id: string): Observable<TutorialDto> {
     return this.http.get<TutorialDto>(`${this.baseUrl}/tutorials/${id}`);
+  }
+
+  compareTypes(type1: string, type2: string): Observable<CompareResponse> {
+    return this.http.post<CompareResponse>(`${this.baseUrl}/compare`, {
+      type1,
+      type2,
+    } as CompareRequest);
   }
 
   analyzeGlobal(typeString: string): Observable<GlobalAnalyzeResponse> {
