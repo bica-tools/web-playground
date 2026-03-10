@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../services/api.service';
-import { AnalyzeResponse, BenchmarkDto, TestGenRequest } from '../../models/api.models';
+import { AnalyzeResponse, BenchmarkDto } from '../../models/api.models';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
@@ -222,47 +222,6 @@ interface QuickExample {
                 </div>
               } @else {
                 <p class="tab-empty">No diagram available for this session type.</p>
-              }
-            </div>
-          </mat-tab>
-
-          <!-- Tests tab -->
-          <mat-tab label="Tests">
-            <div class="tab-content">
-              <div class="test-gen-controls">
-                <mat-form-field appearance="outline" class="class-name-input">
-                  <mat-label>Class name</mat-label>
-                  <input matInput
-                         [ngModel]="className()"
-                         (ngModelChange)="className.set($event)"
-                         placeholder="e.g. FileHandle">
-                </mat-form-field>
-
-                <button mat-flat-button
-                        color="primary"
-                        [disabled]="generatingTests() || !className().trim()"
-                        (click)="generateTests()">
-                  @if (generatingTests()) {
-                    <mat-spinner diameter="18"></mat-spinner>
-                  } @else {
-                    Generate Tests
-                  }
-                </button>
-              </div>
-
-              @if (result()!.numTests) {
-                <p class="test-summary">
-                  {{ result()!.numTests }} tests available:
-                  {{ result()!.numValidPaths }} valid paths,
-                  {{ result()!.numViolations }} violations,
-                  {{ result()!.numIncomplete }} incomplete prefixes
-                </p>
-              }
-
-              @if (testSource()) {
-                <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
-              } @else if (!className().trim()) {
-                <p class="tab-empty">Enter a class name above and click "Generate Tests" to produce JUnit 5 test source.</p>
               }
             </div>
           </mat-tab>
@@ -497,30 +456,14 @@ interface QuickExample {
       padding: 8px;
     }
 
-    /* Test gen */
-    .test-gen-controls {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-    .class-name-input { flex: 1; min-width: 180px; }
-    .test-summary {
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0 0 12px;
-    }
   `],
 })
 export class AnalyzerComponent implements OnInit {
   readonly typeString = signal('');
-  readonly className = signal('');
   readonly benchmarks = signal<BenchmarkDto[]>([]);
   readonly result = signal<AnalyzeResponse | null>(null);
-  readonly testSource = signal('');
   readonly error = signal('');
   readonly analyzing = signal(false);
-  readonly generatingTests = signal(false);
 
   readonly quickExamples: QuickExample[] = [
     { label: 'Iterator', typeString: 'rec X . &{hasNext: +{true: &{next: X}, false: end}}' },
@@ -561,67 +504,29 @@ export class AnalyzerComponent implements OnInit {
   onBenchmarkSelect(value: string): void {
     if (value) {
       this.typeString.set(value);
-      const benchmark = this.benchmarks().find(b => b.typeString === value);
-      if (benchmark) {
-        this.className.set(this.toClassName(benchmark.name));
-      }
       this.analyze();
     }
   }
 
   loadExample(example: QuickExample): void {
     this.typeString.set(example.typeString);
-    this.className.set(this.toClassName(example.label));
     this.analyze();
-  }
-
-  private toClassName(name: string): string {
-    return name.replace(/[^a-zA-Z0-9]/g, '') + 'Test';
   }
 
   analyze(): void {
     if (!this.typeString().trim()) return;
     this.analyzing.set(true);
     this.result.set(null);
-    this.testSource.set('');
     this.error.set('');
 
     this.api.analyze(this.typeString()).subscribe({
       next: (res) => {
         this.result.set(res);
         this.analyzing.set(false);
-        if (this.className().trim()) {
-          this.generateTests();
-        }
       },
       error: (err) => {
         this.error.set(err.error?.error || err.message || 'Analysis failed');
         this.analyzing.set(false);
-      },
-    });
-  }
-
-  generateTests(): void {
-    if (!this.typeString().trim() || !this.className().trim()) return;
-    this.generatingTests.set(true);
-
-    const request: TestGenRequest = {
-      typeString: this.typeString(),
-      className: this.className(),
-    };
-
-    this.api.generateTests(request).subscribe({
-      next: (res) => {
-        this.testSource.set(res.testSource);
-        this.generatingTests.set(false);
-      },
-      error: (err) => {
-        this.snackBar.open(
-          err.error?.error || 'Test generation failed',
-          'Dismiss',
-          { duration: 5000 },
-        );
-        this.generatingTests.set(false);
       },
     });
   }

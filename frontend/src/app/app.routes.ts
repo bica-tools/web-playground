@@ -11,6 +11,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tools/test-generator',
+    loadComponent: () =>
+      import('./pages/test-generator/test-generator.component').then(
+        (m) => m.TestGeneratorComponent,
+      ),
+  },
+  {
     path: 'benchmarks',
     loadComponent: () =>
       import('./pages/benchmarks/benchmarks.component').then(

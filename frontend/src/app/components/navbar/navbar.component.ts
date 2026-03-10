@@ -36,7 +36,22 @@ import { filter } from 'rxjs/operators';
 
       <!-- Desktop nav -->
       <nav class="nav-links desktop-nav">
-        <a mat-button routerLink="/tools/analyzer" routerLinkActive="active">Analyzer</a>
+        <!-- Tools dropdown -->
+        <div class="nav-dropdown">
+          <button mat-button class="dropdown-trigger"
+                  [class.active]="isToolsActive"
+                  (mouseenter)="toolsOpen = true"
+                  (mouseleave)="toolsOpen = false">
+            Tools <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+          </button>
+          <div class="dropdown-menu"
+               [class.open]="toolsOpen"
+               (mouseenter)="toolsOpen = true"
+               (mouseleave)="toolsOpen = false">
+            <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="toolsOpen = false">Analyzer</a>
+            <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="toolsOpen = false">Test Generator</a>
+          </div>
+        </div>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
         <a mat-button routerLink="/publications" routerLinkActive="active">Publications</a>
 
@@ -79,7 +94,9 @@ import { filter } from 'rxjs/operators';
     @if (isMenuOpen) {
       <nav class="mobile-nav">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
-        <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()">Analyzer</a>
+        <span class="mobile-section-label">Tools</span>
+        <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Analyzer</a>
+        <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Test Generator</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
         <span class="mobile-section-label">Learn</span>
@@ -238,10 +255,15 @@ import { filter } from 'rxjs/operators';
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() logoutClicked = new EventEmitter<void>();
   isMenuOpen = false;
+  toolsOpen = false;
   learnOpen = false;
   private routerSub?: Subscription;
 
   constructor(private router: Router) {}
+
+  get isToolsActive(): boolean {
+    return this.router.url.startsWith('/tools/');
+  }
 
   get isLearnActive(): boolean {
     const url = this.router.url;
