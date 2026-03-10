@@ -65,6 +65,20 @@ export interface TutorialDto {
   steps: TutorialStepDto[];
 }
 
+export interface CoverageFrameDto {
+  testName: string;
+  testKind: string;
+  transitionCoverage: number;
+  stateCoverage: number;
+  svgHtml: string;
+}
+
+export interface CoverageStoryboardResponse {
+  totalTransitions: number;
+  totalStates: number;
+  frames: CoverageFrameDto[];
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

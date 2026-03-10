@@ -6,6 +6,7 @@ import {
   AnalyzeResponse,
   TestGenRequest,
   TestGenResponse,
+  CoverageStoryboardResponse,
   BenchmarkDto,
   TutorialSummaryDto,
   TutorialDto,
@@ -25,6 +26,12 @@ export class ApiService {
 
   generateTests(request: TestGenRequest): Observable<TestGenResponse> {
     return this.http.post<TestGenResponse>(`${this.baseUrl}/test-gen`, request);
+  }
+
+  coverageStoryboard(typeString: string): Observable<CoverageStoryboardResponse> {
+    return this.http.post<CoverageStoryboardResponse>(`${this.baseUrl}/coverage-storyboard`, {
+      typeString,
+    } as AnalyzeRequest);
   }
 
   getBenchmarks(): Observable<BenchmarkDto[]> {

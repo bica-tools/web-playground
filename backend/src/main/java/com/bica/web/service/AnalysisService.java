@@ -21,6 +21,8 @@ import com.bica.reborn.testgen.TestGenerator;
 import com.bica.reborn.testgen.ViolationStyle;
 import com.bica.web.dto.AnalyzeResponse;
 import com.bica.web.dto.BenchmarkDto;
+import com.bica.web.dto.CoverageFrameDto;
+import com.bica.web.dto.CoverageStoryboardResponse;
 import com.bica.web.dto.TestGenResponse;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
@@ -289,6 +291,86 @@ public class AnalysisService {
 
         String testSource = TestGenerator.generate(ss, config, pretty);
         return new TestGenResponse(testSource);
+    }
+
+    public CoverageStoryboardResponse coverageStoryboard(String typeString) {
+        SessionType ast = Parser.parse(typeString);
+        StateSpace ss = StateSpaceBuilder.build(ast);
+        LatticeResult latticeResult = LatticeChecker.checkLattice(ss);
+
+        var config = new TestGenConfig("Coverage", null, "obj", 2, 100, ViolationStyle.CALL_ANYWAY);
+        var enumResult = PathEnumerator.enumerate(ss, config);
+
+        var frames = new ArrayList<CoverageFrameDto>();
+        int totalTransitions = ss.transitions().size();
+        int totalStates = ss.states().size();
+
+        // Valid paths
+        for (int i = 0; i < enumResult.validPaths().size(); i++) {
+            var path = enumResult.validPaths().get(i);
+            var covered = collectCoveredTransitions(ss, path.steps());
+            var coveredStates = collectCoveredStates(ss, path.steps());
+            double transCov = totalTransitions > 0 ? (double) covered.size() / totalTransitions : 0;
+            double stateCov = totalStates > 0 ? (double) coveredStates.size() / totalStates : 0;
+            String dot = BicaCli.buildDotWithCoverage(ss, latticeResult, covered, coveredStates);
+            String svg = renderSvg(dot);
+            frames.add(new CoverageFrameDto(
+                    "validPath_" + (i + 1), "valid", transCov, stateCov, svg));
+        }
+
+        // Violations
+        for (int i = 0; i < enumResult.violations().size(); i++) {
+            var viol = enumResult.violations().get(i);
+            var covered = collectCoveredTransitions(ss, viol.prefixPath());
+            var coveredStates = collectCoveredStates(ss, viol.prefixPath());
+            double transCov = totalTransitions > 0 ? (double) covered.size() / totalTransitions : 0;
+            double stateCov = totalStates > 0 ? (double) coveredStates.size() / totalStates : 0;
+            String dot = BicaCli.buildDotWithCoverage(ss, latticeResult, covered, coveredStates);
+            String svg = renderSvg(dot);
+            frames.add(new CoverageFrameDto(
+                    "violation_" + viol.disabledMethod() + "_at_" + viol.state(),
+                    "violation", transCov, stateCov, svg));
+        }
+
+        // Incomplete prefixes
+        for (int i = 0; i < enumResult.incompletePrefixes().size(); i++) {
+            var prefix = enumResult.incompletePrefixes().get(i);
+            var covered = collectCoveredTransitions(ss, prefix.steps());
+            var coveredStates = collectCoveredStates(ss, prefix.steps());
+            double transCov = totalTransitions > 0 ? (double) covered.size() / totalTransitions : 0;
+            double stateCov = totalStates > 0 ? (double) coveredStates.size() / totalStates : 0;
+            String dot = BicaCli.buildDotWithCoverage(ss, latticeResult, covered, coveredStates);
+            String svg = renderSvg(dot);
+            frames.add(new CoverageFrameDto(
+                    "incomplete_" + (i + 1), "incomplete", transCov, stateCov, svg));
+        }
+
+        return new CoverageStoryboardResponse(totalTransitions, totalStates, frames);
+    }
+
+    private Set<StateSpace.Transition> collectCoveredTransitions(StateSpace ss,
+                                                                   List<PathEnumerator.Step> steps) {
+        var covered = new HashSet<StateSpace.Transition>();
+        int current = ss.top();
+        for (var step : steps) {
+            for (var t : ss.transitions()) {
+                if (t.source() == current && t.label().equals(step.label()) && t.target() == step.target()) {
+                    covered.add(t);
+                    break;
+                }
+            }
+            current = step.target();
+        }
+        return covered;
+    }
+
+    private Set<Integer> collectCoveredStates(StateSpace ss, List<PathEnumerator.Step> steps) {
+        var covered = new HashSet<Integer>();
+        covered.add(ss.top());
+        for (var step : steps) {
+            covered.add(step.target());
+        }
+        return covered;
     }
 
     public List<BenchmarkDto> getBenchmarks() {

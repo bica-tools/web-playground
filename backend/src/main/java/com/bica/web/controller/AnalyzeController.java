@@ -60,6 +60,22 @@ public class AnalyzeController {
         }
     }
 
+    @PostMapping("/coverage-storyboard")
+    public ResponseEntity<?> coverageStoryboard(@RequestBody AnalyzeRequest request) {
+        if (request.typeString() == null || request.typeString().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "typeString is required"));
+        }
+        try {
+            CoverageStoryboardResponse response = analysisService.coverageStoryboard(
+                    request.typeString().trim());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();

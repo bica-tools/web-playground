@@ -6,10 +6,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { TestGenRequest } from '../../models/api.models';
+import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
+import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
   selector: 'app-test-generator',
@@ -21,8 +23,10 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatTabsModule,
     MatSnackBarModule,
     CodeBlockComponent,
+    HasseDiagramComponent,
   ],
   template: `
     <header class="page-header">
@@ -104,15 +108,68 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       </section>
     }
 
-    <!-- Result -->
-    @if (testSource()) {
-      <section class="result-section">
-        <div class="result-header">
-          <h3>Generated JUnit 5 Tests</h3>
-          <span class="result-meta">Class: {{ className() }}ProtocolTest</span>
-        </div>
-        <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
-      </section>
+    <!-- Result tabs -->
+    @if (testSource() || coverageFrames().length > 0) {
+      <mat-tab-group class="result-tabs" animationDuration="200ms">
+        @if (testSource()) {
+          <mat-tab label="Generated Tests">
+            <section class="result-section">
+              <div class="result-header">
+                <h3>JUnit 5 Tests</h3>
+                <span class="result-meta">Class: {{ className() }}ProtocolTest</span>
+              </div>
+              <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
+            </section>
+          </mat-tab>
+        }
+        <mat-tab>
+          <ng-template mat-tab-label>
+            Coverage Storyboard
+            @if (loadingCoverage()) {
+              <mat-spinner diameter="16" class="tab-spinner"></mat-spinner>
+            }
+          </ng-template>
+          <section class="result-section">
+            @if (coverageFrames().length === 0 && !loadingCoverage()) {
+              <div class="coverage-prompt">
+                <button mat-flat-button color="primary"
+                        [disabled]="loadingCoverage() || !typeString().trim()"
+                        (click)="loadCoverage()">
+                  Generate Coverage Storyboard
+                </button>
+                <p>Visualise how each test covers the state space — green edges/states are exercised, gray are not.</p>
+              </div>
+            }
+            @if (coverageFrames().length > 0) {
+              <div class="coverage-stats">
+                <span class="stat-chip">{{ coverageTotalTransitions() }} transitions</span>
+                <span class="stat-chip">{{ coverageTotalStates() }} states</span>
+                <span class="stat-chip">{{ coverageFrames().length }} frames</span>
+              </div>
+              <div class="coverage-controls">
+                <button mat-icon-button [disabled]="currentFrame() === 0" (click)="prevFrame()">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+                <span class="frame-label">
+                  {{ currentFrame() + 1 }} / {{ coverageFrames().length }}
+                  &mdash; {{ coverageFrames()[currentFrame()].testName }}
+                </span>
+                <button mat-icon-button [disabled]="currentFrame() >= coverageFrames().length - 1" (click)="nextFrame()">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              </div>
+              <div class="frame-meta">
+                <span class="kind-chip" [attr.data-kind]="coverageFrames()[currentFrame()].testKind">
+                  {{ coverageFrames()[currentFrame()].testKind }}
+                </span>
+                <span>Transition coverage: {{ (coverageFrames()[currentFrame()].transitionCoverage * 100).toFixed(1) }}%</span>
+                <span>State coverage: {{ (coverageFrames()[currentFrame()].stateCoverage * 100).toFixed(1) }}%</span>
+              </div>
+              <app-hasse-diagram [svgHtml]="coverageFrames()[currentFrame()].svgHtml"></app-hasse-diagram>
+            }
+          </section>
+        </mat-tab>
+      </mat-tab-group>
     }
   `,
   styles: [`
@@ -201,7 +258,8 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     }
 
     /* Result */
-    .result-section { margin: 24px 0; }
+    .result-tabs { margin-top: 16px; }
+    .result-section { padding: 16px 0; }
     .result-header {
       display: flex;
       align-items: baseline;
@@ -219,6 +277,65 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
       color: rgba(0, 0, 0, 0.45);
       font-family: 'JetBrains Mono', monospace;
     }
+    .tab-spinner { display: inline-block; margin-left: 8px; }
+
+    /* Coverage */
+    .coverage-prompt {
+      text-align: center;
+      padding: 32px 0;
+    }
+    .coverage-prompt p {
+      margin: 12px 0 0;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.5);
+    }
+    .coverage-stats {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      padding: 8px 0 16px;
+    }
+    .stat-chip {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px;
+      font-size: 12px;
+      color: rgba(0,0,0,0.7);
+    }
+    .coverage-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .frame-label {
+      font-size: 13px;
+      font-weight: 500;
+      min-width: 200px;
+      text-align: center;
+    }
+    .frame-meta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 13px;
+      color: rgba(0,0,0,0.6);
+      margin-bottom: 8px;
+    }
+    .kind-chip {
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .kind-chip[data-kind="valid"] { background: #dcfce7; color: #166534; }
+    .kind-chip[data-kind="violation"] { background: #fee2e2; color: #991b1b; }
+    .kind-chip[data-kind="incomplete"] { background: #fef3c7; color: #92400e; }
   `],
 })
 export class TestGeneratorComponent implements OnInit {
@@ -227,6 +344,13 @@ export class TestGeneratorComponent implements OnInit {
   readonly testSource = signal('');
   readonly error = signal('');
   readonly generating = signal(false);
+
+  // Coverage storyboard
+  readonly coverageFrames = signal<CoverageFrameDto[]>([]);
+  readonly coverageTotalTransitions = signal(0);
+  readonly coverageTotalStates = signal(0);
+  readonly loadingCoverage = signal(false);
+  readonly currentFrame = signal(0);
 
   constructor(
     private api: ApiService,
@@ -250,6 +374,7 @@ export class TestGeneratorComponent implements OnInit {
     this.generating.set(true);
     this.testSource.set('');
     this.error.set('');
+    this.coverageFrames.set([]);
 
     const request: TestGenRequest = {
       typeString: this.typeString(),
@@ -266,5 +391,40 @@ export class TestGeneratorComponent implements OnInit {
         this.generating.set(false);
       },
     });
+  }
+
+  loadCoverage(): void {
+    if (!this.typeString().trim()) return;
+    this.loadingCoverage.set(true);
+    this.currentFrame.set(0);
+
+    this.api.coverageStoryboard(this.typeString()).subscribe({
+      next: (res) => {
+        this.coverageFrames.set(res.frames);
+        this.coverageTotalTransitions.set(res.totalTransitions);
+        this.coverageTotalStates.set(res.totalStates);
+        this.loadingCoverage.set(false);
+      },
+      error: (err) => {
+        this.snackBar.open(
+          err.error?.error || 'Coverage storyboard failed',
+          'Close',
+          { duration: 5000 },
+        );
+        this.loadingCoverage.set(false);
+      },
+    });
+  }
+
+  prevFrame(): void {
+    if (this.currentFrame() > 0) {
+      this.currentFrame.set(this.currentFrame() - 1);
+    }
+  }
+
+  nextFrame(): void {
+    if (this.currentFrame() < this.coverageFrames().length - 1) {
+      this.currentFrame.set(this.currentFrame() + 1);
+    }
   }
 }
