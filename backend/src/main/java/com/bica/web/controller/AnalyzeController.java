@@ -108,6 +108,29 @@ public class AnalyzeController {
         }
     }
 
+    @PostMapping("/compose")
+    public ResponseEntity<?> compose(@RequestBody CompositionRequest request) {
+        if (request.participants() == null || request.participants().size() < 2) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "At least 2 participants are required"));
+        }
+        for (var p : request.participants()) {
+            if (p.name() == null || p.name().isBlank()
+                    || p.typeString() == null || p.typeString().isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Each participant needs a name and typeString"));
+            }
+        }
+        try {
+            CompositionResponse response = analysisService.compose(
+                    request.participants(), request.globalType());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();

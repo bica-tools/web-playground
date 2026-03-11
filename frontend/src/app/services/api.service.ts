@@ -14,6 +14,8 @@ import {
   GlobalAnalyzeResponse,
   CompareRequest,
   CompareResponse,
+  CompositionRequest,
+  CompositionResponse,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -55,6 +57,10 @@ export class ApiService {
       type1,
       type2,
     } as CompareRequest);
+  }
+
+  compose(request: CompositionRequest): Observable<CompositionResponse> {
+    return this.http.post<CompositionResponse>(`${this.baseUrl}/compose`, request);
   }
 
   analyzeGlobal(typeString: string): Observable<GlobalAnalyzeResponse> {

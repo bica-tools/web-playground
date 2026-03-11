@@ -19,6 +19,11 @@ import com.bica.reborn.testgen.PathEnumerator;
 import com.bica.reborn.testgen.TestGenConfig;
 import com.bica.reborn.testgen.TestGenerator;
 import com.bica.reborn.testgen.ViolationStyle;
+import com.bica.reborn.composition.CompositionChecker;
+import com.bica.reborn.composition.CompositionResult;
+import com.bica.reborn.composition.ComparisonResult;
+import com.bica.reborn.composition.ParticipantPair;
+import com.bica.reborn.composition.SynchronizedResult;
 import com.bica.reborn.contextfree.ContextFreeChecker;
 import com.bica.reborn.duality.DualityChecker;
 import com.bica.reborn.globaltype.*;
@@ -26,6 +31,8 @@ import com.bica.reborn.recursion.RecursionChecker;
 import com.bica.reborn.subtyping.SubtypingChecker;
 import com.bica.web.dto.AnalyzeResponse;
 import com.bica.web.dto.CompareResponse;
+import com.bica.web.dto.CompositionRequest;
+import com.bica.web.dto.CompositionResponse;
 import com.bica.web.dto.BenchmarkDto;
 import com.bica.web.dto.CoverageFrameDto;
 import com.bica.web.dto.CoverageStoryboardResponse;
@@ -489,6 +496,102 @@ public class AnalysisService {
                 chomsky1.level(), chomsky2.level(),
                 rec1.numRecBinders() > 0, rec1.isGuarded(), rec1.isContractive(), rec1.isTailRecursive(),
                 rec2.numRecBinders() > 0, rec2.isGuarded(), rec2.isContractive(), rec2.isTailRecursive()
+        );
+    }
+
+    // --- Composition ---
+
+    public CompositionResponse compose(List<CompositionRequest.ParticipantEntry> participants,
+                                        String globalType) {
+        // Build participant entries for CompositionChecker
+        var entries = new ArrayList<Map.Entry<String, SessionType>>();
+        for (var p : participants) {
+            SessionType ast = Parser.parse(p.typeString());
+            entries.add(Map.entry(p.name(), ast));
+        }
+
+        // Synchronized composition (includes free product)
+        SynchronizedResult syncResult = CompositionChecker.synchronizedCompose(entries);
+
+        // Per-participant info
+        var participantDtos = new ArrayList<CompositionResponse.ParticipantDto>();
+        for (var p : participants) {
+            StateSpace ss = syncResult.stateSpaces().get(p.name());
+            LatticeResult lr = LatticeChecker.checkLattice(ss);
+            String dot = BicaCli.buildDot(ss, lr, p.name(), true, true);
+            String svg;
+            try { svg = renderSvg(dot); } catch (Exception e) { svg = ""; }
+            participantDtos.add(new CompositionResponse.ParticipantDto(
+                    p.name(),
+                    PrettyPrinter.pretty(syncResult.participants().get(p.name())),
+                    ss.states().size(),
+                    ss.transitions().size(),
+                    lr.isLattice(),
+                    svg
+            ));
+        }
+
+        // Free product SVG
+        StateSpace freeSs = syncResult.freeProduct();
+        LatticeResult freeLr = LatticeChecker.checkLattice(freeSs);
+        String freeDot = BicaCli.buildDot(freeSs, freeLr, "Free Product", true, true);
+        String freeSvg;
+        try { freeSvg = renderSvg(freeDot); } catch (Exception e) { freeSvg = ""; }
+
+        // Synced product SVG
+        StateSpace syncSs = syncResult.synced();
+        LatticeResult syncLr = LatticeChecker.checkLattice(syncSs);
+        String syncDot = BicaCli.buildDot(syncSs, syncLr, "Synchronized Product", true, true);
+        String syncSvg;
+        try { syncSvg = renderSvg(syncDot); } catch (Exception e) { syncSvg = ""; }
+
+        // Compatibility entries
+        var compatEntries = new ArrayList<CompositionResponse.CompatibilityEntry>();
+        for (var entry : syncResult.compatibility().entrySet()) {
+            compatEntries.add(new CompositionResponse.CompatibilityEntry(
+                    entry.getKey().first(), entry.getKey().second(), entry.getValue()));
+        }
+
+        // Shared labels entries
+        var sharedLabelEntries = new ArrayList<CompositionResponse.SharedLabelsEntry>();
+        for (var entry : syncResult.sharedLabels().entrySet()) {
+            sharedLabelEntries.add(new CompositionResponse.SharedLabelsEntry(
+                    entry.getKey().first(), entry.getKey().second(),
+                    new ArrayList<>(entry.getValue())));
+        }
+
+        // Optional global comparison
+        CompositionResponse.GlobalComparisonDto globalDto = null;
+        if (globalType != null && !globalType.isBlank()) {
+            Map<String, SessionType> participantMap = new LinkedHashMap<>();
+            for (var e : entries) {
+                participantMap.put(e.getKey(), e.getValue());
+            }
+            ComparisonResult cmp = CompositionChecker.compareWithGlobal(participantMap, globalType.trim());
+            globalDto = new CompositionResponse.GlobalComparisonDto(
+                    cmp.globalStates(),
+                    cmp.globalIsLattice(),
+                    cmp.embeddingExists(),
+                    cmp.overApproximationRatio(),
+                    cmp.roleTypeMatches()
+            );
+        }
+
+        return new CompositionResponse(
+                participants.size(),
+                participantDtos,
+                freeSs.states().size(),
+                freeSs.transitions().size(),
+                freeLr.isLattice(),
+                freeSvg,
+                syncSs.states().size(),
+                syncSs.transitions().size(),
+                syncLr.isLattice(),
+                syncSvg,
+                syncResult.reductionRatio(),
+                compatEntries,
+                sharedLabelEntries,
+                globalDto
         );
     }
 

@@ -32,6 +32,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tools/composition',
+    loadComponent: () =>
+      import('./pages/composition/composition.component').then(
+        (m) => m.CompositionComponent,
+      ),
+  },
+  {
     path: 'benchmarks',
     loadComponent: () =>
       import('./pages/benchmarks/benchmarks.component').then(

@@ -142,6 +142,64 @@ export interface CompareResponse {
   isTailRecursive2: boolean;
 }
 
+// --- Composition ---
+
+export interface ParticipantEntry {
+  name: string;
+  typeString: string;
+}
+
+export interface CompositionRequest {
+  participants: ParticipantEntry[];
+  globalType?: string;
+}
+
+export interface ParticipantDto {
+  name: string;
+  pretty: string;
+  states: number;
+  transitions: number;
+  isLattice: boolean;
+  svgHtml: string;
+}
+
+export interface CompatibilityEntry {
+  first: string;
+  second: string;
+  compatible: boolean;
+}
+
+export interface SharedLabelsEntry {
+  first: string;
+  second: string;
+  labels: string[];
+}
+
+export interface GlobalComparisonDto {
+  globalStates: number;
+  globalIsLattice: boolean;
+  embeddingExists: boolean;
+  overApproximationRatio: number;
+  roleTypeMatches: { [role: string]: boolean };
+}
+
+export interface CompositionResponse {
+  participantCount: number;
+  participants: ParticipantDto[];
+  freeStates: number;
+  freeTransitions: number;
+  freeIsLattice: boolean;
+  freeSvgHtml: string;
+  syncedStates: number;
+  syncedTransitions: number;
+  syncedIsLattice: boolean;
+  syncedSvgHtml: string;
+  reductionRatio: number;
+  compatibility: CompatibilityEntry[];
+  sharedLabels: SharedLabelsEntry[];
+  globalComparison: GlobalComparisonDto | null;
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;
