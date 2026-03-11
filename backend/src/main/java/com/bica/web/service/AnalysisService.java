@@ -162,7 +162,95 @@ public class AnalysisService {
                     "rec X . &{depolarize: +{OPEN: conduct_ions . +{INACTIVATE: &{repolarize: X, permanent_inactivation: end}, CLOSE_DIRECT: X}, SUBTHRESHOLD: X}, shutdown: end}", false),
             new BenchmarkDef("Ion Channel (Na+/K+ Parallel)",
                     "Parallel Na+/K+ ion channels during action potential with concurrent activation.",
-                    "rec X . &{depolarize: (conduct_Na . +{INACTIVATE_Na: end, CLOSE_Na: end} || conduct_K . delayed_close_K . end) . &{repolarize: X, permanent_inactivation: end}, shutdown: end}", true)
+                    "rec X . &{depolarize: (conduct_Na . +{INACTIVATE_Na: end, CLOSE_Na: end} || conduct_K . delayed_close_K . end) . &{repolarize: X, permanent_inactivation: end}, shutdown: end}", true),
+            // 35. Ki3 Onboarding
+            new BenchmarkDef("Ki3 Onboarding",
+                    "Ki3 SaaS tenant provisioning: parallel VPS/DNS, then database/proxy/monitoring, health checks, activation or rollback.",
+                    "validateContract . +{APPROVED: (createVPS . +{PROVISIONED: end, FAILED: end} || configureDNS . +{PROPAGATED: end, FAILED: end}) . createKeycloakRealm . +{CREATED: (createSchema . seedData . end || configureProxy . requestSSL . end) . (setupMonitoring . createDashboards . end || configureBackup . end) . runHealthChecks . +{HEALTHY: notifyTenant . activateSubscription . end, UNHEALTHY: rollback . notifyOps . end}, FAILED: end}, REJECTED: end}", true),
+            // 36. Ki3 Offboarding
+            new BenchmarkDef("Ki3 Offboarding",
+                    "Ki3 SaaS tenant teardown: three parallel phases removing services, middleware, infrastructure, then VPS deletion.",
+                    "confirmCancellation . exportData . notifyTenant . (removeMonitoring . end || removeBackup . end) . (revokeSSL . end || deleteSchema . end) . (deleteKeycloakRealm . end || removeDNS . end) . deleteVPS . archiveAuditLog . closeSubscription . end", true),
+            // 37. Carnot Cycle
+            new BenchmarkDef("Carnot Cycle",
+                    "Carnot thermodynamic engine: four-stroke cycle with optional stop.",
+                    "rec X . &{isothermal_expand: adiabatic_expand . isothermal_compress . &{adiabatic_compress: X, stop: end}}", false),
+            // 38. Quantum Measurement
+            new BenchmarkDef("Quantum Measurement",
+                    "Sequential spin measurements on a qubit: prepare, then choose measurement basis (X or Z).",
+                    "prepare . &{measure_x: +{up_x: measure_z . end, down_x: measure_z . end}, measure_z: +{up_z: measure_x . end, down_z: measure_x . end}}", false),
+            // 39. Billiard Map
+            new BenchmarkDef("Billiard Map",
+                    "A 2D billiard table: periodic orbits as recursive reflections off four walls.",
+                    "rec X . &{reflect_north: X, reflect_south: X, reflect_east: X, reflect_west: X, exit: end}", false),
+            // 40. Ki3 CI/CD Pipeline
+            new BenchmarkDef("Ki3 CI/CD Pipeline",
+                    "Ki3 multi-tenant SaaS CI/CD: parallel lint, parallel test, parallel Docker build, security scan, staging, production.",
+                    "(lintBackend . +{PASS: end, FAIL: end} || lintFrontend . +{PASS: end, FAIL: end}) . +{LINT_OK: (testBackend . +{PASS: end, FAIL: end} || testFrontend . +{PASS: end, FAIL: end}) . +{TESTS_OK: (buildBackend . +{PUSHED: end, FAIL: end} || buildFrontend . +{PUSHED: end, FAIL: end}) . +{IMAGES_OK: securityScan . +{CLEAN: deployStaging . +{HEALTHY: e2eSmoke . +{PASS: approveProduction . +{APPROVED: deployProduction . +{HEALTHY: end, UNHEALTHY: rollbackProduction . end}, REJECTED: end}, FAIL: rollbackStaging . end}, UNHEALTHY: rollbackStaging . end}, CRITICAL: end}, BUILD_FAIL: end}, TEST_FAIL: end}, LINT_FAIL: end}", true),
+            // 41. Ribosome Translation
+            new BenchmarkDef("Ribosome Translation",
+                    "Ribosome translation: elongation loop (sense codon, match tRNA, peptide bond) until stop codon triggers release.",
+                    "rec X . &{sense_codon: match_tRNA . peptide_bond . X, stop_codon: release . end}", false),
+            // 42. Polysome
+            new BenchmarkDef("Polysome",
+                    "Polysome: two ribosomes translating the same mRNA concurrently.",
+                    "initiate . (rec X . &{sense_codon: match_tRNA . peptide_bond . X, stop_codon: release . end} || rec Y . &{sense_codon: match_tRNA . peptide_bond . Y, stop_codon: release . end}) . end", true),
+            // 43. Alternative Splicing
+            new BenchmarkDef("Alternative Splicing",
+                    "Alternative splicing: transcription produces pre-mRNA, spliceosome selects among three isoforms.",
+                    "transcribe . splice . +{ISOFORM_A: translate . end, ISOFORM_B: translate . end, ISOFORM_C: translate . end}", false),
+            // 44. Lac Operon
+            new BenchmarkDef("Lac Operon",
+                    "Lac operon gene regulation: sense lactose, then transcribe/translate or repress.",
+                    "rec X . &{sense_lactose: +{PRESENT: transcribe . translate . X, ABSENT: repress . X}, cell_death: end}", false),
+            // 45. DNA Replication Fork
+            new BenchmarkDef("DNA Replication Fork",
+                    "DNA replication fork: leading strand synthesis in parallel with lagging strand (Okazaki fragments).",
+                    "unwind . (rec X . &{synthesize_leading: X, complete_leading: end} || rec Y . &{synthesize_okazaki: ligate . Y, complete_lagging: end}) . end", true),
+            // 46. tRNA Charging
+            new BenchmarkDef("tRNA Charging",
+                    "Aminoacyl-tRNA synthetase charging cycle: bind amino acid, bind tRNA, transfer, release, loop.",
+                    "rec X . &{bind_amino_acid: bind_tRNA . transfer . release . X, shutdown: end}", false),
+            // 47. mRNA Lifecycle
+            new BenchmarkDef("mRNA Lifecycle",
+                    "Complete mRNA lifecycle: transcription, capping, splicing, export, translation, decay.",
+                    "transcribe . cap . splice . export . translate . decay . end", false),
+            // 48. Protein Folding
+            new BenchmarkDef("Protein Folding",
+                    "Chaperone-assisted protein folding: fold attempt, then native/misfolded/aggregate outcomes.",
+                    "rec X . &{fold_attempt: +{NATIVE: end, MISFOLDED: chaperone_bind . unfold . X, AGGREGATE: degrade . end}}", false),
+            // 49. Cell Cycle
+            new BenchmarkDef("Cell Cycle",
+                    "Eukaryotic cell cycle with G1/G2 checkpoints, S phase, mitosis, repair, differentiation, apoptosis.",
+                    "rec X . &{G1_checkpoint: +{PASS: S_phase . G2_checkpoint . +{PASS: mitosis . X, FAIL: repair . X}, FAIL: repair . X}, differentiate: end, apoptosis: end}", false),
+            // 50. Signal Transduction PKA
+            new BenchmarkDef("Signal Transduction PKA",
+                    "PKA signal transduction: hormone binds receptor, activates G-protein, produces cAMP, PKA concurrently phosphorylates and opens ion channels.",
+                    "hormone_bind . activate_G_protein . produce_cAMP . activate_PKA . (phosphorylate . end || open_ion_channel . end) . end", true),
+            // 51. ER-Golgi Secretory
+            new BenchmarkDef("ER-Golgi Secretory",
+                    "ER-Golgi secretory pathway: synthesize, fold, quality control, then sort or degrade.",
+                    "synthesize . fold . +{NATIVE: ER_exit . golgi_sort . +{MEMBRANE: end, SECRETED: end, LYSOSOME: end}, MISFOLDED: ER_retain . degrade . end}", false),
+            // 52. Glucose Regulation
+            new BenchmarkDef("Glucose Regulation",
+                    "Homeostatic glucose regulation: measure glucose, respond with glucagon/insulin, loop.",
+                    "rec X . &{measure_glucose: +{LOW: release_glucagon . X, NORMAL: X, HIGH: release_insulin . X}, apoptosis: end}", false),
+            // 53. Action Potential Full
+            new BenchmarkDef("Action Potential Full",
+                    "Full action potential with parallel Na+/K+ channels, repolarization, and refractory period.",
+                    "rec X . &{stimulus: +{THRESHOLD: (Na_activate . +{INACTIVATE: end, CLOSE: end} || K_activate . K_delayed_close . end) . repolarize . refractory . X, SUBTHRESHOLD: X}, shutdown: end}", true),
+            // 54. Apoptosis
+            new BenchmarkDef("Apoptosis",
+                    "Programmed cell death: intrinsic (mitochondrial) and extrinsic (death receptor) pathways converge on caspase-3.",
+                    "receive_signal . +{INTRINSIC: mitochondrial_release . activate_caspase9 . activate_caspase3 . DNA_fragmentation . end, EXTRINSIC: activate_caspase8 . activate_caspase3 . DNA_fragmentation . end}", false),
+            // 55. T-Cell Activation
+            new BenchmarkDef("T-Cell Activation",
+                    "T-cell immune response: antigen presentation, activation, concurrent cytokine release and proliferation.",
+                    "antigen_present . activate . (release_cytokine . end || proliferate . end) . +{MEMORY: end, APOPTOSIS: end}", true),
+            // 56. Photosynthesis-Respiration
+            new BenchmarkDef("Photosynthesis-Respiration",
+                    "Plant cell energy metabolism: photosynthesis (light reactions || Calvin cycle) then respiration (glycolysis || Krebs cycle).",
+                    "(light_reactions . produce_ATP . end || calvin_cycle . fix_carbon . end) . (glycolysis . pyruvate . end || krebs_cycle . electron_transport . end) . end", true)
     );
 
     @PostConstruct
