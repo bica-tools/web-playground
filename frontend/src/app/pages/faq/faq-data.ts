@@ -65,4 +65,34 @@ export const FAQ_DATA: FaqItem[] = [
       'Because every constructor preserves lattice structure, and the proof goes by structural induction: <code>end</code> is trivial; sequencing adds a maximum; branch/selection create joins and meets; recursion is absorbed by SCC quotient; parallel takes the product. Since every constructor preserves the property and the base case has it, every well-formed session type has it.',
     category: 'Fundamentals',
   },
+  {
+    question: 'What is the lattice classification hierarchy?',
+    answer:
+      'Every session type state space is classified in the lattice hierarchy: <strong>boolean</strong> (power-of-2 elements) \u2282 <strong>distributive</strong> (no M\u2083, no N\u2085) \u2282 <strong>modular</strong> (has M\u2083 but no N\u2085) \u2282 <strong>lattice</strong> (has N\u2085). Across 79 benchmarks: 72% are distributive, 3% modular, 25% lattice-only. Non-distributivity typically arises from the interaction of branching/selection with parallel composition.',
+    category: 'Theory',
+  },
+  {
+    question: 'What is Gay\u2013Hole subtyping?',
+    answer:
+      'Gay\u2013Hole subtyping is a coinductive relation on session types. For branches, the subtype offers <em>more</em> methods (covariant width). For selections, the subtype selects <em>fewer</em> labels (contravariant width). For parallel, subtyping is componentwise: <code>(S\u2081 \u2225 S\u2082) \u2264 (T\u2081 \u2225 T\u2082)</code> iff <code>S\u2081 \u2264 T\u2081</code> and <code>S\u2082 \u2264 T\u2082</code>. The key result: subtyping corresponds to lattice embedding of state spaces.',
+    category: 'Theory',
+  },
+  {
+    question: 'Does the parallel constructor support more than two branches?',
+    answer:
+      'Yes. The parallel constructor is <strong>n-ary</strong>: <code>S\u2081 \u2225 S\u2082 \u2225 \u2026 \u2225 S\u2099</code> composes any number of concurrent sub-protocols. The state space is the n-fold product lattice. Since lattice products are associative, n-ary parallel is semantically equivalent to nested binary \u2014 but the flat form expresses the intent that all branches are peers at the same level.',
+    category: 'Constructs',
+  },
+  {
+    question: 'Can session types model security protocols?',
+    answer:
+      'Yes. The benchmark suite includes 10 security protocols: Needham\u2013Schroeder, Kerberos, SSH, Diffie\u2013Hellman, Mutual TLS, Signal (Double Ratchet), X.509 Certificate Chain, SAML SSO, Zero-Knowledge Proofs, and DNSSEC. All form lattices. Selections model verifier decisions (TRUSTED/UNTRUSTED, PASS/FAIL), and parallel models concurrent certificate verification (e.g., mTLS).',
+    category: 'Benchmarks',
+  },
+  {
+    question: 'How many benchmark protocols are there?',
+    answer:
+      'The suite contains <strong>79 benchmarks</strong> across 7 domains: software protocols (15), distributed systems (15), industry/Ki3 (3), physics (16), molecular biology (12), cell biology (8), and security (10). All 79 form lattices under the reachability ordering \u2014 no counterexample has been found among well-formed session types.',
+    category: 'Benchmarks',
+  },
 ];
