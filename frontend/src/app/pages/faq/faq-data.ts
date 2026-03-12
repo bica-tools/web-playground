@@ -95,4 +95,67 @@ export const FAQ_DATA: FaqItem[] = [
       'The suite contains <strong>79 benchmarks</strong> across 7 domains: software protocols (15), distributed systems (15), industry/Ki3 (3), physics (16), molecular biology (12), cell biology (8), and security (10). All 79 form lattices under the reachability ordering \u2014 no counterexample has been found among well-formed session types.',
     category: 'Benchmarks',
   },
+
+  // ── Realizability (Step 156) ──────────────────────────────────
+
+  {
+    question: 'What is realizability?',
+    answer:
+      '<strong>Realizability</strong> answers the inverse problem: given a finite bounded lattice <em>L</em>, does there exist a session type <em>S</em> such that <code>L(S) \u2245 L</code>? If yes, <em>L</em> is <strong>realizable</strong>. The Characterization Theorem says: a lattice is realizable if and only if it is a bounded lattice with <strong>reticular form</strong>.',
+    category: 'Realizability',
+  },
+  {
+    question: 'Why do we need realizability? Isn\u2019t the Reticulate Theorem enough?',
+    answer:
+      'The Reticulate Theorem answers \u201cwhat do session types produce?\u201d (bounded lattices). Realizability answers the harder inverse: \u201cwhich bounded lattices come from session types?\u201d This is essential for tool builders: given an arbitrary state machine (e.g. extracted from legacy code), can we <em>type</em> it with a session type? Realizability gives a precise <strong>decision procedure</strong>.',
+    category: 'Realizability',
+  },
+  {
+    question: 'Is the realizability check decidable and efficient?',
+    answer:
+      'Yes. For a finite state space with <em>n</em> states and <em>m</em> transitions: (1) the lattice check is <em>O(n\u00B3)</em> (SCC quotient + pairwise meet/join), (2) reticular form check is <em>O(n \u00B7 m)</em> (classify each state). Both are implemented in <code>check_realizability(ss)</code> with polynomial-time algorithms.',
+    category: 'Realizability',
+  },
+  {
+    question: 'What are obstruction categories?',
+    answer:
+      'When a state space is <strong>not</strong> realizable, the failure decomposes into obstructions across 5 categories: <strong>A\u2014Structural</strong> (nondeterminism, unreachable states, dead ends); <strong>B\u2014Lattice</strong> (missing meet/join, not bounded); <strong>C\u2014Reticular</strong> (mixed states, label conflicts); <strong>D\u2014Automata</strong> (trace structure violations); <strong>E\u2014Counting</strong> (duplicate labels, empty non-bottom). The <code>find_obstructions(ss)</code> function diagnoses all of them.',
+    category: 'Realizability',
+  },
+  {
+    question: 'What is the non-realizable catalogue?',
+    answer:
+      'A collection of <strong>18 hand-crafted state spaces</strong> that are not realizable, organized by obstruction category. Examples include: <code>nondeterministic</code> (same label, two targets), <code>missing_meet</code> (W-shape with no GLB), <code>dead_end</code> (no path to bottom). Use <code>generate_non_realizable(kind)</code> to access any entry.',
+    category: 'Realizability',
+  },
+  {
+    question: 'Can a lattice be a lattice but not have reticular form?',
+    answer:
+      'In principle, yes: a lattice where some non-bottom state has both branch-like and selection-like transitions that don\u2019t decompose as a product. However, such lattices are rare and don\u2019t arise from standard protocol patterns. No natural example has been found among 79 benchmarks, 478,000+ enumerated types, or 6 wild state machines.',
+    category: 'Realizability',
+  },
+  {
+    question: 'What about infinite session types and realizability?',
+    answer:
+      'Realizability applies to <strong>finite state spaces</strong>. Recursive types (<code>\u03BCX.S</code>) produce finite state spaces via SCC quotient, so all well-formed session types are covered. Infinite-state systems (from unbounded recursion) are outside scope.',
+    category: 'Realizability',
+  },
+  {
+    question: 'How does realizability relate to subtyping?',
+    answer:
+      'Subtyping <code>S\u2081 \u2264 S\u2082</code> implies an order-embedding <code>L(S\u2082) \u21AA L(S\u2081)</code>. If <em>L\u2081</em> and <em>L\u2082</em> are both realizable and <em>L\u2082</em> embeds in <em>L\u2081</em>, then the corresponding session types are related by subtyping. Realizability is a <strong>prerequisite</strong> for this analysis.',
+    category: 'Realizability',
+  },
+  {
+    question: 'Why isn\u2019t nondeterminism in the session type grammar?',
+    answer:
+      'Session types model <strong>deterministic protocols</strong>: from any state, each method name leads to at most one successor. Nondeterminism would mean the same method call could lead to different states, violating protocol predictability. This is why nondeterministic LTSs are non-realizable.',
+    category: 'Realizability',
+  },
+  {
+    question: 'Can I use check_realizability on arbitrary state machines?',
+    answer:
+      'Yes. The function <code>check_realizability(ss)</code> accepts any <code>StateSpace</code> object \u2014 not just those built from session types. If the input is realizable, it returns the <strong>reconstructed session type</strong>. If not, it returns diagnostic obstructions explaining why. This makes it useful for checking whether legacy state machines can be typed.',
+    category: 'Realizability',
+  },
 ];
