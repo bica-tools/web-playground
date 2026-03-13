@@ -158,4 +158,64 @@ export const FAQ_DATA: FaqItem[] = [
       'Yes. The function <code>check_realizability(ss)</code> accepts any <code>StateSpace</code> object \u2014 not just those built from session types. If the input is realizable, it returns the <strong>reconstructed session type</strong>. If not, it returns diagnostic obstructions explaining why. This makes it useful for checking whether legacy state machines can be typed.',
     category: 'Realizability',
   },
+  {
+    question: 'What is a channel in the reticulate framework?',
+    answer:
+      'A <strong>channel</strong> is an object with two roles (A and B) whose session types are <em>dual</em>: <code>S</code> and <code>dual(S)</code>. The channel\u2019s state space is the product <code>L(S) \u00D7 L(dual(S))</code>, which models all valid interleavings of the two roles\u2019 behaviour. This product is always a bounded lattice.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'Why is the channel product always a lattice?',
+    answer:
+      'Because (1) every well-formed session type has a lattice state space (Reticulate Theorem), (2) duality preserves lattice structure (<code>L(S) \u2245 L(dual(S))</code>), and (3) the product of two lattices is always a lattice. These three facts compose to give the result.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'What is branch complementarity?',
+    answer:
+      '<strong>Branch complementarity</strong> is the property that a branch transition for role A corresponds to a selection transition for role B, and vice versa. It captures the channel invariant: when one side waits for input (branch), the other side provides it (selection).',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'How does the channel construction relate to the parallel constructor?',
+    answer:
+      'The channel <code>Ch(S) = L(S) \u00D7 L(dual(S))</code> uses the same product construction as the parallel operator <code>S\u2081 \u2225 S\u2082</code>. The difference is that the two components are <em>dual</em>, which adds complementarity and isomorphism properties that arbitrary parallel composition does not have.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'What does role embedding mean?',
+    answer:
+      'The <strong>role embedding</strong> \u03B9<sub>A</sub>: s \u21A6 (s, \u22A4<sub>B</sub>) maps each local state to a channel state. It is an <em>order-embedding</em>: it preserves and reflects the reachability ordering. This means a role\u2019s local view is faithfully represented in the channel \u2014 no ordering information is lost.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'Can I build a channel from a global type?',
+    answer:
+      'Yes. For a binary global type <code>G</code> between roles A and B, project onto each role, verify they are duals, and build the channel product. The function <code>channel_from_global(g, sender, receiver)</code> does this automatically.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'Does the channel construction work with recursive types?',
+    answer:
+      'Yes. Recursive types produce cyclic state spaces handled by SCC quotient. The product of two SCC-quotiented lattices is still a lattice, and branch complementarity is verified across the recursive structure. All recursive benchmarks pass.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'How are channels different from arbitrary objects?',
+    answer:
+      'A channel is a <strong>special case</strong> of an object: it has exactly two roles whose types are dual. This gives extra structure (isomorphism, complementarity, role embedding) that arbitrary multi-role objects do not have. The same lattice framework applies to both \u2014 channels are just the dual case.',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'How does channel duality relate to linear logic?',
+    answer:
+      'In the Caires\u2013Pfenning\u2013Wadler correspondence, session type duality maps to <strong>linear negation</strong>. The channel product <code>L(S) \u00D7 L(dual(S))</code> can be seen as the semantic model of two complementary linear propositions, with the lattice structure providing the \u201Ctruth values.\u201D',
+    category: 'Channel Duality',
+  },
+  {
+    question: 'What was verified empirically for channel duality?',
+    answer:
+      'Across <strong>78 benchmarks</strong> (71 binary + 7 binary multiparty), the channel product is always a bounded lattice, the two local state spaces are isomorphic, branch complementarity holds, and both role embeddings are verified. All checks are automated in <code>test_channel.py</code> (132 tests).',
+    category: 'Channel Duality',
+  },
 ];
