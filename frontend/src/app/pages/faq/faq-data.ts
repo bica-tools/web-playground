@@ -218,4 +218,67 @@ export const FAQ_DATA: FaqItem[] = [
       'Across <strong>78 benchmarks</strong> (71 binary + 7 binary multiparty), the channel product is always a bounded lattice, the two local state spaces are isomorphic, branch complementarity holds, and both role embeddings are verified. All checks are automated in <code>test_channel.py</code> (132 tests).',
     category: 'Channel Duality',
   },
+
+  // ── Async Channels (Step 157b) ──────────────────────────────────
+
+  {
+    question: 'What is an async channel?',
+    answer:
+      'An <strong>async channel</strong> is a binary communication link where output is non-blocking (the sender deposits a label into a FIFO buffer and advances) while input is blocking (the receiver waits for a message). The state space is <code>(s_A, s_B, buf_AB, buf_BA)</code> \u2014 role states plus two bounded queues of capacity <em>K</em>.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'Why use bounded buffers instead of unbounded?',
+    answer:
+      'Unbounded buffers yield <strong>infinite state spaces</strong>, making lattice checking undecidable. Bounded buffers (<code>|buf| \u2264 K</code>) keep the state space finite while capturing the essential phenomenon of sender look-ahead. In practice, <code>K=1</code> captures most async behaviour.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'Does the async channel state space form a lattice?',
+    answer:
+      'Yes. For every well-formed session type <em>S</em> and every finite capacity <em>K</em>, the async channel <code>Ch<sub>K</sub>(S)</code> is a <strong>bounded lattice</strong>. This extends the synchronous result from Step 157a to the buffered setting. Verified across all benchmarks at K=1 and K=2.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'How does the async channel relate to the sync channel?',
+    answer:
+      'The sync channel is the product <code>L(S) \u00D7 L(dual(S))</code> with independent transitions. The async channel adds buffer dimensions and constrains reachability by send/receive rules. The sync channel\u2019s <strong>empty-buffer states embed</strong> into the async channel, preserving and reflecting the ordering.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'What happens at buffer capacity K=0?',
+    answer:
+      'At <code>K=0</code>, no messages can be buffered, so no async communication occurs. The state space contains only the initial state <code>(\u22A4_S, \u22A4_dual, \u03B5, \u03B5)</code> \u2014 a degenerate single-state lattice. This represents a deadlocked channel where neither role can make progress.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'How does buffer capacity affect state-space size?',
+    answer:
+      'Higher <em>K</em> allows more buffered states, <strong>monotonically increasing</strong> the state count. Growth is bounded by <code>|L(S)| \u00D7 |L(dual(S))| \u00D7 |\u03A3|<sup>2K</sup></code> where \u03A3 is the label alphabet. For simple protocols, K=1 suffices; complex protocols may need K=2 or higher.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'Are send transitions classified as selections?',
+    answer:
+      'Yes. <strong>Send transitions</strong> represent the sender\u2019s internal choice (which label to fire into the buffer), so they are classified as <em>selection transitions</em>. Receive transitions consume from the buffer and are classified as <em>branch transitions</em>. This mirrors the branch/selection duality.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'Can async channels be built from global types?',
+    answer:
+      'Yes. The function <code>async_channel_from_global(g, sender, receiver, capacity)</code> projects the global type onto the sender role, computes the dual, and builds the async channel. This connects the multiparty global type framework to async binary analysis.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'Why is the async state space sometimes smaller than the sync product?',
+    answer:
+      'Because not all synchronous product states are <strong>reachable</strong> under async semantics. For example, a state where the receiver has advanced but the sender has not yet sent is unreachable \u2014 the receiver cannot act until the buffer is non-empty. The async BFS only explores reachable states.',
+    category: 'Async Channels',
+  },
+  {
+    question: 'What is the sync embedding property?',
+    answer:
+      'The <strong>sync embedding</strong> maps each reachable empty-buffer async state <code>(s_A, s_B, \u03B5, \u03B5)</code> to the sync state <code>(s_A, s_B)</code>. This map is order-preserving (sync reachability implies async reachability via buffered paths) and order-reflecting (no spurious orderings are created). It confirms that async refines sync.',
+    category: 'Async Channels',
+  },
 ];
