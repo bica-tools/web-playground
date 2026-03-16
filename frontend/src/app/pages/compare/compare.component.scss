@@ -1,0 +1,206 @@
+/* ══════════════════════════════════════════════════════════ */
+/* COMPARE — Side-by-side morphism viewer                    */
+/* ══════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+/* ── Header ── */
+.compare-header {
+  width: 100vw; margin-left: calc(-50vw + 50%); margin-top: -24px;
+  background: linear-gradient(145deg, #1e1b4b, #312e81 60%, #4338ca);
+  color: #fff; padding: 32px 24px 28px; text-align: center;
+
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  p { font-size: 13px; opacity: 0.6; margin: 0; }
+}
+
+/* ── Input bar ── */
+.input-bar {
+  max-width: 1200px; margin: 20px auto 0; padding: 0 16px;
+}
+
+.input-grid {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px;
+  align-items: end;
+}
+
+.input-col {
+  label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.6px; color: rgba(0,0,0,0.45);
+    margin-bottom: 4px; font-weight: 500;
+  }
+  textarea {
+    width: 100%; height: 60px; padding: 10px 12px;
+    border: 2px solid rgba(0,0,0,0.1); border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #fff; resize: vertical; box-sizing: border-box;
+    transition: border-color 0.2s;
+    &:focus { outline: none; border-color: var(--brand-primary); }
+  }
+}
+
+.input-mid {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding-bottom: 8px;
+}
+
+.compare-btn {
+  padding: 10px 24px; background: var(--brand-primary); color: #fff;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  &:hover:not(:disabled) { background: var(--brand-primary-dark); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.compare-spinner { --mdc-circular-progress-active-indicator-color: white; }
+
+.compare-hint { font-size: 10px; color: rgba(0,0,0,0.3); }
+
+/* Examples */
+.examples-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+  align-items: center; max-width: 1200px; margin-left: auto; margin-right: auto;
+  padding: 0 16px;
+}
+
+.ex-label {
+  font-size: 11px; color: rgba(0,0,0,0.4); text-transform: uppercase;
+  letter-spacing: 0.5px; font-weight: 500;
+}
+
+.ex-chip {
+  padding: 4px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px;
+  background: transparent; font-size: 12px; color: rgba(0,0,0,0.6);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  &:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+}
+
+/* ── Error / Loading ── */
+.error-banner {
+  max-width: 1200px; margin: 16px auto; padding: 0 16px;
+  .inner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: 10px; color: #991b1b; font-size: 13px;
+  }
+}
+
+.loading-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 48px 0; color: rgba(0,0,0,0.4);
+}
+
+/* ── Relationship banner ── */
+.relation-banner {
+  max-width: 1200px; margin: 20px auto 0; padding: 0 16px;
+}
+
+.relation-inner {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; padding: 14px 20px;
+  background: #f8f9fb; border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px; flex-wrap: wrap;
+}
+
+.rel-badge {
+  padding: 5px 16px; border-radius: 16px; font-size: 13px;
+  font-weight: 600; border: 1px solid;
+}
+
+.rel-equivalent { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+.rel-subtype { background: #e0f2fe; border-color: #bae6fd; color: #075985; }
+.rel-unrelated { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+.rel-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: rgba(0,0,0,0.5);
+}
+
+.rel-pass { color: #059669; }
+.rel-fail { color: #dc2626; }
+
+/* ── Side-by-side Hasse ── */
+.hasse-compare {
+  max-width: 1200px; margin: 20px auto; padding: 0 16px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+
+.hasse-panel {
+  border: 1px solid rgba(0,0,0,0.06); border-radius: 12px;
+  background: #fafbfc; overflow: hidden;
+}
+
+.panel-header {
+  padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.7);
+}
+
+.panel-meta {
+  display: flex; gap: 8px;
+}
+
+.meta-chip {
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.meta-lattice { background: #ecfdf5; color: #065f46; }
+.meta-not-lattice { background: #fef2f2; color: #991b1b; }
+.meta-states { background: #f1f5f9; color: rgba(0,0,0,0.5); }
+
+.panel-pretty {
+  padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: rgba(0,0,0,0.6); white-space: pre-wrap; word-break: break-all;
+  background: #fff;
+}
+
+.panel-hasse {
+  padding: 16px; display: flex; justify-content: center; min-height: 180px;
+}
+
+:host ::ng-deep .panel-hasse svg { max-width: 100%; max-height: 400px; }
+
+/* ── Properties table ── */
+.props-section {
+  max-width: 1200px; margin: 0 auto 48px; padding: 0 16px;
+}
+
+.props-title {
+  font-size: 15px; font-weight: 700; margin: 0 0 12px; color: rgba(0,0,0,0.85);
+}
+
+.props-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  border: 1px solid rgba(0,0,0,0.08); border-radius: 10px;
+  overflow: hidden; background: #fff;
+
+  th, td {
+    padding: 10px 16px; font-size: 13px; text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  th {
+    background: #f8f9fb; font-weight: 600; color: rgba(0,0,0,0.5);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td:first-child { font-weight: 500; color: rgba(0,0,0,0.7); }
+}
+
+.prop-yes { color: #059669; font-weight: 600; }
+.prop-no { color: #dc2626; font-weight: 600; }
+.prop-val {
+  font-family: 'JetBrains Mono', monospace; color: rgba(0,0,0,0.65);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .input-grid { grid-template-columns: 1fr; }
+  .input-mid { flex-direction: row; padding-bottom: 0; }
+  .hasse-compare { grid-template-columns: 1fr; }
+}
