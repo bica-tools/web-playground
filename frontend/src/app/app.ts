@@ -18,7 +18,7 @@ import { FooterComponent } from './components/footer/footer.component';
     } @else {
       <div class="auth-gate">
         <div class="auth-box">
-          <h1>BICA Reborn</h1>
+          <h1>BICA Tools</h1>
           <p>Session Types as Algebraic Reticulates</p>
           <form (ngSubmit)="login()">
             <input

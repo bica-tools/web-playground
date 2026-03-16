@@ -7,16 +7,16 @@ import { Component } from '@angular/core';
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-main">
-          <span class="footer-brand">BICA Reborn</span>
+          <span class="footer-brand">BICA Tools</span>
           <span class="footer-sep">&mdash;</span>
           <span>Session Types as Algebraic Reticulates</span>
         </div>
         <div class="footer-meta">
           <span>Alexandre Zua Caldeira &middot; Independent Researcher</span>
           <span class="footer-sep">&middot;</span>
-          <a href="https://github.com/alcides/bica" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/bica-tools" target="_blank" rel="noopener">GitHub</a>
           <span class="footer-sep">&middot;</span>
-          <span>Last updated: March 2026</span>
+          <span>bica-tools.org</span>
         </div>
       </div>
     </footer>

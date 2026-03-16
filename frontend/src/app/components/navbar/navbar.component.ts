@@ -29,7 +29,7 @@ import { filter } from 'rxjs/operators';
           <circle cx="26" cy="16" r="3" fill="white"/>
           <circle cx="16" cy="28" r="3" fill="white"/>
         </svg>
-        <span class="brand-text">BICA Reborn</span>
+        <span class="brand-text">BICA Tools</span>
       </a>
 
       <span class="spacer"></span>
