@@ -1,0 +1,319 @@
+/* ══════════════════════════════════════════════════════════ */
+/* SCROLLYTELLING INTRODUCTION                               */
+/* ══════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+/* ── Shared ── */
+.scene {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-inner {
+  max-width: 1100px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.scene-text {
+  h2 {
+    font-size: 32px; font-weight: 700; margin: 0 0 16px;
+    letter-spacing: -0.5px; line-height: 1.2;
+  }
+  p {
+    font-size: 16px; line-height: 1.8; margin: 0 0 16px;
+    color: rgba(0,0,0,0.65);
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 4px;
+    font-size: 14px;
+  }
+}
+
+.scene-viz {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 300px;
+}
+
+/* ── Scene 0: Title ── */
+.scene-title {
+  background: linear-gradient(145deg, #1e1b4b, #312e81 50%, #4338ca);
+  color: #fff; text-align: center;
+  flex-direction: column;
+
+  h1 {
+    font-size: 52px; font-weight: 700; margin: 0 0 16px;
+    letter-spacing: -1px; line-height: 1.1;
+  }
+  .title-sub {
+    font-size: 20px; opacity: 0.7; margin: 0 0 8px; font-weight: 300;
+  }
+  .title-scroll {
+    margin-top: 48px; font-size: 13px; opacity: 0.4;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .scroll-arrow {
+    width: 20px; height: 20px; margin: 12px auto 0;
+    border-right: 2px solid rgba(255,255,255,0.3);
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    transform: rotate(45deg);
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: rotate(45deg) translate(0,0); opacity: 0.3; }
+  50% { transform: rotate(45deg) translate(4px,4px); opacity: 0.6; }
+}
+
+/* ── Scene 1: What is a protocol ── */
+.scene-protocol { background: #fff; }
+
+.protocol-diagram {
+  background: #f8f9fb; border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px; padding: 32px; width: 100%;
+}
+
+.protocol-steps {
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.proto-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 10px;
+  transition: all 0.3s ease;
+  background: #fff; border: 1px solid rgba(0,0,0,0.06);
+}
+
+.proto-step.highlighted {
+  border-color: var(--brand-primary);
+  box-shadow: 0 2px 12px rgba(67,56,202,0.1);
+}
+
+.proto-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(67,56,202,0.08); color: var(--brand-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+
+.proto-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 14px;
+  color: rgba(0,0,0,0.75);
+}
+
+.proto-kind {
+  margin-left: auto; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 3px 10px; border-radius: 10px;
+  font-weight: 600;
+}
+
+.kind-method { background: #e0f2fe; color: #075985; }
+.kind-branch { background: #ecfdf5; color: #065f46; }
+.kind-select { background: #fef3c7; color: #92400e; }
+
+/* ── Scene 2: State space ── */
+.scene-statespace { background: #f8f9fb; }
+
+.state-graph {
+  width: 100%; max-width: 380px;
+
+  svg {
+    width: 100%; height: auto;
+  }
+}
+
+/* State graph animation */
+.sg-node { opacity: 0; animation: sgAppear 0.5s ease-out forwards; }
+.sg-n0 { animation-delay: 0.2s; }
+.sg-n1 { animation-delay: 0.6s; }
+.sg-n2 { animation-delay: 1.0s; }
+.sg-n3 { animation-delay: 1.4s; }
+.sg-n4 { animation-delay: 1.8s; }
+
+@keyframes sgAppear {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sg-edge {
+  stroke-dasharray: 150; stroke-dashoffset: 150;
+  animation: sgDraw 0.4s ease-out forwards;
+}
+.sg-e0 { animation-delay: 0.4s; }
+.sg-e1 { animation-delay: 0.8s; }
+.sg-e2 { animation-delay: 0.8s; }
+.sg-e3 { animation-delay: 1.2s; }
+.sg-e4 { animation-delay: 1.6s; }
+
+@keyframes sgDraw { to { stroke-dashoffset: 0; } }
+
+.sg-label {
+  opacity: 0; animation: sgFade 0.3s ease-out forwards;
+}
+.sg-l0 { animation-delay: 0.5s; }
+.sg-l1 { animation-delay: 0.9s; }
+.sg-l2 { animation-delay: 0.9s; }
+.sg-l3 { animation-delay: 1.3s; }
+.sg-l4 { animation-delay: 1.7s; }
+
+@keyframes sgFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Scene 3: Lattice ── */
+.scene-lattice { background: #fff; }
+
+.lattice-check {
+  width: 100%; max-width: 420px; background: #f8f9fb;
+  border: 1px solid rgba(0,0,0,0.06); border-radius: 16px;
+  padding: 28px; display: flex; flex-direction: column; gap: 16px;
+}
+
+.check-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; color: rgba(0,0,0,0.7);
+}
+
+.check-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+
+.check-pass { background: #ecfdf5; color: #059669; }
+.check-info { background: #e0f2fe; color: #0284c7; }
+
+.check-item strong {
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+}
+
+/* ── Scene 4: Parallel ── */
+.scene-parallel { background: #f8f9fb; }
+
+.parallel-viz {
+  width: 100%; display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
+}
+
+.par-formula {
+  font-family: 'JetBrains Mono', monospace; font-size: 15px;
+  color: rgba(0,0,0,0.7); text-align: center;
+  background: #fff; border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px; padding: 14px 24px;
+  width: 100%;
+}
+
+.par-formula strong { color: var(--brand-primary); }
+
+.par-grid {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 12px; align-items: center; width: 100%;
+}
+
+.par-box {
+  background: #fff; border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px; padding: 16px; text-align: center;
+}
+
+.par-box-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: rgba(0,0,0,0.4); margin-bottom: 6px; font-weight: 500;
+}
+
+.par-box-val {
+  font-family: 'JetBrains Mono', monospace; font-size: 20px;
+  font-weight: 700; color: var(--brand-primary);
+}
+
+.par-op {
+  font-size: 24px; color: rgba(0,0,0,0.25); text-align: center;
+  font-weight: 300;
+}
+
+/* ── Scene 5: The theorem ── */
+.scene-theorem {
+  background: linear-gradient(145deg, #1e1b4b, #312e81 60%, #4338ca);
+  color: #fff; text-align: center; flex-direction: column;
+
+  .theorem-box {
+    max-width: 700px; margin: 0 auto;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 40px 36px;
+  }
+
+  .theorem-label {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 2px;
+    opacity: 0.5; margin-bottom: 16px;
+  }
+
+  .theorem-statement {
+    font-size: 22px; font-weight: 400; line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .theorem-statement em {
+    font-style: normal; color: #93c5fd; font-weight: 600;
+  }
+
+  .theorem-cite {
+    font-size: 13px; opacity: 0.5; font-style: italic;
+  }
+
+  .theorem-cta {
+    margin-top: 40px; display: flex; gap: 16px;
+    justify-content: center; flex-wrap: wrap;
+  }
+}
+
+.btn-primary-light {
+  background: #fff !important; color: #312e81 !important;
+  font-weight: 600 !important; padding: 10px 28px !important;
+  border-radius: 8px !important;
+}
+
+.btn-outline-light {
+  border-color: rgba(255,255,255,0.3) !important;
+  color: #fff !important; padding: 10px 28px !important;
+  border-radius: 8px !important;
+}
+
+/* ── Scene number indicators ── */
+.scene-indicator {
+  position: fixed; right: 24px; top: 50%;
+  transform: translateY(-50%); z-index: 100;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.indicator-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(0,0,0,0.15); border: none;
+  cursor: pointer; transition: all 0.2s;
+  padding: 0;
+
+  &.active { background: var(--brand-primary); transform: scale(1.3); }
+  &.light { background: rgba(255,255,255,0.3); }
+  &.light.active { background: #fff; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .scene { padding: 48px 16px; min-height: auto; }
+  .scene-inner { grid-template-columns: 1fr; gap: 32px; }
+  .scene-title h1 { font-size: 36px; }
+  .scene-text h2 { font-size: 26px; }
+  .scene-indicator { display: none; }
+  .par-grid { grid-template-columns: 1fr; }
+  .par-op { transform: rotate(90deg); }
+}

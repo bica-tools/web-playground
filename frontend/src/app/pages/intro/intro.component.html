@@ -1,0 +1,271 @@
+<!-- Scene indicator dots -->
+<nav class="scene-indicator">
+  @for (s of scenes; track s.id; let i = $index) {
+    <button
+      class="indicator-dot"
+      [class.active]="activeScene() === i"
+      [class.light]="s.dark"
+      (click)="scrollToScene(i)"
+      [title]="s.label">
+    </button>
+  }
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 0: Title                                         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-title" #sceneEl>
+  <h1>What are<br/>Session Types?</h1>
+  <p class="title-sub">And why do they form lattices?</p>
+  <p class="title-sub" style="opacity: 0.4; font-size: 14px;">A visual introduction in 5 scenes</p>
+  <div class="title-scroll">
+    Scroll to explore
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 1: What is a protocol?                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-protocol" #sceneEl>
+  <div class="scene-inner">
+    <div class="scene-text">
+      <h2>Objects have protocols</h2>
+      <p>
+        Think of a <strong>file handle</strong>. You can't read before opening.
+        You can't close twice. There's a <em>sequence of operations</em> you must follow.
+      </p>
+      <p>
+        A <strong>session type</strong> describes this protocol formally &mdash;
+        which methods are available, in what order, with what choices.
+      </p>
+      <p>
+        In our notation:
+        <code>open . &amp;&#123;read: close . end, write: close . end&#125;</code>
+      </p>
+      <p>
+        The <code>&amp;&#123;...&#125;</code> is a <strong>branch</strong> &mdash;
+        the <em>environment</em> chooses which method to call.
+      </p>
+    </div>
+    <div class="scene-viz">
+      <div class="protocol-diagram">
+        <div class="protocol-steps">
+          <div class="proto-step highlighted">
+            <span class="proto-num">1</span>
+            <span class="proto-label">open()</span>
+            <span class="proto-kind kind-method">method</span>
+          </div>
+          <div class="proto-step">
+            <span class="proto-num">2</span>
+            <span class="proto-label">read() or write()</span>
+            <span class="proto-kind kind-branch">branch</span>
+          </div>
+          <div class="proto-step">
+            <span class="proto-num">3</span>
+            <span class="proto-label">close()</span>
+            <span class="proto-kind kind-method">method</span>
+          </div>
+          <div class="proto-step">
+            <span class="proto-num">4</span>
+            <span class="proto-label">end</span>
+            <span class="proto-kind" style="background:#f3f4f6;color:#6b7280">done</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 2: State space                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-statespace" #sceneEl>
+  <div class="scene-inner">
+    <div class="scene-text">
+      <h2>Types become state spaces</h2>
+      <p>
+        Each session type unfolds into a <strong>state space</strong> &mdash;
+        a directed graph where nodes are states and edges are method calls.
+      </p>
+      <p>
+        The <strong>top</strong> node is the initial state (before any call).
+        The <strong>bottom</strong> is the terminal state (<code>end</code>).
+      </p>
+      <p>
+        Reachability defines a <strong>partial order</strong>: state A &ge; state B
+        if there's a path from A to B. This gives us a poset.
+      </p>
+    </div>
+    <div class="scene-viz">
+      <div class="state-graph">
+        <svg viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Edges -->
+          <g stroke="rgba(0,0,0,0.2)" stroke-width="1.5" fill="none">
+            <line x1="160" y1="48" x2="80" y2="148" class="sg-edge sg-e0"/>
+            <line x1="160" y1="48" x2="240" y2="148" class="sg-edge sg-e1"/>
+            <line x1="80" y1="148" x2="160" y2="248" class="sg-edge sg-e2"/>
+            <line x1="240" y1="148" x2="160" y2="248" class="sg-edge sg-e3"/>
+            <line x1="160" y1="248" x2="160" y2="348" class="sg-edge sg-e4"/>
+          </g>
+          <!-- Edge labels -->
+          <g font-family="'JetBrains Mono',monospace" font-size="12" fill="rgba(0,0,0,0.4)" font-style="italic">
+            <text x="108" y="92" class="sg-label sg-l0">open</text>
+            <text x="45" y="196" class="sg-label sg-l1">read</text>
+            <text x="235" y="196" class="sg-label sg-l2">write</text>
+            <text x="200" y="292" class="sg-label sg-l3">close</text>
+            <text x="172" y="302" class="sg-label sg-l4">close</text>
+          </g>
+          <!-- Nodes -->
+          <g>
+            <g class="sg-node sg-n0">
+              <circle cx="160" cy="40" r="20" fill="rgba(147,197,253,0.3)" stroke="rgba(99,102,241,0.6)" stroke-width="1.5"/>
+              <text x="160" y="44" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="rgba(0,0,0,0.7)">top</text>
+            </g>
+            <g class="sg-node sg-n1">
+              <circle cx="80" cy="148" r="18" fill="rgba(0,0,0,0.03)" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+              <text x="80" y="152" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(0,0,0,0.6)">s&#x2081;</text>
+            </g>
+            <g class="sg-node sg-n2">
+              <circle cx="240" cy="148" r="18" fill="rgba(0,0,0,0.03)" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+              <text x="240" y="152" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(0,0,0,0.6)">s&#x2082;</text>
+            </g>
+            <g class="sg-node sg-n3">
+              <circle cx="160" cy="248" r="18" fill="rgba(0,0,0,0.03)" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+              <text x="160" y="252" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="rgba(0,0,0,0.6)">s&#x2083;</text>
+            </g>
+            <g class="sg-node sg-n4">
+              <circle cx="160" cy="348" r="20" fill="rgba(134,239,172,0.25)" stroke="rgba(34,197,94,0.5)" stroke-width="1.5"/>
+              <text x="160" y="352" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="rgba(0,0,0,0.7)">end</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 3: Lattice                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-lattice" #sceneEl>
+  <div class="scene-inner">
+    <div class="scene-text">
+      <h2>Posets become lattices</h2>
+      <p>
+        A poset is a <strong>lattice</strong> if every pair of elements has a
+        <strong>meet</strong> (greatest lower bound) and a <strong>join</strong>
+        (least upper bound).
+      </p>
+      <p>
+        We prove that <em>every well-formed session type's state space is a
+        bounded lattice</em>. The top is the initial state. The bottom is
+        <code>end</code>. Every pair has a meet and join.
+      </p>
+      <p>
+        This is the <strong>Reticulate Theorem</strong> &mdash; proved
+        constructor by constructor, mechanised in Lean 4 with zero <code>sorry</code>.
+      </p>
+    </div>
+    <div class="scene-viz">
+      <div class="lattice-check">
+        <div class="check-item">
+          <span class="check-icon check-pass">&#x2713;</span>
+          Has unique <strong>top</strong> (initial state)
+        </div>
+        <div class="check-item">
+          <span class="check-icon check-pass">&#x2713;</span>
+          Has unique <strong>bottom</strong> (end state)
+        </div>
+        <div class="check-item">
+          <span class="check-icon check-pass">&#x2713;</span>
+          All pairs have a <strong>meet</strong> (s&#x2081; &#x2227; s&#x2082;)
+        </div>
+        <div class="check-item">
+          <span class="check-icon check-pass">&#x2713;</span>
+          All pairs have a <strong>join</strong> (s&#x2081; &#x2228; s&#x2082;)
+        </div>
+        <div class="check-item">
+          <span class="check-icon check-info">&#x2261;</span>
+          <strong>Bounded lattice</strong> &mdash; a reticulate
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 4: Parallel                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-parallel" #sceneEl>
+  <div class="scene-inner">
+    <div class="scene-text">
+      <h2>Parallel forces products</h2>
+      <p>
+        The <strong>parallel constructor</strong> (<code>&#x2225;</code>) models
+        two concurrent paths on a shared object. Both must complete before
+        the session continues.
+      </p>
+      <p>
+        The state space of <code>S&#x2081; &#x2225; S&#x2082;</code> is the
+        <strong>product lattice</strong> L(S&#x2081;) &times; L(S&#x2082;),
+        ordered componentwise. Products of lattices are lattices.
+      </p>
+      <p>
+        This makes lattice structure <em>necessary</em> &mdash; not merely a
+        nice property, but an inevitable consequence of concurrency.
+      </p>
+    </div>
+    <div class="scene-viz">
+      <div class="parallel-viz">
+        <div class="par-formula">
+          L(<strong>S&#x2081; &#x2225; S&#x2082;</strong>) = L(S&#x2081;) <strong>&times;</strong> L(S&#x2082;)
+        </div>
+        <div class="par-grid">
+          <div class="par-box">
+            <div class="par-box-label">L(a.b.end)</div>
+            <div class="par-box-val">3 states</div>
+          </div>
+          <div class="par-op">&times;</div>
+          <div class="par-box">
+            <div class="par-box-label">L(c.d.end)</div>
+            <div class="par-box-val">3 states</div>
+          </div>
+          <div class="par-op">=</div>
+          <div class="par-box">
+            <div class="par-box-label">Product lattice</div>
+            <div class="par-box-val">9 states</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCENE 5: The theorem                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="scene scene-theorem" #sceneEl>
+  <div class="theorem-box">
+    <div class="theorem-label">The Reticulate Theorem</div>
+    <p class="theorem-statement">
+      For every well-formed session type S, the SCC quotient of its
+      state space, ordered by reachability, is a <em>bounded lattice</em>.
+    </p>
+    <p class="theorem-cite">
+      Proved by structural induction on constructors.
+      Mechanised in Lean 4 (zero sorry). Verified on 34 benchmarks.
+    </p>
+  </div>
+  <div class="theorem-cta">
+    <a mat-flat-button routerLink="/tools/analyzer" class="btn-primary-light">
+      Try the Playground
+    </a>
+    <a mat-stroked-button routerLink="/theory" class="btn-outline-light">
+      Browse the Registry
+    </a>
+    <a mat-stroked-button routerLink="/benchmarks" class="btn-outline-light">
+      See Benchmarks
+    </a>
+  </div>
+</section>
