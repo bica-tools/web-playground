@@ -11,6 +11,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'proofs',
+    loadComponent: () =>
+      import('./pages/proofs/proofs.component').then(
+        (m) => m.ProofsComponent,
+      ),
+  },
+  {
     path: 'theory',
     loadComponent: () =>
       import('./pages/theory/theory.component').then(

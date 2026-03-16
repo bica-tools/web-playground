@@ -244,7 +244,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
              generate tests. 5 interactive tools in the browser.</p>
           <span class="pillar-link">Open the playground &rarr;</span>
         </div>
-        <div class="pillar" routerLink="/about">
+        <div class="pillar" routerLink="/proofs">
           <div class="pillar-icon">
             <svg viewBox="0 0 48 48" width="48" height="48">
               <path d="M10 38 L10 10 L26 10 L26 6 L38 18 L26 18 L26 14 L14 14 L14 38 Z" fill="none" stroke="currentColor" stroke-width="2"/>

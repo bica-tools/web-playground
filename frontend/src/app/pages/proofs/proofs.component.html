@@ -1,0 +1,77 @@
+<!-- Hero -->
+<section class="proofs-hero">
+  <h1>Proof Gallery</h1>
+  <p>Lean 4 mechanisation of session types as algebraic reticulates</p>
+</section>
+
+<!-- Summary -->
+<section class="summary-bar">
+  <div class="sum-item">
+    <span class="sum-value sum-green">{{ counts().proved }}</span>
+    <span class="sum-label">Modules proved</span>
+  </div>
+  <div class="sum-item">
+    <span class="sum-value sum-purple">{{ counts().thmCount }}</span>
+    <span class="sum-label">Key theorems</span>
+  </div>
+  <div class="sum-item">
+    <span class="sum-value sum-green">{{ counts().total }}</span>
+    <span class="sum-label">Total modules</span>
+  </div>
+  <div class="sum-item">
+    <span class="sum-value sum-amber">{{ counts().sorryCount }}</span>
+    <span class="sum-label">Remaining sorry</span>
+  </div>
+</section>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  @for (cat of categories; track cat.id) {
+    <button class="filter-chip" [class.active]="activeFilter() === cat.id"
+            (click)="setFilter(cat.id)">{{ cat.label }}</button>
+  }
+</div>
+
+<!-- Module cards -->
+<div class="gallery">
+  @for (m of filtered(); track m.file) {
+    <div class="module-card">
+      <div class="card-header">
+        <span class="card-file">{{ m.file }}</span>
+        <span class="card-status" [class.status-proved]="m.status === 'proved'"
+              [class.status-partial]="m.status === 'partial'">
+          {{ m.status === 'proved' ? '0 sorry' : 'partial' }}
+        </span>
+      </div>
+      <div class="card-desc">{{ m.description }}</div>
+      <div class="card-theorems">
+        <div class="thm-label">Key theorems</div>
+        <div class="thm-list">
+          @for (t of m.theorems; track t.name) {
+            <div class="thm-item">
+              <span class="thm-icon">&#x2713;</span>
+              <span class="thm-name">{{ t.name }}</span>
+              @if (t.note) {
+                <span class="thm-note">{{ t.note }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="card-footer">
+        @if (m.step) {
+          <span class="tag tag-step">Step {{ m.step }}</span>
+        }
+        @if (m.lines) {
+          <span class="tag tag-lines">{{ m.lines }} lines</span>
+        }
+        @if (m.depends) {
+          @for (d of m.depends; track d) {
+            <span class="tag tag-dep">{{ d }}</span>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
