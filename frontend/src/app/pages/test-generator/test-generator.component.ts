@@ -1,342 +1,178 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
 import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
-import { CodeBlockComponent } from '../../components/code-block/code-block.component';
-import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 @Component({
   selector: 'app-test-generator',
   standalone: true,
   imports: [
     FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatTabsModule,
     MatSnackBarModule,
-    CodeBlockComponent,
-    HasseDiagramComponent,
   ],
   template: `
-    <header class="page-header">
-      <h1>Test Generator</h1>
-      <p>Generate JUnit 5 tests from session type definitions: valid paths, protocol violations, and incomplete prefixes.</p>
-    </header>
+    <div class="tg-layout">
 
-    <!-- Input form -->
-    <section class="form-section">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Session type</mat-label>
-        <textarea matInput
-                  [ngModel]="typeString()"
-                  (ngModelChange)="typeString.set($event)"
-                  rows="3"
-                  placeholder="e.g. rec X . &{read: X, done: end}"></textarea>
-      </mat-form-field>
+      <!-- ════════ LEFT PANE ════════ -->
+      <div class="left-pane">
+        <h1 class="pane-title">Test Generator</h1>
+        <p class="pane-subtitle">Generate JUnit 5 tests with coverage storyboard.</p>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="class-name-input">
-          <mat-label>Class name</mat-label>
-          <input matInput
-                 [ngModel]="className()"
-                 (ngModelChange)="className.set($event)"
-                 placeholder="e.g. FileHandle">
-        </mat-form-field>
-      </div>
+        <label class="field-label">Session type</label>
+        <textarea
+          class="type-input"
+          [ngModel]="typeString()"
+          (ngModelChange)="typeString.set($event)"
+          placeholder="rec X . &{read: X, close: end}"
+          spellcheck="false"
+        ></textarea>
 
-      <div class="form-row">
-        <button mat-flat-button
-                color="primary"
-                class="generate-btn"
+        <label class="field-label" style="margin-top:12px">Class name</label>
+        <input
+          class="class-input"
+          [ngModel]="className()"
+          (ngModelChange)="className.set($event)"
+          placeholder="FileHandle"
+          spellcheck="false"
+        />
+
+        <button class="generate-btn"
                 [disabled]="generating() || !typeString().trim() || !className().trim()"
                 (click)="generate()">
           @if (generating()) {
-            <mat-spinner diameter="20"></mat-spinner>
+            <mat-spinner diameter="18" class="gen-spinner"></mat-spinner>
           } @else {
             Generate Tests
           }
         </button>
-      </div>
-    </section>
 
-    <!-- Error -->
-    @if (error()) {
-      <section class="error-card">
-        <mat-icon>error_outline</mat-icon>
-        <span>{{ error() }}</span>
-      </section>
-    }
-
-    <!-- Help text (when no result yet) -->
-    @if (!testSource() && !generating() && !error()) {
-      <section class="help-section">
-        <h3>How it works</h3>
-        <div class="help-grid">
-          <div class="help-card">
-            <div class="help-number">1</div>
-            <div>
-              <strong>Valid paths</strong>
-              <p>Complete execution traces from initial state to end, exercising all reachable branches.</p>
-            </div>
+        <!-- How it works -->
+        <div class="how-it-works">
+          <div class="hiw-title">Three kinds of tests</div>
+          <div class="hiw-item">
+            <span class="hiw-num">1</span>
+            <div class="hiw-text"><strong>Valid paths</strong> &mdash; complete traces from top to end</div>
           </div>
-          <div class="help-card">
-            <div class="help-number">2</div>
-            <div>
-              <strong>Violations</strong>
-              <p>Attempts to call methods that are not enabled in a given state &mdash; tests that the object rejects invalid operations.</p>
-            </div>
+          <div class="hiw-item">
+            <span class="hiw-num">2</span>
+            <div class="hiw-text"><strong>Violations</strong> &mdash; calls to disabled methods (expect rejection)</div>
           </div>
-          <div class="help-card">
-            <div class="help-number">3</div>
-            <div>
-              <strong>Incomplete prefixes</strong>
-              <p>Partial executions that stop before reaching end &mdash; tests for detecting abandoned sessions.</p>
-            </div>
+          <div class="hiw-item">
+            <span class="hiw-num">3</span>
+            <div class="hiw-text"><strong>Incomplete</strong> &mdash; partial executions that stop before end</div>
           </div>
         </div>
-      </section>
-    }
+      </div>
 
-    <!-- Result tabs -->
-    @if (testSource() || coverageFrames().length > 0) {
-      <mat-tab-group class="result-tabs" animationDuration="200ms">
-        @if (testSource()) {
-          <mat-tab label="Generated Tests">
-            <section class="result-section">
-              <div class="result-header">
-                <h3>JUnit 5 Tests</h3>
-                <span class="result-meta">Class: {{ className() }}ProtocolTest</span>
-              </div>
-              <app-code-block [code]="testSource()" label="JUnit 5"></app-code-block>
-            </section>
-          </mat-tab>
+      <!-- ════════ RIGHT PANE ════════ -->
+      <div class="right-pane">
+
+        <!-- Empty state -->
+        @if (!testSource() && !generating() && !error()) {
+          <div class="empty-state">
+            <div class="empty-icon">&#x2699;</div>
+            <p class="empty-text">Enter a session type and class name</p>
+            <p class="empty-hint">Tests and coverage storyboard will appear here</p>
+          </div>
         }
-        <mat-tab>
-          <ng-template mat-tab-label>
-            Coverage Storyboard
-            @if (loadingCoverage()) {
-              <mat-spinner diameter="16" class="tab-spinner"></mat-spinner>
+
+        <!-- Loading -->
+        @if (generating()) {
+          <div class="empty-state">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        }
+
+        <!-- Error -->
+        @if (error()) {
+          <div class="error-banner">
+            <mat-icon>error_outline</mat-icon>
+            {{ error() }}
+          </div>
+        }
+
+        <!-- ── Coverage Storyboard (primary view) ── -->
+        @if (coverageFrames().length > 0) {
+          <div class="storyboard-section">
+            <h2 class="storyboard-header">Coverage Storyboard</h2>
+
+            <div class="storyboard-stats">
+              <span class="stat-chip">{{ coverageTotalTransitions() }} transitions</span>
+              <span class="stat-chip">{{ coverageTotalStates() }} states</span>
+              <span class="stat-chip">{{ coverageFrames().length }} test frames</span>
+            </div>
+
+            <!-- Frame navigator -->
+            <div class="frame-nav">
+              <button class="frame-btn" [disabled]="currentFrame() === 0" (click)="prevFrame()">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <div class="frame-info">
+                <div class="frame-counter">{{ currentFrame() + 1 }} / {{ coverageFrames().length }}</div>
+                <div class="frame-name">{{ coverageFrames()[currentFrame()].testName }}</div>
+              </div>
+              <button class="frame-btn" [disabled]="currentFrame() >= coverageFrames().length - 1" (click)="nextFrame()">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+
+            <!-- Frame metadata -->
+            <div class="frame-meta">
+              <span class="kind-badge"
+                    [class.kind-valid]="coverageFrames()[currentFrame()].testKind === 'valid'"
+                    [class.kind-violation]="coverageFrames()[currentFrame()].testKind === 'violation'"
+                    [class.kind-incomplete]="coverageFrames()[currentFrame()].testKind === 'incomplete'">
+                {{ coverageFrames()[currentFrame()].testKind }}
+              </span>
+              <span class="coverage-pct">
+                Transitions: {{ (coverageFrames()[currentFrame()].transitionCoverage * 100).toFixed(0) }}%
+              </span>
+              <span class="coverage-pct">
+                States: {{ (coverageFrames()[currentFrame()].stateCoverage * 100).toFixed(0) }}%
+              </span>
+            </div>
+
+            <!-- Hasse with coverage highlighting -->
+            <div class="hasse-frame" [innerHTML]="currentFrameSvg()"></div>
+          </div>
+        }
+
+        <!-- Loading coverage -->
+        @if (loadingCoverage() && !generating()) {
+          <div class="empty-state" style="min-height:200px">
+            <mat-spinner diameter="32"></mat-spinner>
+            <p class="empty-hint" style="margin-top:12px">Loading coverage storyboard...</p>
+          </div>
+        }
+
+        <!-- ── Generated Code ── -->
+        @if (testSource()) {
+          <div class="code-section">
+            <div class="code-header">
+              <span class="code-title">Generated JUnit 5 Tests</span>
+              <span class="code-meta">{{ className() }}ProtocolTest.java</span>
+            </div>
+            <button class="code-toggle" (click)="showCode.set(!showCode())">
+              {{ showCode() ? 'Hide' : 'Show' }} source code
+            </button>
+            @if (showCode()) {
+              <div class="code-block">{{ testSource() }}</div>
             }
-          </ng-template>
-          <section class="result-section">
-            @if (coverageFrames().length === 0 && !loadingCoverage()) {
-              <div class="coverage-prompt">
-                <button mat-flat-button color="primary"
-                        [disabled]="loadingCoverage() || !typeString().trim()"
-                        (click)="loadCoverage()">
-                  Generate Coverage Storyboard
-                </button>
-                <p>Visualise how each test covers the state space — green edges/states are exercised, gray are not.</p>
-              </div>
-            }
-            @if (coverageFrames().length > 0) {
-              <div class="coverage-stats">
-                <span class="stat-chip">{{ coverageTotalTransitions() }} transitions</span>
-                <span class="stat-chip">{{ coverageTotalStates() }} states</span>
-                <span class="stat-chip">{{ coverageFrames().length }} frames</span>
-              </div>
-              <div class="coverage-controls">
-                <button mat-icon-button [disabled]="currentFrame() === 0" (click)="prevFrame()">
-                  <mat-icon>chevron_left</mat-icon>
-                </button>
-                <span class="frame-label">
-                  {{ currentFrame() + 1 }} / {{ coverageFrames().length }}
-                  &mdash; {{ coverageFrames()[currentFrame()].testName }}
-                </span>
-                <button mat-icon-button [disabled]="currentFrame() >= coverageFrames().length - 1" (click)="nextFrame()">
-                  <mat-icon>chevron_right</mat-icon>
-                </button>
-              </div>
-              <div class="frame-meta">
-                <span class="kind-chip" [attr.data-kind]="coverageFrames()[currentFrame()].testKind">
-                  {{ coverageFrames()[currentFrame()].testKind }}
-                </span>
-                <span>Transition coverage: {{ (coverageFrames()[currentFrame()].transitionCoverage * 100).toFixed(1) }}%</span>
-                <span>State coverage: {{ (coverageFrames()[currentFrame()].stateCoverage * 100).toFixed(1) }}%</span>
-              </div>
-              <app-hasse-diagram [svgHtml]="coverageFrames()[currentFrame()].svgHtml"></app-hasse-diagram>
-            }
-          </section>
-        </mat-tab>
-      </mat-tab-group>
-    }
+          </div>
+        }
+      </div>
+    </div>
   `,
-  styles: [`
-    .page-header {
-      padding: 24px 0 16px;
-    }
-    .page-header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0 0 8px;
-    }
-    .page-header p {
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0;
-    }
-
-    .form-section { margin-bottom: 24px; }
-    .full-width { width: 100%; }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-    .class-name-input { flex: 1; min-width: 180px; }
-    .generate-btn { height: 56px; min-width: 160px; }
-
-    .error-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      margin: 16px 0;
-      border: 2px solid #d32f2f;
-      border-radius: 8px;
-      background: #fce4ec;
-      color: #b71c1c;
-    }
-
-    /* Help section */
-    .help-section {
-      margin: 24px 0;
-    }
-    .help-section h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: rgba(0, 0, 0, 0.7);
-      margin: 0 0 16px;
-    }
-    .help-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .help-card {
-      display: flex;
-      gap: 14px;
-      padding: 18px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 10px;
-      background: #fafafa;
-    }
-    .help-number {
-      flex-shrink: 0;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--brand-primary, #4338ca);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .help-card strong {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    .help-card p {
-      margin: 0;
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
-      line-height: 1.5;
-    }
-
-    /* Result */
-    .result-tabs { margin-top: 16px; }
-    .result-section { padding: 16px 0; }
-    .result-header {
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .result-header h3 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 0;
-      color: rgba(0, 0, 0, 0.7);
-    }
-    .result-meta {
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.45);
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .tab-spinner { display: inline-block; margin-left: 8px; }
-
-    /* Coverage */
-    .coverage-prompt {
-      text-align: center;
-      padding: 32px 0;
-    }
-    .coverage-prompt p {
-      margin: 12px 0 0;
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.5);
-    }
-    .coverage-stats {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      padding: 8px 0 16px;
-    }
-    .stat-chip {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #f1f5f9;
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: 16px;
-      font-size: 12px;
-      color: rgba(0,0,0,0.7);
-    }
-    .coverage-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .frame-label {
-      font-size: 13px;
-      font-weight: 500;
-      min-width: 200px;
-      text-align: center;
-    }
-    .frame-meta {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      font-size: 13px;
-      color: rgba(0,0,0,0.6);
-      margin-bottom: 8px;
-    }
-    .kind-chip {
-      padding: 2px 10px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .kind-chip[data-kind="valid"] { background: #dcfce7; color: #166534; }
-    .kind-chip[data-kind="violation"] { background: #fee2e2; color: #991b1b; }
-    .kind-chip[data-kind="incomplete"] { background: #fef3c7; color: #92400e; }
-  `],
+  styleUrl: './test-generator.component.scss',
 })
 export class TestGeneratorComponent implements OnInit {
   readonly typeString = signal('');
@@ -344,6 +180,7 @@ export class TestGeneratorComponent implements OnInit {
   readonly testSource = signal('');
   readonly error = signal('');
   readonly generating = signal(false);
+  readonly showCode = signal(true);
 
   // Coverage storyboard
   readonly coverageFrames = signal<CoverageFrameDto[]>([]);
@@ -351,21 +188,19 @@ export class TestGeneratorComponent implements OnInit {
   readonly coverageTotalStates = signal(0);
   readonly loadingCoverage = signal(false);
   readonly currentFrame = signal(0);
+  readonly currentFrameSvg = signal<SafeHtml>('');
 
   constructor(
     private api: ApiService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
-      if (params['type']) {
-        this.typeString.set(params['type']);
-      }
-      if (params['class']) {
-        this.className.set(params['class']);
-      }
+      if (params['type']) this.typeString.set(params['type']);
+      if (params['class']) this.className.set(params['class']);
     });
   }
 
@@ -385,7 +220,6 @@ export class TestGeneratorComponent implements OnInit {
       next: (res) => {
         this.testSource.set(res.testSource);
         this.generating.set(false);
-        // Auto-load coverage storyboard
         this.loadCoverage();
       },
       error: (err) => {
@@ -406,11 +240,13 @@ export class TestGeneratorComponent implements OnInit {
         this.coverageTotalTransitions.set(res.totalTransitions);
         this.coverageTotalStates.set(res.totalStates);
         this.loadingCoverage.set(false);
+        if (res.frames.length > 0) {
+          this.updateFrameSvg(0);
+        }
       },
       error: (err) => {
         this.snackBar.open(
-          err.error?.error || 'Coverage storyboard failed',
-          'Close',
+          err.error?.error || 'Coverage storyboard failed', 'Close',
           { duration: 5000 },
         );
         this.loadingCoverage.set(false);
@@ -420,13 +256,26 @@ export class TestGeneratorComponent implements OnInit {
 
   prevFrame(): void {
     if (this.currentFrame() > 0) {
-      this.currentFrame.set(this.currentFrame() - 1);
+      const next = this.currentFrame() - 1;
+      this.currentFrame.set(next);
+      this.updateFrameSvg(next);
     }
   }
 
   nextFrame(): void {
     if (this.currentFrame() < this.coverageFrames().length - 1) {
-      this.currentFrame.set(this.currentFrame() + 1);
+      const next = this.currentFrame() + 1;
+      this.currentFrame.set(next);
+      this.updateFrameSvg(next);
+    }
+  }
+
+  private updateFrameSvg(index: number): void {
+    const frames = this.coverageFrames();
+    if (index >= 0 && index < frames.length) {
+      this.currentFrameSvg.set(
+        this.sanitizer.bypassSecurityTrustHtml(frames[index].svgHtml),
+      );
     }
   }
 }
