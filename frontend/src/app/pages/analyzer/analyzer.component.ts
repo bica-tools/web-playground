@@ -1,18 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
 import { AnalyzeResponse } from '../../models/api.models';
-import { CodeBlockComponent } from '../../components/code-block/code-block.component';
-import { HasseDiagramComponent } from '../../components/hasse-diagram/hasse-diagram.component';
 
 interface QuickExample {
   label: string;
@@ -24,454 +19,224 @@ interface QuickExample {
   standalone: true,
   imports: [
     FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatChipsModule,
     MatSnackBarModule,
-    MatTabsModule,
-    CodeBlockComponent,
-    HasseDiagramComponent,
   ],
   template: `
-    <header class="page-header">
-      <h1>Interactive Analyzer</h1>
-      <p>Parse a session type, build its state space, check lattice properties, and visualize the Hasse diagram.</p>
-    </header>
+    <div class="analyzer-layout">
 
-    <!-- Input form (always visible) -->
-    <section class="form-section">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Session type</mat-label>
-        <textarea matInput
-                  [ngModel]="typeString()"
-                  (ngModelChange)="typeString.set($event)"
-                  rows="3"
-                  placeholder="e.g. rec X . &{read: X, done: end}"
-                  (keydown.control.enter)="analyze()"></textarea>
-        <mat-hint>Press Ctrl+Enter to analyze</mat-hint>
-      </mat-form-field>
+      <!-- ════════ LEFT PANE: Input (sticky) ════════ -->
+      <div class="left-pane">
+        <h1 class="pane-title">Analyzer</h1>
+        <p class="pane-subtitle">Type a session type. See the lattice.</p>
 
-      <div class="form-row">
-        <button mat-flat-button
-                color="primary"
-                class="analyze-btn"
-                [disabled]="analyzing() || !typeString().trim()"
-                (click)="analyze()">
-          @if (analyzing()) {
-            <mat-spinner diameter="20"></mat-spinner>
-          } @else {
-            Analyze
-          }
-        </button>
+        <label class="input-label">Session type</label>
+        <textarea
+          class="type-input"
+          [ngModel]="typeString()"
+          (ngModelChange)="typeString.set($event)"
+          (keydown.control.enter)="analyze()"
+          placeholder="rec X . &{read: X, close: end}"
+          spellcheck="false"
+        ></textarea>
+        <span class="input-hint">Ctrl+Enter to analyze</span>
 
-        <button mat-stroked-button
-                class="copy-link-btn"
-                (click)="copyLink()"
-                [disabled]="!typeString().trim()">
-          <mat-icon>link</mat-icon>
-          Copy link
-        </button>
-      </div>
-    </section>
-
-    <!-- Error -->
-    @if (error()) {
-      <section class="error-card">
-        <mat-icon>error_outline</mat-icon>
-        <span>{{ error() }}</span>
-      </section>
-    }
-
-    <!-- Quick examples (when no result yet) -->
-    @if (!result() && !analyzing()) {
-      <section class="quick-examples">
-        <p class="quick-examples-label">Quick examples:</p>
-        <div class="quick-examples-row">
-          @for (ex of quickExamples; track ex.label) {
-            <button mat-stroked-button
-                    class="quick-example-btn"
-                    (click)="loadExample(ex)">
-              {{ ex.label }}
-            </button>
-          }
+        <div class="action-row">
+          <button class="analyze-btn"
+                  [disabled]="analyzing() || !typeString().trim()"
+                  (click)="analyze()">
+            @if (analyzing()) {
+              <mat-spinner diameter="18" class="analyze-spinner"></mat-spinner>
+            } @else {
+              Analyze
+            }
+          </button>
+          <button class="copy-btn"
+                  (click)="copyLink()"
+                  [disabled]="!typeString().trim()"
+                  title="Copy shareable link">
+            <mat-icon>link</mat-icon>
+          </button>
         </div>
-      </section>
 
-      <!-- Grammar reference -->
-      <section class="grammar-section">
-        <h3>Session Type Grammar</h3>
-        <app-code-block [code]="grammarRef" label="Grammar"></app-code-block>
-      </section>
-    }
+        <!-- Examples -->
+        <div class="examples-section">
+          <div class="examples-label">Examples</div>
+          <div class="examples-grid">
+            @for (ex of quickExamples; track ex.label) {
+              <button class="example-chip" (click)="loadExample(ex)">{{ ex.label }}</button>
+            }
+          </div>
+        </div>
 
-    <!-- Results tabs -->
-    @if (result()) {
-      <section class="results-tabs">
-        <app-code-block [code]="result()!.pretty" label="Pretty-printed"></app-code-block>
+        <!-- Grammar toggle -->
+        <button class="grammar-toggle" (click)="showGrammar.set(!showGrammar())">
+          {{ showGrammar() ? 'Hide' : 'Show' }} grammar reference
+        </button>
+        @if (showGrammar()) {
+          <div class="grammar-block">{{ grammarRef }}</div>
+        }
+      </div>
 
-        <mat-tab-group animationDuration="200ms" class="result-tab-group">
+      <!-- ════════ RIGHT PANE: Results ════════ -->
+      <div class="right-pane">
 
-          <!-- Overview tab -->
-          <mat-tab label="Overview">
-            <div class="tab-content">
-              <div class="verdict-grid">
-                <div class="verdict-card" [class.pass]="result()!.isLattice" [class.fail]="!result()!.isLattice">
-                  <div class="verdict-icon">{{ result()!.isLattice ? '\u2713' : '\u2717' }}</div>
-                  <div class="verdict-label">Lattice</div>
-                </div>
-                <div class="verdict-card" [class.pass]="result()!.terminates" [class.fail]="!result()!.terminates">
-                  <div class="verdict-icon">{{ result()!.terminates ? '\u2713' : '\u2717' }}</div>
-                  <div class="verdict-label">Terminates</div>
-                </div>
-                <div class="verdict-card" [class.pass]="result()!.wfParallel" [class.fail]="!result()!.wfParallel">
-                  <div class="verdict-icon">{{ result()!.wfParallel ? '\u2713' : '\u2717' }}</div>
-                  <div class="verdict-label">WF-Par</div>
-                </div>
-                @if (result()!.usesParallel) {
-                  <div class="verdict-card" [class.pass]="result()!.threadSafe" [class.fail]="!result()!.threadSafe">
-                    <div class="verdict-icon">{{ result()!.threadSafe ? '\u2713' : '\u2717' }}</div>
-                    <div class="verdict-label">Thread Safe</div>
-                  </div>
+        <!-- Empty state -->
+        @if (!result() && !analyzing() && !error()) {
+          <div class="empty-state">
+            <div class="empty-icon">&#x25C7;</div>
+            <p class="empty-text">Type a session type and click Analyze</p>
+            <p class="empty-hint">or click an example on the left</p>
+          </div>
+        }
+
+        <!-- Loading -->
+        @if (analyzing()) {
+          <div class="empty-state">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        }
+
+        <!-- Error -->
+        @if (error()) {
+          <div class="error-banner">
+            <mat-icon>error_outline</mat-icon>
+            {{ error() }}
+          </div>
+        }
+
+        <!-- Results -->
+        @if (result()) {
+          <!-- Header badges -->
+          <div class="result-header">
+            <span class="result-badge" [class.badge-lattice]="result()!.isLattice" [class.badge-not-lattice]="!result()!.isLattice">
+              {{ result()!.isLattice ? 'Lattice' : 'Not a lattice' }}
+            </span>
+            <span class="result-stat">{{ result()!.numStates }} states</span>
+            <span class="result-stat">{{ result()!.numTransitions }} transitions</span>
+            <span class="result-stat">{{ result()!.numTests }} tests</span>
+            @if (result()!.usesParallel) {
+              <span class="result-stat parallel-tag">&#x2225; parallel</span>
+            }
+          </div>
+
+          <!-- Pretty-printed -->
+          <div class="pretty-block">{{ result()!.pretty }}</div>
+
+          <!-- Hasse diagram (front and center) -->
+          @if (result()!.svgHtml) {
+            <div class="hasse-section" [innerHTML]="safeSvg()"></div>
+          }
+
+          <!-- Verdict chips -->
+          <div class="verdict-row">
+            <span class="verdict-chip" [class.verdict-pass]="result()!.isLattice" [class.verdict-fail]="!result()!.isLattice">
+              {{ result()!.isLattice ? '\u2713' : '\u2717' }} Lattice
+            </span>
+            <span class="verdict-chip" [class.verdict-pass]="result()!.terminates" [class.verdict-fail]="!result()!.terminates">
+              {{ result()!.terminates ? '\u2713' : '\u2717' }} Terminates
+            </span>
+            <span class="verdict-chip" [class.verdict-pass]="result()!.wfParallel" [class.verdict-fail]="!result()!.wfParallel">
+              {{ result()!.wfParallel ? '\u2713' : '\u2717' }} WF-Par
+            </span>
+            @if (result()!.usesParallel) {
+              <span class="verdict-chip" [class.verdict-pass]="result()!.threadSafe" [class.verdict-fail]="!result()!.threadSafe">
+                {{ result()!.threadSafe ? '\u2713' : '\u2717' }} Thread Safe
+              </span>
+            }
+          </div>
+
+          @if (result()!.counterexample) {
+            <div class="counterexample-text">Counterexample: {{ result()!.counterexample }}</div>
+          }
+
+          <!-- Details grid -->
+          <div class="details-grid">
+            <div class="detail-card">
+              <div class="detail-label">States</div>
+              <div class="detail-value">{{ result()!.numStates }}</div>
+              <div class="detail-sub">{{ result()!.numSccs }} SCCs</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Transitions</div>
+              <div class="detail-value">{{ result()!.numTransitions }}</div>
+              <div class="detail-sub">{{ result()!.numMethods }} methods</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Test Paths</div>
+              <div class="detail-value">{{ result()!.numTests }}</div>
+              <div class="detail-sub">{{ result()!.numValidPaths }} valid &middot; {{ result()!.numViolations }} violations</div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-label">Properties</div>
+              <div class="detail-value" style="font-size:14px">
+                {{ result()!.isRecursive ? 'Recursive (depth ' + result()!.recDepth + ')' : 'Non-recursive' }}
+              </div>
+              <div class="detail-sub">{{ result()!.numIncomplete }} incomplete prefixes</div>
+            </div>
+          </div>
+
+          <!-- Methods -->
+          @if (result()!.methods && result()!.methods.length > 0) {
+            <div class="methods-section">
+              <div class="methods-label">Methods</div>
+              <div class="methods-list">
+                @for (m of result()!.methods; track m) {
+                  <span class="method-chip">{{ m }}</span>
                 }
               </div>
-
-              @if (result()!.counterexample) {
-                <p class="counterexample">Counterexample: {{ result()!.counterexample }}</p>
-              }
-
-              <h3>Summary</h3>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <span class="summary-value">{{ result()!.numStates }}</span>
-                  <span class="summary-label">States</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-value">{{ result()!.numTransitions }}</span>
-                  <span class="summary-label">Transitions</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-value">{{ result()!.numMethods }}</span>
-                  <span class="summary-label">Methods</span>
-                </div>
-                <div class="summary-item">
-                  <span class="summary-value">{{ result()!.numTests }}</span>
-                  <span class="summary-label">Test Paths</span>
-                </div>
-              </div>
             </div>
-          </mat-tab>
+          }
 
-          <!-- State Space tab -->
-          <mat-tab label="State Space">
-            <div class="tab-content">
-              <h3>Metrics</h3>
-              <div class="metrics-grid">
-                <table class="metrics-table">
-                  <tbody>
-                    <tr><td>States</td><td>{{ result()!.numStates }}</td></tr>
-                    <tr><td>Transitions</td><td>{{ result()!.numTransitions }}</td></tr>
-                    <tr><td>SCCs</td><td>{{ result()!.numSccs }}</td></tr>
-                    <tr><td>Methods</td><td>{{ result()!.numMethods }}</td></tr>
-                  </tbody>
-                </table>
-                <table class="metrics-table">
-                  <tbody>
-                    <tr><td>Uses parallel</td><td>{{ result()!.usesParallel ? 'Yes' : 'No' }}</td></tr>
-                    <tr><td>Recursive</td><td>{{ result()!.isRecursive ? 'Yes (depth ' + result()!.recDepth + ')' : 'No' }}</td></tr>
-                    <tr><td>Test paths</td><td>{{ result()!.numTests }}</td></tr>
-                    <tr>
-                      <td>Breakdown</td>
-                      <td>{{ result()!.numValidPaths }} valid &middot; {{ result()!.numViolations }} violations &middot; {{ result()!.numIncomplete }} incomplete</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              @if (result()!.methods && result()!.methods.length > 0) {
-                <h3>Methods</h3>
-                <div class="methods-list">
-                  @for (m of result()!.methods; track m) {
-                    <span class="method-chip">{{ m }}</span>
-                  }
-                </div>
-              }
-            </div>
-          </mat-tab>
-
-          <!-- Hasse Diagram tab -->
-          <mat-tab label="Hasse Diagram">
-            <div class="tab-content">
-              @if (result()!.svgHtml) {
-                <div class="hasse-container">
-                  <app-hasse-diagram [svgHtml]="result()!.svgHtml"></app-hasse-diagram>
-                </div>
-              } @else {
-                <p class="tab-empty">No diagram available for this session type.</p>
-              }
-            </div>
-          </mat-tab>
-
-          <!-- DOT tab -->
-          <mat-tab label="DOT">
-            <div class="tab-content">
-              @if (result()!.dotSource) {
-                <app-code-block [code]="result()!.dotSource" label="DOT"></app-code-block>
-              } @else {
-                <p class="tab-empty">No DOT source available.</p>
-              }
-            </div>
-          </mat-tab>
-
-        </mat-tab-group>
-      </section>
-    }
+          <!-- DOT source toggle -->
+          @if (result()!.dotSource) {
+            <button class="dot-toggle" (click)="showDot.set(!showDot())">
+              {{ showDot() ? 'Hide' : 'Show' }} DOT source
+            </button>
+            @if (showDot()) {
+              <div class="dot-block">{{ result()!.dotSource }}</div>
+            }
+          }
+        }
+      </div>
+    </div>
   `,
-  styles: [`
-    .page-header {
-      padding: 24px 0 16px;
-    }
-    .page-header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0 0 8px;
-    }
-    .page-header p {
-      color: rgba(0, 0, 0, 0.6);
-      margin: 0;
-    }
-
-    .form-section { margin-bottom: 24px; }
-    .full-width { width: 100%; }
-    .form-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    }
-    .analyze-btn { height: 56px; min-width: 120px; }
-    .copy-link-btn { height: 56px; }
-
-    .error-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      margin: 16px 0;
-      border: 2px solid #d32f2f;
-      border-radius: 8px;
-      background: #fce4ec;
-      color: #b71c1c;
-    }
-
-    /* Quick examples */
-    .quick-examples {
-      margin: 24px 0;
-      padding: 20px;
-      border: 1px dashed rgba(0, 0, 0, 0.15);
-      border-radius: 12px;
-      text-align: center;
-    }
-    .quick-examples-label {
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.5);
-      margin: 0 0 12px;
-    }
-    .quick-examples-row {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .quick-example-btn {
-      font-size: 13px;
-      border-color: var(--brand-primary, #4338ca);
-      color: var(--brand-primary, #4338ca);
-    }
-
-    /* Grammar */
-    .grammar-section {
-      margin: 24px 0;
-    }
-    .grammar-section h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: rgba(0, 0, 0, 0.7);
-      margin: 0 0 10px;
-    }
-
-    /* Results tabs */
-    .results-tabs { margin: 24px 0; }
-
-    .result-tab-group {
-      margin-top: 16px;
-    }
-
-    .tab-content {
-      padding: 20px 0;
-    }
-    .tab-content h3 {
-      font-size: 15px;
-      font-weight: 600;
-      margin: 20px 0 10px;
-      color: rgba(0, 0, 0, 0.7);
-    }
-    .tab-content h3:first-child {
-      margin-top: 0;
-    }
-    .tab-empty {
-      color: rgba(0, 0, 0, 0.45);
-      font-size: 14px;
-      text-align: center;
-      padding: 32px 16px;
-    }
-
-    /* Verdict grid */
-    .verdict-grid {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .verdict-card {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 14px;
-      border: 1px solid;
-    }
-    .verdict-card.pass {
-      background: #ecfdf5;
-      border-color: #a7f3d0;
-      color: #065f46;
-    }
-    .verdict-card.fail {
-      background: #fef2f2;
-      border-color: #fecaca;
-      color: #991b1b;
-    }
-    .verdict-icon { font-size: 18px; }
-    .verdict-label { font-size: 13px; }
-
-    .counterexample {
-      font-size: 13px;
-      color: #991b1b;
-      background: #fef2f2;
-      padding: 8px 14px;
-      border-radius: 6px;
-      border: 1px solid #fecaca;
-      margin: 12px 0;
-    }
-
-    /* Summary grid (overview tab) */
-    .summary-grid {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .summary-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 16px 24px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      min-width: 100px;
-    }
-    .summary-value {
-      font-size: 28px;
-      font-weight: 600;
-      color: var(--brand-primary, #4338ca);
-    }
-    .summary-label {
-      font-size: 12px;
-      color: rgba(0, 0, 0, 0.5);
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Metrics */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    @media (max-width: 600px) {
-      .metrics-grid { grid-template-columns: 1fr; }
-    }
-    .metrics-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .metrics-table td {
-      padding: 7px 14px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      font-size: 14px;
-    }
-    .metrics-table td:last-child {
-      text-align: right;
-      font-weight: 500;
-    }
-
-    /* Methods */
-    .methods-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .method-chip {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #f1f5f9;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 16px;
-      font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
-      color: rgba(0, 0, 0, 0.7);
-    }
-
-    /* Hasse container */
-    .hasse-container {
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      background: #fafafa;
-      padding: 8px;
-    }
-
-  `],
+  styleUrl: './analyzer.component.scss',
 })
 export class AnalyzerComponent implements OnInit {
   readonly typeString = signal('');
   readonly result = signal<AnalyzeResponse | null>(null);
   readonly error = signal('');
   readonly analyzing = signal(false);
+  readonly showGrammar = signal(false);
+  readonly showDot = signal(false);
+  readonly safeSvg = signal<SafeHtml>('');
 
   readonly quickExamples: QuickExample[] = [
-    { label: 'Iterator', typeString: 'rec X . &{hasNext: +{true: &{next: X}, false: end}}' },
-    { label: 'SMTP', typeString: '&{ehlo: &{mail: &{rcpt: &{data: &{send: +{ok: end, error: end}}}}}}' },
-    { label: 'Two-Buyer', typeString: '&{quote: +{accept: &{deliver: end}, reject: end}}' },
+    { label: 'Iterator', typeString: 'rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}' },
+    { label: 'SMTP', typeString: 'connect . ehlo . rec X . &{mail: rcpt . data . +{OK: X, ERR: X}, quit: end}' },
+    { label: 'Two-Buyer', typeString: 'lookup . getPrice . (proposeA . end || proposeB . +{ACCEPT: pay . end, REJECT: end})' },
     { label: 'File Handle', typeString: '&{open: +{ok: (rec X . &{read: X, done: end} || rec Y . &{write: Y, done: end}) . &{close: end}, error: end}}' },
+    { label: 'MCP', typeString: 'initialize . (rec X . &{callTool: +{RESULT: X, ERROR: X}, listTools: X, shutdown: end} || rec Y . +{NOTIFICATION: Y, DONE: end})' },
     { label: 'Simple', typeString: '&{a: &{b: end, c: end}}' },
   ];
 
-  readonly grammarRef = `S  ::=  &{ m\u2081 : S\u2081 , ... , m\u2099 : S\u2099 }    -- branch (external choice)
-     |  +{ l\u2081 : S\u2081 , ... , l\u2099 : S\u2099 }    -- selection (internal choice)
-     |  ( S\u2081 || S\u2082 )                    -- parallel
-     |  rec X . S                        -- recursion
-     |  X                                -- variable
-     |  end                              -- terminated
-     |  S\u2081 . S\u2082                          -- sequencing`;
+  readonly grammarRef = `S  ::=  &{ m\u2081 : S\u2081 , ... , m\u2099 : S\u2099 }   branch
+     |  +{ l\u2081 : S\u2081 , ... , l\u2099 : S\u2099 }   selection
+     |  ( S\u2081 || S\u2082 )                   parallel
+     |  rec X . S                       recursion
+     |  X                               variable
+     |  end                             terminated
+     |  S\u2081 . S\u2082                         sequencing`;
 
   constructor(
     private api: ApiService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
+    private sanitizer: DomSanitizer,
   ) {}
 
   ngOnInit(): void {
@@ -493,10 +258,12 @@ export class AnalyzerComponent implements OnInit {
     this.analyzing.set(true);
     this.result.set(null);
     this.error.set('');
+    this.showDot.set(false);
 
     this.api.analyze(this.typeString()).subscribe({
       next: (res) => {
         this.result.set(res);
+        this.safeSvg.set(this.sanitizer.bypassSecurityTrustHtml(res.svgHtml));
         this.analyzing.set(false);
       },
       error: (err) => {
