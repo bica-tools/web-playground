@@ -4,6 +4,13 @@ import { HomeComponent } from './pages/home/home.component';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   {
+    path: 'theory',
+    loadComponent: () =>
+      import('./pages/theory/theory.component').then(
+        (m) => m.TheoryComponent,
+      ),
+  },
+  {
     path: 'tools/analyzer',
     loadComponent: () =>
       import('./pages/analyzer/analyzer.component').then(

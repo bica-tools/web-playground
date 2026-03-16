@@ -1,0 +1,103 @@
+<!-- Hero -->
+<section class="theory-hero">
+  <h1>Theorem Registry</h1>
+  <p>Every result in the research programme — from conjecture to mechanised proof.</p>
+</section>
+
+<!-- Summary counters -->
+<section class="summary-bar">
+  <div class="summary-item">
+    <span class="summary-value val-proved">{{ counts().proved }}</span>
+    <span class="summary-label">Proved / Mechanised</span>
+  </div>
+  <div class="summary-item">
+    <span class="summary-value val-mechanised">{{ counts().mechanised }}</span>
+    <span class="summary-label">In Lean 4</span>
+  </div>
+  <div class="summary-item">
+    <span class="summary-value val-implemented">{{ counts().implemented }}</span>
+    <span class="summary-label">Implemented</span>
+  </div>
+  <div class="summary-item">
+    <span class="summary-value">{{ counts().withPaper }}</span>
+    <span class="summary-label">With paper</span>
+  </div>
+  <div class="summary-item">
+    <span class="summary-value">{{ counts().total }}</span>
+    <span class="summary-label">Total results</span>
+  </div>
+</section>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  @for (cat of categories; track cat.id) {
+    <button
+      class="filter-chip"
+      [class.active]="activeFilter() === cat.id"
+      (click)="setFilter(cat.id)">
+      {{ cat.label }}
+    </button>
+  }
+</div>
+
+<!-- Registry table -->
+<div class="registry">
+  <table class="registry-table">
+    <thead>
+      <tr>
+        <th class="col-step">Step</th>
+        <th>Result</th>
+        <th class="col-status">Status</th>
+        <th class="col-pillar" title="Paper written">Paper</th>
+        <th class="col-pillar" title="Mechanised in Lean 4">Lean</th>
+        <th class="col-pillar" title="Implemented in Python (Reticulate)">Py</th>
+        <th class="col-pillar" title="Implemented in Java (BICA Reborn)">Java</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (t of filteredTheorems(); track t.step) {
+        <tr>
+          <td class="step-num">{{ t.step }}</td>
+          <td>
+            <div class="result-name">{{ t.name }}</div>
+            <div class="result-desc">
+              {{ t.description }}
+              @if (t.leanFile) {
+                <span class="lean-file">{{ t.leanFile }}</span>
+              }
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="statusClass(t.status)">
+              {{ statusLabel(t.status) }}
+            </span>
+          </td>
+          <td class="pillar-cell">
+            <span class="pillar-dot" [ngClass]="pillarClass(t.paper)">{{ pillarSymbol(t.paper) }}</span>
+          </td>
+          <td class="pillar-cell">
+            <span class="pillar-dot" [ngClass]="pillarClass(t.lean)">{{ pillarSymbol(t.lean) }}</span>
+          </td>
+          <td class="pillar-cell">
+            <span class="pillar-dot" [ngClass]="pillarClass(t.reticulate)">{{ pillarSymbol(t.reticulate) }}</span>
+          </td>
+          <td class="pillar-cell">
+            <span class="pillar-dot" [ngClass]="pillarClass(t.bica)">{{ pillarSymbol(t.bica) }}</span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <span class="legend-label">Legend:</span>
+  <span class="legend-item"><span class="status-badge status-mechanised">Mechanised</span> Lean 4 proof (zero sorry)</span>
+  <span class="legend-item"><span class="status-badge status-implemented">Implemented</span> Code in Reticulate / BICA</span>
+  <span class="legend-item"><span class="status-badge status-partial">Partial</span> Proof in progress</span>
+  <span class="legend-item"><span class="pillar-dot dot-yes">&check;</span> Complete</span>
+  <span class="legend-item"><span class="pillar-dot dot-partial">&cir;</span> Partial</span>
+  <span class="legend-item"><span class="pillar-dot dot-no">&mdash;</span> Not yet</span>
+</div>

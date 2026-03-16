@@ -36,6 +36,8 @@ import { filter } from 'rxjs/operators';
 
       <!-- Desktop nav -->
       <nav class="nav-links desktop-nav">
+        <a mat-button routerLink="/theory" routerLinkActive="active">Theory</a>
+
         <!-- Tools dropdown -->
         <div class="nav-dropdown">
           <button mat-button class="dropdown-trigger"
@@ -97,6 +99,7 @@ import { filter } from 'rxjs/operators';
     @if (isMenuOpen) {
       <nav class="mobile-nav">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
+        <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Theory</a>
         <span class="mobile-section-label">Tools</span>
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Analyzer</a>
         <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Global Types</a>

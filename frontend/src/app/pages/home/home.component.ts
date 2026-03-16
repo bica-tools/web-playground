@@ -215,7 +215,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
     <!-- ═══════════════════════════════════════════════════════ -->
     <section class="pillars">
       <div class="pillars-inner">
-        <div class="pillar" routerLink="/documentation">
+        <div class="pillar" routerLink="/theory">
           <div class="pillar-icon">
             <svg viewBox="0 0 48 48" width="48" height="48">
               <path d="M24 6 L40 14 L40 34 L24 42 L8 34 L8 14 Z" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -227,7 +227,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <h3>Theory</h3>
           <p>19 research steps proving that session-type state spaces form lattices.
              Subtyping, duality, morphisms, multiparty projection, recursion analysis.</p>
-          <span class="pillar-link">Explore the theory &rarr;</span>
+          <span class="pillar-link">Explore the registry &rarr;</span>
         </div>
         <div class="pillar" routerLink="/tools/analyzer">
           <div class="pillar-icon">
