@@ -128,7 +128,7 @@ interface Publication {
         }
         <div class="card-links">
           @if (p.pdfPath) {
-            <a [href]="p.pdfPath" target="_blank" rel="noopener" class="link-btn">PDF</a>
+            <a class="link-btn" (click)="openPdf(p.pdfPath!)">PDF</a>
           }
           @if (p.demoRoute) {
             <a [routerLink]="p.demoRoute" class="link-btn link-demo">Live Demo</a>
@@ -255,6 +255,7 @@ interface Publication {
       text-decoration: none; border: 1px solid rgba(0,0,0,0.12);
       color: var(--brand-primary, #4338ca); transition: all 0.15s;
     }
+    .link-btn { cursor: pointer; }
     .link-btn:hover { background: rgba(67,56,202,0.05); border-color: var(--brand-primary); }
     .link-demo { border-color: #059669; color: #059669; }
     .link-demo:hover { background: rgba(5,150,105,0.05); }
@@ -459,6 +460,10 @@ export class PublicationsComponent {
 
   setFilter(id: string): void {
     this.activeFilter.set(id);
+  }
+
+  openPdf(path: string): void {
+    window.open(path, '_blank', 'noopener');
   }
 
   statusLabel(status: PubStatus): string {
