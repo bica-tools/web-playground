@@ -1,5 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 interface TheoremEntry {
   step: string;
@@ -19,12 +20,42 @@ interface TheoremEntry {
 @Component({
   selector: 'app-theory',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, RouterLink],
   templateUrl: './theory.component.html',
   styleUrl: './theory.component.scss',
 })
 export class TheoryComponent {
+  readonly activeTab = signal<'registry' | 'proofs' | 'publications' | 'pipeline'>('registry');
   readonly activeFilter = signal<string>('all');
+
+  readonly tabs = [
+    { id: 'registry' as const, label: 'Registry' },
+    { id: 'proofs' as const, label: 'Proofs' },
+    { id: 'publications' as const, label: 'Publications' },
+    { id: 'pipeline' as const, label: 'Pipeline' },
+  ];
+
+  readonly linkCards: Record<string, { route: string; title: string; description: string }> = {
+    proofs: {
+      route: '/proofs',
+      title: 'Mechanised Proofs',
+      description: 'Browse the Lean 4 formalisation: proof status, module breakdown, and links to source files.',
+    },
+    publications: {
+      route: '/publications',
+      title: 'Publications',
+      description: 'Conference papers, tool papers, and preprints across all research steps.',
+    },
+    pipeline: {
+      route: '/pipeline',
+      title: 'Verification Pipeline',
+      description: 'End-to-end view of the toolchain: parse, build state space, check lattice, generate tests.',
+    },
+  };
+
+  setTab(id: 'registry' | 'proofs' | 'publications' | 'pipeline'): void {
+    this.activeTab.set(id);
+  }
 
   readonly theorems: TheoremEntry[] = [
     // ── Ground Truth (Steps 1–6) ──

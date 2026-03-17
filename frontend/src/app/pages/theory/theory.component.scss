@@ -17,6 +17,62 @@
   p { font-size: 16px; opacity: 0.7; margin: 0; max-width: 600px; margin: 0 auto; }
 }
 
+/* Tab bar */
+.tab-bar {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  display: flex; justify-content: center; gap: 0;
+  padding: 0 16px;
+}
+
+.tab-btn {
+  padding: 14px 24px; border: none; background: transparent;
+  font-size: 14px; font-weight: 500; color: rgba(0,0,0,0.5);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s; font-family: inherit;
+
+  &:hover { color: var(--brand-primary); }
+  &.active {
+    color: var(--brand-primary); border-bottom-color: var(--brand-primary);
+    font-weight: 600;
+  }
+}
+
+/* Link card for non-registry tabs */
+.link-card-container {
+  max-width: 600px; margin: 48px auto; padding: 0 16px;
+}
+
+.link-card {
+  display: block; padding: 32px; border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.08); background: #fff;
+  text-decoration: none; color: inherit;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+
+  &:hover {
+    border-color: var(--brand-primary);
+    box-shadow: 0 4px 24px rgba(67,56,202,0.08);
+  }
+
+  h2 {
+    font-size: 20px; font-weight: 700; margin: 0 0 8px;
+    color: rgba(0,0,0,0.85);
+  }
+  p {
+    font-size: 14px; color: rgba(0,0,0,0.55); margin: 0;
+    line-height: 1.6;
+  }
+  .link-card-arrow {
+    position: absolute; top: 32px; right: 32px;
+    font-size: 20px; color: var(--brand-primary); opacity: 0;
+    transition: opacity 0.15s;
+  }
+  &:hover .link-card-arrow { opacity: 1; }
+}
+
 .summary-bar {
   width: 100vw;
   margin-left: calc(-50vw + 50%);

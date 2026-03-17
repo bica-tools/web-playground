@@ -1,8 +1,34 @@
 <!-- Hero -->
 <section class="theory-hero">
-  <h1>Theorem Registry</h1>
-  <p>Every result in the research programme — from conjecture to mechanised proof.</p>
+  <h1>Research</h1>
+  <p>Theorem registry, mechanised proofs, publications, and verification pipeline</p>
 </section>
+
+<!-- Tab bar -->
+<nav class="tab-bar">
+  @for (tab of tabs; track tab.id) {
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === tab.id"
+      (click)="setTab(tab.id)">
+      {{ tab.label }}
+    </button>
+  }
+</nav>
+
+<!-- Link card for non-registry tabs -->
+@if (activeTab() !== 'registry') {
+  <div class="link-card-container">
+    <a class="link-card" [routerLink]="linkCards[activeTab()].route">
+      <h2>{{ linkCards[activeTab()].title }}</h2>
+      <p>{{ linkCards[activeTab()].description }}</p>
+      <span class="link-card-arrow">&rarr;</span>
+    </a>
+  </div>
+}
+
+<!-- Registry tab content -->
+@if (activeTab() === 'registry') {
 
 <!-- Summary counters -->
 <section class="summary-bar">
@@ -101,3 +127,5 @@
   <span class="legend-item"><span class="pillar-dot dot-partial">&cir;</span> Partial</span>
   <span class="legend-item"><span class="pillar-dot dot-no">&mdash;</span> Not yet</span>
 </div>
+
+} <!-- end registry tab -->
