@@ -338,7 +338,6 @@ export class PublicationsComponent {
       category: 'step', status: 'draft',
       description: 'Recursive type unfolding to finite depth. SCC analysis and quotient construction.',
       steps: ['13'],
-      pdfPath: '/papers/step13a-unfolded-lattice.pdf',
     },
     {
       title: 'Step 163: The SessLat Category',
@@ -366,7 +365,6 @@ export class PublicationsComponent {
       category: 'step', status: 'draft',
       description: 'Coequalizer construction for session-type lattice morphisms.',
       steps: ['166'],
-      pdfPath: '/papers/step166-coequalizer.pdf',
     },
     {
       title: 'Step 200a: \u03BB_S\u2070 \u2014 Basic Typestate Checking',
