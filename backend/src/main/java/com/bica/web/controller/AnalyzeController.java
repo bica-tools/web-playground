@@ -5,9 +5,12 @@ import com.bica.web.service.AnalysisService;
 import com.bica.web.service.TutorialService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +23,17 @@ public class AnalyzeController {
 
     private final AnalysisService analysisService;
     private final TutorialService tutorialService;
+    private final CacheManager cacheManager;
+    private final RedisConnectionFactory redisConnectionFactory;
 
-    public AnalyzeController(AnalysisService analysisService, TutorialService tutorialService) {
+    public AnalyzeController(AnalysisService analysisService,
+                             TutorialService tutorialService,
+                             CacheManager cacheManager,
+                             RedisConnectionFactory redisConnectionFactory) {
         this.analysisService = analysisService;
         this.tutorialService = tutorialService;
+        this.cacheManager = cacheManager;
+        this.redisConnectionFactory = redisConnectionFactory;
     }
 
     @PostMapping("/analyze")
@@ -168,6 +178,21 @@ public class AnalyzeController {
                 "benchmarks", analysisService.getBenchmarks().size(),
                 "tutorials", tutorialService.getTutorials().size()
         );
+    }
+
+    @GetMapping("/cache/stats")
+    public Map<String, Object> cacheStats() {
+        Map<String, Object> stats = new LinkedHashMap<>();
+        boolean connected = false;
+        try {
+            redisConnectionFactory.getConnection().ping();
+            connected = true;
+        } catch (Exception e) {
+            log.debug("Redis not available: {}", e.getMessage());
+        }
+        stats.put("enabled", connected);
+        stats.put("cacheNames", cacheManager.getCacheNames());
+        return stats;
     }
 
     // --- helpers ---

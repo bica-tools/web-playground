@@ -43,6 +43,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
@@ -315,6 +316,7 @@ public class AnalysisService {
         );
     }
 
+    @Cacheable(value = "analysis", key = "#typeString.hashCode()")
     public AnalyzeResponse analyze(String typeString) {
         SessionType ast = Parser.parse(typeString);
         String pretty = PrettyPrinter.pretty(ast);
@@ -376,6 +378,7 @@ public class AnalysisService {
         );
     }
 
+    @Cacheable(value = "testgen", key = "T(java.util.Objects).hash(#typeString, #className, #packageName, #maxRevisits)")
     public TestGenResponse generateTests(String typeString, String className,
                                           String packageName, Integer maxRevisits) {
         SessionType ast = Parser.parse(typeString);
@@ -395,6 +398,7 @@ public class AnalysisService {
         return new TestGenResponse(testSource);
     }
 
+    @Cacheable(value = "coverage", key = "#typeString.hashCode()")
     public CoverageStoryboardResponse coverageStoryboard(String typeString) {
         SessionType ast = Parser.parse(typeString);
         StateSpace ss = StateSpaceBuilder.build(ast);
@@ -532,6 +536,7 @@ public class AnalysisService {
 
     // --- Type comparison ---
 
+    @Cacheable(value = "compare", key = "T(java.util.Objects).hash(#type1Str, #type2Str)")
     public CompareResponse compareTypes(String type1Str, String type2Str) {
         SessionType ast1 = Parser.parse(type1Str);
         SessionType ast2 = Parser.parse(type2Str);
@@ -685,6 +690,7 @@ public class AnalysisService {
 
     // --- Global type analysis ---
 
+    @Cacheable(value = "globalAnalysis", key = "#typeString.hashCode()")
     public GlobalAnalyzeResponse analyzeGlobal(String typeString) {
         GlobalType g = GlobalTypeParser.parse(typeString);
         String pretty = GlobalTypePrettyPrinter.pretty(g);
