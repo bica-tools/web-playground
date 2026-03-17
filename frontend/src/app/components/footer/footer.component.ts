@@ -25,7 +25,7 @@ import { Component } from '@angular/core';
     .footer {
       padding: 24px 16px;
       text-align: center;
-      color: rgba(0, 0, 0, 0.5);
+      color: rgba(0, 0, 0, 0.6);
       font-size: 13px;
       border-top: 1px solid rgba(0, 0, 0, 0.08);
       margin-top: 48px;

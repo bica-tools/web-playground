@@ -83,7 +83,7 @@ import { FooterComponent } from './components/footer/footer.component';
       text-align: center;
     }
     .auth-box input::placeholder {
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.7);
     }
     .auth-box button {
       padding: 10px 32px;
@@ -100,7 +100,7 @@ import { FooterComponent } from './components/footer/footer.component';
     }
     .auth-error {
       display: block;
-      color: #fca5a5;
+      color: #fecaca;
       font-size: 14px;
       margin-bottom: 12px;
     }

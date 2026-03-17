@@ -9,7 +9,7 @@
   background: linear-gradient(145deg, #1e1b4b, #312e81 60%, #4338ca);
   color: #fff; padding: 36px 24px 32px; text-align: center;
   h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
-  p { font-size: 13px; opacity: 0.6; margin: 0; }
+  p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; }
 }
 
 /* Stats */
@@ -26,7 +26,7 @@
   font-family: 'JetBrains Mono', monospace; color: var(--brand-primary);
 }
 .st-lbl {
-  font-size: 10px; color: rgba(0,0,0,0.4);
+  font-size: 10px; color: rgba(0,0,0,0.55);
   text-transform: uppercase; letter-spacing: 0.5px;
 }
 
@@ -38,7 +38,7 @@
 
 .f-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-  color: rgba(0,0,0,0.4); font-weight: 500;
+  color: rgba(0,0,0,0.55); font-weight: 500;
 }
 
 .f-chip {
@@ -88,12 +88,12 @@
 .badge-rec { background: #faf5ff; color: #7c3aed; }
 
 .bc-desc {
-  padding: 8px 16px; font-size: 12px; color: rgba(0,0,0,0.45); line-height: 1.5;
+  padding: 8px 16px; font-size: 12px; color: rgba(0,0,0,0.6); line-height: 1.5;
 }
 
 .bc-metrics {
   padding: 8px 16px; display: flex; gap: 12px;
-  font-size: 11px; color: rgba(0,0,0,0.4);
+  font-size: 11px; color: rgba(0,0,0,0.55);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -137,8 +137,8 @@
 
 .dp-close {
   background: none; border: none; cursor: pointer;
-  color: rgba(0,0,0,0.3); font-size: 20px;
-  &:hover { color: rgba(0,0,0,0.6); }
+  color: rgba(0,0,0,0.55); font-size: 20px;
+  &:hover { color: rgba(0,0,0,0.8); }
 }
 
 .dp-body {
@@ -179,7 +179,7 @@
 
 .dp-m-label {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
-  color: rgba(0,0,0,0.35); font-weight: 500;
+  color: rgba(0,0,0,0.55); font-weight: 500;
 }
 
 .dp-m-value {

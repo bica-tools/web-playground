@@ -42,7 +42,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  opacity: 0.6;
+  color: rgba(255,255,255,0.85);
   margin: 0 0 16px;
   font-weight: 500;
 }
@@ -64,7 +64,7 @@
 
 .hero-subtitle {
   font-size: 20px;
-  opacity: 0.8;
+  color: rgba(255,255,255,0.9);
   margin: 0 0 32px;
   font-weight: 300;
   line-height: 1.5;
@@ -189,7 +189,7 @@
 }
 
 .stat-label {
-  font-size: 11px; color: rgba(0,0,0,0.45);
+  font-size: 11px; color: rgba(0,0,0,0.55);
   text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px;
 }
 
@@ -217,7 +217,7 @@
 
 .playground-label {
   display: block; font-size: 12px; text-transform: uppercase;
-  letter-spacing: 0.8px; color: rgba(0,0,0,0.45); margin-bottom: 6px; font-weight: 500;
+  letter-spacing: 0.8px; color: rgba(0,0,0,0.55); margin-bottom: 6px; font-weight: 500;
 }
 
 .playground-input {
@@ -246,7 +246,7 @@
 }
 
 .examples-label {
-  font-size: 12px; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: 12px; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 0.5px;
 }
 
 .example-chip {
@@ -378,12 +378,12 @@
 
 .pipeline-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
-  color: rgba(0,0,0,0.4); margin-bottom: 4px; font-weight: 500;
+  color: rgba(0,0,0,0.55); margin-bottom: 4px; font-weight: 500;
 }
 
 .pipeline-code { font-size: 13px; color: rgba(0,0,0,0.75); }
 .pipeline-code.success { color: #065f46; font-weight: 600; }
-.pipeline-arrow { font-size: 16px; color: rgba(0,0,0,0.2); }
+.pipeline-arrow { font-size: 16px; color: rgba(0,0,0,0.4); }
 
 @media (max-width: 768px) { .insight-content { grid-template-columns: 1fr; } }
 
@@ -455,7 +455,7 @@
 
 .cta-inner {
   h2 { font-size: 32px; font-weight: 700; margin: 0 0 8px; color: #fff; }
-  p { font-size: 16px; opacity: 0.7; margin: 0 0 32px; }
+  p { font-size: 16px; color: rgba(255,255,255,0.85); margin: 0 0 32px; }
 }
 
 .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }

@@ -11,7 +11,7 @@
   color: #fff; padding: 40px 24px 36px; text-align: center;
 
   h1 { font-size: 30px; font-weight: 700; margin: 0 0 6px; }
-  p { font-size: 14px; opacity: 0.6; margin: 0; }
+  p { font-size: 14px; color: rgba(255,255,255,0.85); margin: 0; }
 }
 
 /* Summary */
@@ -33,7 +33,7 @@
 .sum-amber { color: #d97706; }
 
 .sum-label {
-  font-size: 10px; color: rgba(0,0,0,0.4);
+  font-size: 10px; color: rgba(0,0,0,0.55);
   text-transform: uppercase; letter-spacing: 0.6px;
 }
 
@@ -45,7 +45,7 @@
 
 .filter-label {
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-  color: rgba(0,0,0,0.4); font-weight: 500;
+  color: rgba(0,0,0,0.55); font-weight: 500;
 }
 
 .filter-chip {
@@ -97,7 +97,7 @@
 
 .thm-label {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
-  color: rgba(0,0,0,0.35); margin-bottom: 6px; font-weight: 500;
+  color: rgba(0,0,0,0.55); margin-bottom: 6px; font-weight: 500;
 }
 
 .thm-list {
@@ -117,7 +117,7 @@
 }
 
 .thm-note {
-  font-size: 11px; color: rgba(0,0,0,0.35); margin-left: auto;
+  font-size: 11px; color: rgba(0,0,0,0.55); margin-left: auto;
 }
 
 .card-footer {
@@ -132,14 +132,14 @@
 }
 
 .tag-step { background: #e0f2fe; color: #075985; }
-.tag-lines { background: #f1f5f9; color: rgba(0,0,0,0.45); }
+.tag-lines { background: #f1f5f9; color: rgba(0,0,0,0.6); }
 .tag-dep { background: #faf5ff; color: #7c3aed; }
 
 /* Category separator */
 .category-header {
   grid-column: 1 / -1;
   font-size: 12px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: rgba(0,0,0,0.35);
+  letter-spacing: 1px; color: rgba(0,0,0,0.55);
   padding: 16px 0 4px; border-bottom: 1px solid rgba(0,0,0,0.06);
   margin-top: 8px;
 }

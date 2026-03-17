@@ -58,10 +58,10 @@
     letter-spacing: -1px; line-height: 1.1;
   }
   .title-sub {
-    font-size: 20px; opacity: 0.7; margin: 0 0 8px; font-weight: 300;
+    font-size: 20px; color: rgba(255,255,255,0.85); margin: 0 0 8px; font-weight: 300;
   }
   .title-scroll {
-    margin-top: 48px; font-size: 13px; opacity: 0.4;
+    margin-top: 48px; font-size: 13px; color: rgba(255,255,255,0.75);
     text-transform: uppercase; letter-spacing: 2px;
   }
   .scroll-arrow {
@@ -255,7 +255,7 @@
 
   .theorem-label {
     font-size: 12px; text-transform: uppercase; letter-spacing: 2px;
-    opacity: 0.5; margin-bottom: 16px;
+    color: rgba(255,255,255,0.8); margin-bottom: 16px;
   }
 
   .theorem-statement {
@@ -268,7 +268,7 @@
   }
 
   .theorem-cite {
-    font-size: 13px; opacity: 0.5; font-style: italic;
+    font-size: 13px; color: rgba(255,255,255,0.8); font-style: italic;
   }
 
   .theorem-cta {

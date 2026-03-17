@@ -11,7 +11,7 @@
   color: #fff; padding: 32px 24px 28px; text-align: center;
 
   h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
-  p { font-size: 13px; opacity: 0.6; margin: 0; }
+  p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; }
 }
 
 /* ── Input bar ── */
@@ -56,7 +56,7 @@
 
 .compare-spinner { --mdc-circular-progress-active-indicator-color: white; }
 
-.compare-hint { font-size: 10px; color: rgba(0,0,0,0.3); }
+.compare-hint { font-size: 10px; color: rgba(0,0,0,0.55); }
 
 /* Examples */
 .examples-row {
