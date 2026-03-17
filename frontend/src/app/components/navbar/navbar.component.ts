@@ -36,8 +36,26 @@ import { filter } from 'rxjs/operators';
 
       <!-- Desktop nav -->
       <nav class="nav-links desktop-nav">
-        <a mat-button routerLink="/theory" routerLinkActive="active">Theory</a>
-        <a mat-button routerLink="/proofs" routerLinkActive="active">Proofs</a>
+        <!-- Explore dropdown -->
+        <div class="nav-dropdown">
+          <button mat-button class="dropdown-trigger"
+                  [class.active]="isExploreActive"
+                  (mouseenter)="exploreOpen = true"
+                  (mouseleave)="exploreOpen = false">
+            Explore <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+          </button>
+          <div class="dropdown-menu"
+               [class.open]="exploreOpen"
+               (mouseenter)="exploreOpen = true"
+               (mouseleave)="exploreOpen = false">
+            <a routerLink="/intro" routerLinkActive="active" (click)="exploreOpen = false">Visual Intro</a>
+            <a routerLink="/map" routerLinkActive="active" (click)="exploreOpen = false">Research Map</a>
+            <a routerLink="/documentation" routerLinkActive="active" (click)="exploreOpen = false">Documentation</a>
+            <a routerLink="/tutorials" routerLinkActive="active" (click)="exploreOpen = false">Tutorials</a>
+            <a routerLink="/faq" routerLinkActive="active" (click)="exploreOpen = false">FAQ</a>
+            <a routerLink="/pipeline" routerLinkActive="active" (click)="exploreOpen = false">Pipeline</a>
+          </div>
+        </div>
 
         <!-- Tools dropdown -->
         <div class="nav-dropdown">
@@ -58,35 +76,28 @@ import { filter } from 'rxjs/operators';
             <a routerLink="/tools/composition" routerLinkActive="active" (click)="toolsOpen = false">Composition</a>
           </div>
         </div>
-        <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
-        <a mat-button routerLink="/publications" routerLinkActive="active">Publications</a>
 
-        <!-- Learn dropdown -->
+        <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
+        <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
+
+        <!-- About dropdown -->
         <div class="nav-dropdown">
           <button mat-button class="dropdown-trigger"
-                  [class.active]="isLearnActive"
-                  (mouseenter)="learnOpen = true"
-                  (mouseleave)="learnOpen = false">
-            Learn <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+                  [class.active]="isAboutActive"
+                  (mouseenter)="aboutOpen = true"
+                  (mouseleave)="aboutOpen = false">
+            About <mat-icon class="dropdown-arrow">expand_more</mat-icon>
           </button>
           <div class="dropdown-menu"
-               [class.open]="learnOpen"
-               (mouseenter)="learnOpen = true"
-               (mouseleave)="learnOpen = false">
-            <a routerLink="/intro" routerLinkActive="active" (click)="learnOpen = false">Visual Intro</a>
-            <a routerLink="/map" routerLinkActive="active" (click)="learnOpen = false">Research Map</a>
-            <a routerLink="/tutorials" routerLinkActive="active" (click)="learnOpen = false">Tutorials</a>
-            <a routerLink="/documentation" routerLinkActive="active" (click)="learnOpen = false">Documentation</a>
-            <a routerLink="/faq" routerLinkActive="active" (click)="learnOpen = false">FAQ</a>
-            <a routerLink="/pipeline" routerLinkActive="active" (click)="learnOpen = false">Pipeline</a>
+               [class.open]="aboutOpen"
+               (mouseenter)="aboutOpen = true"
+               (mouseleave)="aboutOpen = false">
+            <a routerLink="/publications" routerLinkActive="active" (click)="aboutOpen = false">Publications</a>
+            <a routerLink="/about" routerLinkActive="active" (click)="aboutOpen = false">About</a>
+            <a routerLink="/dashboard" routerLinkActive="active" (click)="aboutOpen = false">Dashboard</a>
           </div>
         </div>
 
-        <a mat-button routerLink="/about" routerLinkActive="active">About</a>
-
-        <a mat-icon-button routerLink="/dashboard" routerLinkActive="active" class="dashboard-btn" title="Dashboard">
-          <mat-icon>dashboard</mat-icon>
-        </a>
         <button mat-icon-button class="logout-btn" title="Logout" (click)="logoutClicked.emit()">
           <mat-icon>logout</mat-icon>
         </button>
@@ -102,25 +113,25 @@ import { filter } from 'rxjs/operators';
     @if (isMenuOpen) {
       <nav class="mobile-nav">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a>
-        <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Theory</a>
-        <a routerLink="/proofs" routerLinkActive="active" (click)="closeMenu()">Proofs</a>
+        <span class="mobile-section-label">Explore</span>
+        <a routerLink="/intro" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Visual Intro</a>
+        <a routerLink="/map" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Research Map</a>
+        <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Documentation</a>
+        <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Tutorials</a>
+        <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">FAQ</a>
+        <a routerLink="/pipeline" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Pipeline</a>
         <span class="mobile-section-label">Tools</span>
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Analyzer</a>
         <a routerLink="/tools/global-analyzer" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Global Types</a>
         <a routerLink="/tools/test-generator" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Test Generator</a>
         <a routerLink="/tools/compare" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Compare</a>
         <a routerLink="/tools/composition" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Composition</a>
+        <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Research</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
-        <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
-        <span class="mobile-section-label">Learn</span>
-        <a routerLink="/intro" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Visual Intro</a>
-        <a routerLink="/map" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Research Map</a>
-        <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Tutorials</a>
-        <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Documentation</a>
-        <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">FAQ</a>
-        <a routerLink="/pipeline" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Pipeline</a>
-        <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
-        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+        <span class="mobile-section-label">About</span>
+        <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Publications</a>
+        <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">About</a>
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Dashboard</a>
         <a (click)="closeMenu(); logoutClicked.emit()" style="cursor:pointer">Logout</a>
       </nav>
     }
@@ -206,13 +217,6 @@ import { filter } from 'rxjs/operators';
       font-weight: 500;
     }
 
-    .dashboard-btn {
-      opacity: 0.7;
-      margin-left: 4px;
-    }
-    .dashboard-btn:hover, .dashboard-btn.active {
-      opacity: 1;
-    }
     .logout-btn {
       opacity: 0.7;
       margin-left: 4px;
@@ -270,21 +274,28 @@ import { filter } from 'rxjs/operators';
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() logoutClicked = new EventEmitter<void>();
   isMenuOpen = false;
+  exploreOpen = false;
   toolsOpen = false;
-  learnOpen = false;
+  aboutOpen = false;
   private routerSub?: Subscription;
 
   constructor(private router: Router) {}
+
+  get isExploreActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/intro') || url.startsWith('/map')
+        || url.startsWith('/documentation') || url.startsWith('/tutorials')
+        || url.startsWith('/faq') || url.startsWith('/pipeline');
+  }
 
   get isToolsActive(): boolean {
     return this.router.url.startsWith('/tools/');
   }
 
-  get isLearnActive(): boolean {
+  get isAboutActive(): boolean {
     const url = this.router.url;
-    return url.startsWith('/intro') || url.startsWith('/map')
-        || url.startsWith('/tutorials') || url.startsWith('/documentation')
-        || url.startsWith('/faq') || url.startsWith('/pipeline');
+    return url.startsWith('/publications') || url.startsWith('/about')
+        || url.startsWith('/dashboard');
   }
 
   ngOnInit(): void {
