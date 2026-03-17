@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { CompareResponse } from '../../models/api.models';
 
@@ -190,7 +191,7 @@ import { CompareResponse } from '../../models/api.models';
   `,
   styleUrl: './compare.component.scss',
 })
-export class CompareComponent {
+export class CompareComponent implements OnInit {
   type1 = '';
   type2 = '';
   loading = signal(false);
@@ -207,7 +208,21 @@ export class CompareComponent {
     { name: 'Recursive vs Finite', type1: 'rec X . &{send: X, done: end}', type2: '&{send: &{send: end, done: end}, done: end}' },
   ];
 
-  constructor(private api: ApiService, private sanitizer: DomSanitizer) {}
+  constructor(
+    private api: ApiService,
+    private sanitizer: DomSanitizer,
+    private route: ActivatedRoute,
+  ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      if (params['type1']) this.type1 = params['type1'];
+      if (params['type2']) this.type2 = params['type2'];
+      if (this.type1.trim() && this.type2.trim()) {
+        setTimeout(() => this.compare(), 0);
+      }
+    });
+  }
 
   loadExample(ex: { type1: string; type2: string }): void {
     this.type1 = ex.type1;

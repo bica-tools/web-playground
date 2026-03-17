@@ -270,6 +270,18 @@
   overflow-x: auto; max-height: 300px;
 }
 
+/* Cross-tool links */
+.cross-links {
+  margin-top: 24px; padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.cross-link {
+  font-size: 13px; color: var(--brand-primary); text-decoration: none;
+  font-weight: 500;
+  &:hover { text-decoration: underline; }
+}
+
 /* Spinner */
 .analyze-spinner { --mdc-circular-progress-active-indicator-color: white; }
 

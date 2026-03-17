@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +23,7 @@ interface QuickExample {
     MatProgressSpinnerModule,
     MatIconModule,
     MatSnackBarModule,
+    RouterLink,
   ],
   template: `
     <div class="analyzer-layout">
@@ -199,6 +200,13 @@ interface QuickExample {
               <div class="dot-block">{{ result()!.dotSource }}</div>
             }
           }
+
+          <!-- Cross-tool navigation -->
+          <div class="cross-links">
+            <a class="cross-link" [routerLink]="['/tools/test-generator']" [queryParams]="{type: typeString()}">Generate Tests &rarr;</a>
+            <a class="cross-link" [routerLink]="['/tools/compare']">Compare with Dual &rarr;</a>
+            <a class="cross-link" [routerLink]="['/tools/test-generator']" [queryParams]="{type: typeString()}">View Coverage &rarr;</a>
+          </div>
         }
       </div>
     </div>

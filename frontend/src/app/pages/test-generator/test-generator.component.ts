@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +18,7 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
     MatProgressSpinnerModule,
     MatIconModule,
     MatSnackBarModule,
+    RouterLink,
   ],
   template: `
     <div class="tg-layout">
@@ -71,6 +72,8 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
             <div class="hiw-text"><strong>Incomplete</strong> &mdash; partial executions that stop before end</div>
           </div>
         </div>
+
+        <a class="back-link" routerLink="/tools/analyzer">&larr; Back to Analyzer</a>
       </div>
 
       <!-- ════════ RIGHT PANE ════════ -->
