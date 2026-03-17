@@ -74,6 +74,7 @@ import { filter } from 'rxjs/operators';
                (mouseenter)="learnOpen = true"
                (mouseleave)="learnOpen = false">
             <a routerLink="/intro" routerLinkActive="active" (click)="learnOpen = false">Visual Intro</a>
+            <a routerLink="/map" routerLinkActive="active" (click)="learnOpen = false">Research Map</a>
             <a routerLink="/tutorials" routerLinkActive="active" (click)="learnOpen = false">Tutorials</a>
             <a routerLink="/documentation" routerLinkActive="active" (click)="learnOpen = false">Documentation</a>
             <a routerLink="/faq" routerLinkActive="active" (click)="learnOpen = false">FAQ</a>
@@ -113,6 +114,7 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/publications" routerLinkActive="active" (click)="closeMenu()">Publications</a>
         <span class="mobile-section-label">Learn</span>
         <a routerLink="/intro" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Visual Intro</a>
+        <a routerLink="/map" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Research Map</a>
         <a routerLink="/tutorials" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Tutorials</a>
         <a routerLink="/documentation" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">Documentation</a>
         <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()" class="mobile-indent">FAQ</a>
@@ -280,9 +282,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   get isLearnActive(): boolean {
     const url = this.router.url;
-    return url.startsWith('/intro') || url.startsWith('/tutorials')
-        || url.startsWith('/documentation') || url.startsWith('/faq')
-        || url.startsWith('/pipeline');
+    return url.startsWith('/intro') || url.startsWith('/map')
+        || url.startsWith('/tutorials') || url.startsWith('/documentation')
+        || url.startsWith('/faq') || url.startsWith('/pipeline');
   }
 
   ngOnInit(): void {

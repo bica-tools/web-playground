@@ -11,6 +11,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'map',
+    loadComponent: () =>
+      import('./pages/concept-graph/concept-graph.component').then(
+        (m) => m.ConceptGraphComponent,
+      ),
+  },
+  {
     path: 'proofs',
     loadComponent: () =>
       import('./pages/proofs/proofs.component').then(
