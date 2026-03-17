@@ -135,8 +135,12 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <span class="stat-label">States verified</span>
         </div>
         <div class="stat-item">
-          <span class="stat-value">4,000+</span>
-          <span class="stat-label">Tests (Python + Java)</span>
+          <span class="stat-value">{{ stats()!.totalTests }}</span>
+          <span class="stat-label">Tests generated</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">4,100+</span>
+          <span class="stat-label">Library tests</span>
         </div>
         <div class="stat-item">
           <span class="stat-value">28</span>
@@ -357,12 +361,12 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <div class="pub-authors">A. Zua Caldeira</div>
         </div>
         <div class="pub-card">
-          <div class="pub-venue">Tool paper (in preparation)</div>
+          <div class="pub-venue">Tool paper (forthcoming)</div>
           <div class="pub-title">Reticulate: A Lattice Checker for Session Types</div>
           <div class="pub-authors">A. Zua Caldeira</div>
         </div>
         <div class="pub-card">
-          <div class="pub-venue">Tool paper (in preparation)</div>
+          <div class="pub-venue">Tool paper (forthcoming)</div>
           <div class="pub-title">BICA Reborn: Annotation-Based Session Types for Java</div>
           <div class="pub-authors">A. Zua Caldeira</div>
         </div>
@@ -414,9 +418,8 @@ export class HomeComponent implements OnInit {
   ];
 
   readonly benchmarkNames = [
-    'SMTP', 'OAuth 2.0', 'MCP', 'A2A', 'Raft', 'Saga', '2PC', 'WebSocket',
-    'Kafka', 'gRPC', 'JDBC', 'Java Iterator', 'Circuit Breaker', 'Leader Election',
-    'Two-Buyer', 'HTTP', 'Ion Channel', 'Enzyme Kinetics',
+    'SMTP (email)', 'OAuth 2.0 (auth)', 'MCP (AI agents)', 'Two-Buyer (e-commerce)',
+    'Raft (consensus)', 'JDBC (database)', 'Ion Channel (biology)', 'Enzyme Kinetics (biochemistry)',
   ];
 
   constructor(private api: ApiService, private sanitizer: DomSanitizer) {}
