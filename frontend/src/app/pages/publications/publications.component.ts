@@ -32,10 +32,6 @@ interface Publication {
     <!-- Summary counters -->
     <section class="summary-bar">
       <div class="sum-item">
-        <span class="sum-value sum-venue">{{ counts().venue }}</span>
-        <span class="sum-label">Venue submissions</span>
-      </div>
-      <div class="sum-item">
         <span class="sum-value sum-step">{{ counts().step }}</span>
         <span class="sum-label">Step papers</span>
       </div>
@@ -62,21 +58,6 @@ interface Publication {
                 (click)="setFilter(cat.id)">{{ cat.label }}</button>
       }
     </div>
-
-    <!-- Venue Submissions -->
-    @if (activeFilter() === 'all' || activeFilter() === 'venue') {
-      @if (venueItems().length) {
-        <section class="pub-section">
-          <h2>Venue Submissions</h2>
-          <p class="section-desc">Papers targeting specific conferences and workshops for peer review.</p>
-          <div class="pub-grid">
-            @for (p of venueItems(); track p.title) {
-              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p }"></ng-container>
-            }
-          </div>
-        </section>
-      }
-    }
 
     <!-- Step Papers -->
     @if (activeFilter() === 'all' || activeFilter() === 'step') {
@@ -294,33 +275,14 @@ export class PublicationsComponent {
 
   readonly categories = [
     { id: 'all', label: 'All' },
-    { id: 'venue', label: 'Venue Submissions' },
     { id: 'step', label: 'Step Papers' },
     { id: 'tool', label: 'Tool Papers' },
     { id: 'reference', label: 'Reference' },
   ];
 
   readonly publications: Publication[] = [
-    // ── Venue Submissions ──
-    {
-      title: 'Session Type State Spaces Form Lattices',
-      category: 'venue', status: 'draft',
-      venue: 'CONCUR 2026, Liverpool, Sep 1\u20134',
-      deadline: 'Abstract Apr 20, Full paper Apr 27',
-      description: 'Main result paper. Proves session-type state spaces form bounded lattices via structural induction. LIPIcs format.',
-      steps: ['1', '2', '6'],
-      pdfPath: '/papers/step5-lattice.pdf',
-      demoRoute: '/tools/analyzer',
-    },
-    // ICE 2026 submissions hidden during double-blind review (3 papers submitted Apr 2)
-    {
-      title: 'Bottom-Up Composition of Session Types',
-      category: 'venue', status: 'draft',
-      venue: 'Target: EPTCS (journal track)',
-      description: 'Free and synchronised products of local types, Galois connection to global types.',
-      steps: ['15'],
-      pdfPath: '/papers/composition.pdf',
-    },
+    // Venue submissions hidden during double-blind review (ICE 2026, Apr 2)
+    // Re-add after review results: CONCUR, ICE x3, EPTCS composition
     // ── Step Papers ──
     {
       title: 'Step 1: State Spaces as Posets',
@@ -487,14 +449,12 @@ export class PublicationsComponent {
     const all = this.publications;
     return {
       total: all.length,
-      venue: all.filter(p => p.category === 'venue').length,
       step: all.filter(p => p.category === 'step').length,
       tool: all.filter(p => p.category === 'tool').length,
       reference: all.filter(p => p.category === 'reference').length,
     };
   });
 
-  readonly venueItems = computed(() => this.filterBy('venue'));
   readonly stepItems = computed(() => this.filterBy('step'));
   readonly toolItems = computed(() => this.filterBy('tool'));
   readonly referenceItems = computed(() => this.filterBy('reference'));
