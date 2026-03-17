@@ -42,13 +42,13 @@ import { BenchmarkDto } from '../../models/api.models';
     }
 
     <!-- Filters -->
-    <div class="filter-row">
-      <span class="f-label">Filter:</span>
-      <button class="f-chip" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
-      <button class="f-chip" [class.active]="filter() === 'parallel'" (click)="filter.set('parallel')">&#x2225; Parallel</button>
-      <button class="f-chip" [class.active]="filter() === 'recursive'" (click)="filter.set('recursive')">Recursive</button>
-      <button class="f-chip" [class.active]="filter() === 'simple'" (click)="filter.set('simple')">Simple</button>
-      <button class="f-chip" [class.active]="filter() === 'large'" (click)="filter.set('large')">Large (&gt;5 states)</button>
+    <div class="filter-row" role="group" aria-label="Benchmark filters">
+      <span class="f-label" id="filter-label">Filter:</span>
+      <button class="f-chip" [class.active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">All</button>
+      <button class="f-chip" [class.active]="filter() === 'parallel'" [attr.aria-pressed]="filter() === 'parallel'" (click)="filter.set('parallel')">&#x2225; Parallel</button>
+      <button class="f-chip" [class.active]="filter() === 'recursive'" [attr.aria-pressed]="filter() === 'recursive'" (click)="filter.set('recursive')">Recursive</button>
+      <button class="f-chip" [class.active]="filter() === 'simple'" [attr.aria-pressed]="filter() === 'simple'" (click)="filter.set('simple')">Simple</button>
+      <button class="f-chip" [class.active]="filter() === 'large'" [attr.aria-pressed]="filter() === 'large'" (click)="filter.set('large')">Large (&gt;5 states)</button>
     </div>
 
     <!-- Loading -->
@@ -61,11 +61,11 @@ import { BenchmarkDto } from '../../models/api.models';
 
     <!-- Selected detail panel -->
     @if (selected()) {
-      <div class="detail-overlay">
+      <div class="detail-overlay" role="dialog" aria-modal="true" [attr.aria-label]="'Details for ' + selected()!.name">
         <div class="detail-panel">
           <div class="dp-header">
             <span class="dp-title">{{ selected()!.name }}</span>
-            <button class="dp-close" (click)="selected.set(null)">&times;</button>
+            <button class="dp-close" (click)="selected.set(null)" aria-label="Close detail panel">&times;</button>
           </div>
           <div class="dp-body">
             <div class="dp-left">
@@ -106,7 +106,7 @@ import { BenchmarkDto } from '../../models/api.models';
                 </a>
               </div>
             </div>
-            <div class="dp-right" [innerHTML]="selectedSvg()"></div>
+            <figure class="dp-right" role="img" [attr.aria-label]="'Hasse diagram of ' + selected()!.name" [innerHTML]="selectedSvg()"></figure>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@ import { BenchmarkDto } from '../../models/api.models';
     @if (!loading()) {
       <div class="bench-grid">
         @for (b of filtered(); track b.name) {
-          <div class="bench-card" [class.selected]="selected()?.name === b.name" (click)="selectBenchmark(b)">
+          <div class="bench-card" role="button" tabindex="0" [attr.aria-label]="'View details for ' + b.name" [class.selected]="selected()?.name === b.name" (click)="selectBenchmark(b)" (keydown.enter)="selectBenchmark(b)">
             <div class="bc-header">
               <span class="bc-name">{{ b.name }}</span>
               <div class="bc-badges">
@@ -133,7 +133,7 @@ import { BenchmarkDto } from '../../models/api.models';
               <span>{{ b.numTests }} tests</span>
             </div>
             @if (b.svgHtml) {
-              <div class="bc-hasse" [innerHTML]="getSafeSvg(b.name)"></div>
+              <div class="bc-hasse" [innerHTML]="getSafeSvg(b.name)" role="img" [attr.aria-label]="'Hasse diagram of ' + b.name"></div>
             }
             <div class="bc-actions">
               <a class="bc-link" [routerLink]="['/tools/analyzer']" [queryParams]="{type: b.typeString}" (click)="$event.stopPropagation()">

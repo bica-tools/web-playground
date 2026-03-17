@@ -23,15 +23,16 @@ import { CompareResponse } from '../../models/api.models';
     <div class="input-bar">
       <div class="input-grid">
         <div class="input-col">
-          <label>Type 1</label>
-          <textarea [(ngModel)]="type1" placeholder="&{read: end, write: end}"
+          <label for="compare-type1">Type 1</label>
+          <textarea id="compare-type1" [(ngModel)]="type1" placeholder="&{read: end, write: end}"
                     spellcheck="false"
                     (keydown.control.enter)="compare()"
                     (keydown.meta.enter)="compare()"></textarea>
         </div>
         <div class="input-mid">
           <button class="compare-btn" (click)="compare()"
-                  [disabled]="loading() || !type1.trim() || !type2.trim()">
+                  [disabled]="loading() || !type1.trim() || !type2.trim()"
+                  aria-label="Compare types">
             @if (loading()) {
               <mat-spinner diameter="16" class="compare-spinner"></mat-spinner>
             } @else {
@@ -42,8 +43,8 @@ import { CompareResponse } from '../../models/api.models';
           <span class="compare-hint">Ctrl+Enter</span>
         </div>
         <div class="input-col">
-          <label>Type 2</label>
-          <textarea [(ngModel)]="type2" placeholder="&{read: end}"
+          <label for="compare-type2">Type 2</label>
+          <textarea id="compare-type2" [(ngModel)]="type2" placeholder="&{read: end}"
                     spellcheck="false"
                     (keydown.control.enter)="compare()"
                     (keydown.meta.enter)="compare()"></textarea>
@@ -55,15 +56,15 @@ import { CompareResponse } from '../../models/api.models';
     <div class="examples-row">
       <span class="ex-label">Examples:</span>
       @for (ex of examples; track ex.name) {
-        <button class="ex-chip" (click)="loadExample(ex)">{{ ex.name }}</button>
+        <button class="ex-chip" (click)="loadExample(ex)" [attr.aria-label]="'Load ' + ex.name + ' example'">{{ ex.name }}</button>
       }
     </div>
 
     <!-- Error -->
     @if (error()) {
-      <div class="error-banner">
+      <div class="error-banner" role="alert">
         <div class="inner">
-          <mat-icon>error_outline</mat-icon>
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
           {{ error() }}
         </div>
       </div>
@@ -71,7 +72,7 @@ import { CompareResponse } from '../../models/api.models';
 
     <!-- Loading -->
     @if (loading()) {
-      <div class="loading-state">
+      <div class="loading-state" role="status" aria-label="Comparing types">
         <mat-spinner diameter="32"></mat-spinner>
         <span>Comparing types...</span>
       </div>
@@ -113,7 +114,7 @@ import { CompareResponse } from '../../models/api.models';
             </div>
           </div>
           <div class="panel-pretty">{{ r.pretty1 }}</div>
-          <div class="panel-hasse" [innerHTML]="svg1()"></div>
+          <figure class="panel-hasse" role="img" aria-label="Hasse diagram of Type 1" [innerHTML]="svg1()"></figure>
         </div>
 
         <!-- Type 2 -->
@@ -128,19 +129,19 @@ import { CompareResponse } from '../../models/api.models';
             </div>
           </div>
           <div class="panel-pretty">{{ r.pretty2 }}</div>
-          <div class="panel-hasse" [innerHTML]="svg2()"></div>
+          <figure class="panel-hasse" role="img" aria-label="Hasse diagram of Type 2" [innerHTML]="svg2()"></figure>
         </div>
       </div>
 
       <!-- Properties comparison table -->
       <div class="props-section">
         <h2 class="props-title">Properties</h2>
-        <table class="props-table">
+        <table class="props-table" aria-label="Property comparison between Type 1 and Type 2">
           <thead>
             <tr>
-              <th>Property</th>
-              <th>Type 1</th>
-              <th>Type 2</th>
+              <th scope="col">Property</th>
+              <th scope="col">Type 1</th>
+              <th scope="col">Type 2</th>
             </tr>
           </thead>
           <tbody>

@@ -36,7 +36,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
         </div>
         <div class="hero-viz">
           <!-- Animated lattice that builds itself -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" class="hero-lattice">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" class="hero-lattice" role="img" aria-label="Animated Hasse diagram of a parallel session type">
             <!-- Edges animate in after nodes -->
             <g class="lattice-edges" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none">
               <line x1="150" y1="48" x2="60" y2="128" class="edge e1"/>
@@ -163,8 +163,9 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
         <div class="playground-container">
           <div class="playground-input-area">
             <div class="playground-input-wrapper">
-              <label class="playground-label">Session type</label>
+              <label for="playground-input" class="playground-label">Session type</label>
               <input
+                id="playground-input"
                 type="text"
                 class="playground-input"
                 [value]="playgroundInput()"
@@ -174,7 +175,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
                 spellcheck="false"
               />
             </div>
-            <button class="playground-btn" (click)="analyzePlayground()" [disabled]="playgroundLoading()">
+            <button class="playground-btn" (click)="analyzePlayground()" [disabled]="playgroundLoading()" aria-label="Analyze session type">
               @if (playgroundLoading()) {
                 <mat-spinner diameter="18" class="playground-spinner"></mat-spinner>
               } @else {
@@ -185,13 +186,13 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <div class="playground-examples">
             <span class="examples-label">Examples:</span>
             @for (ex of quickExamples; track ex.name) {
-              <button class="example-chip" (click)="loadExample(ex.type)">{{ ex.name }}</button>
+              <button class="example-chip" (click)="loadExample(ex.type)" [attr.aria-label]="'Load ' + ex.name + ' example'">{{ ex.name }}</button>
             }
           </div>
           @if (playgroundResult()) {
             <div class="playground-result">
               <div class="result-meta">
-                <div class="result-badge" [class.lattice]="playgroundResult()!.isLattice" [class.not-lattice]="!playgroundResult()!.isLattice">
+                <div class="result-badge" role="status" [class.lattice]="playgroundResult()!.isLattice" [class.not-lattice]="!playgroundResult()!.isLattice">
                   {{ playgroundResult()!.isLattice ? 'Lattice' : 'Not a lattice' }}
                 </div>
                 <span class="result-stat">{{ playgroundResult()!.numStates }} states</span>
@@ -201,14 +202,14 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
                   <span class="result-stat parallel-badge">&#x2225; parallel</span>
                 }
               </div>
-              <div class="result-hasse" [innerHTML]="playgroundSvg()"></div>
+              <figure class="result-hasse" role="img" aria-label="Hasse diagram of analyzed session type" [innerHTML]="playgroundSvg()"></figure>
               <a class="result-expand" routerLink="/tools/analyzer" [queryParams]="{type: playgroundInput()}">
                 Open in full analyzer &rarr;
               </a>
             </div>
           }
           @if (playgroundError()) {
-            <div class="playground-error">{{ playgroundError() }}</div>
+            <div class="playground-error" role="alert">{{ playgroundError() }}</div>
           }
         </div>
       </div>
@@ -219,9 +220,9 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
     <!-- ═══════════════════════════════════════════════════════ -->
     <section class="pillars">
       <div class="pillars-inner">
-        <div class="pillar" routerLink="/theory">
+        <a class="pillar" routerLink="/theory">
           <div class="pillar-icon">
-            <svg viewBox="0 0 48 48" width="48" height="48">
+            <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
               <path d="M24 6 L40 14 L40 34 L24 42 L8 34 L8 14 Z" fill="none" stroke="currentColor" stroke-width="2"/>
               <line x1="24" y1="6" x2="24" y2="42" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
               <line x1="8" y1="14" x2="40" y2="14" stroke="currentColor" stroke-width="1" opacity="0.3"/>
@@ -232,10 +233,10 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <p>19 research steps proving that session-type state spaces form lattices.
              Subtyping, duality, morphisms, multiparty projection, recursion analysis.</p>
           <span class="pillar-link">Explore the registry &rarr;</span>
-        </div>
-        <div class="pillar" routerLink="/tools/analyzer">
+        </a>
+        <a class="pillar" routerLink="/tools/analyzer">
           <div class="pillar-icon">
-            <svg viewBox="0 0 48 48" width="48" height="48">
+            <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
               <rect x="6" y="10" width="36" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
               <line x1="6" y1="18" x2="42" y2="18" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="12" cy="14" r="2" fill="currentColor" opacity="0.4"/>
@@ -247,10 +248,10 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <p>Reticulate (Python) and BICA Reborn (Java). Parse, verify, visualise,
              generate tests. 5 interactive tools in the browser.</p>
           <span class="pillar-link">Open the playground &rarr;</span>
-        </div>
-        <div class="pillar" routerLink="/proofs">
+        </a>
+        <a class="pillar" routerLink="/proofs">
           <div class="pillar-icon">
-            <svg viewBox="0 0 48 48" width="48" height="48">
+            <svg viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
               <path d="M10 38 L10 10 L26 10 L26 6 L38 18 L26 18 L26 14 L14 14 L14 38 Z" fill="none" stroke="currentColor" stroke-width="2"/>
               <line x1="18" y1="22" x2="34" y2="22" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
               <line x1="18" y1="28" x2="30" y2="28" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
@@ -262,7 +263,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <p>28 Lean 4 modules, zero sorry. Progress, preservation, substitution,
              lattice properties, channel duality &mdash; all mechanised.</p>
           <span class="pillar-link">Browse the proofs &rarr;</span>
-        </div>
+        </a>
       </div>
     </section>
 

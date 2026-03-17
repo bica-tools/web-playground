@@ -28,8 +28,9 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
         <h1 class="pane-title">Test Generator</h1>
         <p class="pane-subtitle">Generate JUnit 5 tests with coverage storyboard.</p>
 
-        <label class="field-label">Session type</label>
+        <label for="tg-type-input" class="field-label">Session type</label>
         <textarea
+          id="tg-type-input"
           class="type-input"
           [ngModel]="typeString()"
           (ngModelChange)="typeString.set($event)"
@@ -37,8 +38,9 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
           spellcheck="false"
         ></textarea>
 
-        <label class="field-label" style="margin-top:12px">Class name</label>
+        <label for="tg-class-input" class="field-label" style="margin-top:12px">Class name</label>
         <input
+          id="tg-class-input"
           class="class-input"
           [ngModel]="className()"
           (ngModelChange)="className.set($event)"
@@ -48,7 +50,8 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
 
         <button class="generate-btn"
                 [disabled]="generating() || !typeString().trim() || !className().trim()"
-                (click)="generate()">
+                (click)="generate()"
+                aria-label="Generate tests">
           @if (generating()) {
             <mat-spinner diameter="18" class="gen-spinner"></mat-spinner>
           } @else {
@@ -97,8 +100,8 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
 
         <!-- Error -->
         @if (error()) {
-          <div class="error-banner">
-            <mat-icon>error_outline</mat-icon>
+          <div class="error-banner" role="alert">
+            <mat-icon aria-hidden="true">error_outline</mat-icon>
             {{ error() }}
           </div>
         }
@@ -116,15 +119,15 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
 
             <!-- Frame navigator -->
             <div class="frame-nav">
-              <button class="frame-btn" [disabled]="currentFrame() === 0" (click)="prevFrame()">
-                <mat-icon>chevron_left</mat-icon>
+              <button class="frame-btn" [disabled]="currentFrame() === 0" (click)="prevFrame()" aria-label="Previous frame">
+                <mat-icon aria-hidden="true">chevron_left</mat-icon>
               </button>
               <div class="frame-info">
                 <div class="frame-counter">{{ currentFrame() + 1 }} / {{ coverageFrames().length }}</div>
                 <div class="frame-name">{{ coverageFrames()[currentFrame()].testName }}</div>
               </div>
-              <button class="frame-btn" [disabled]="currentFrame() >= coverageFrames().length - 1" (click)="nextFrame()">
-                <mat-icon>chevron_right</mat-icon>
+              <button class="frame-btn" [disabled]="currentFrame() >= coverageFrames().length - 1" (click)="nextFrame()" aria-label="Next frame">
+                <mat-icon aria-hidden="true">chevron_right</mat-icon>
               </button>
             </div>
 
@@ -145,7 +148,7 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
             </div>
 
             <!-- Hasse with coverage highlighting -->
-            <div class="hasse-frame" [innerHTML]="currentFrameSvg()"></div>
+            <figure class="hasse-frame" role="img" aria-label="Coverage Hasse diagram" [innerHTML]="currentFrameSvg()"></figure>
           </div>
         }
 
@@ -164,7 +167,7 @@ import { TestGenRequest, CoverageFrameDto } from '../../models/api.models';
               <span class="code-title">Generated JUnit 5 Tests</span>
               <span class="code-meta">{{ className() }}ProtocolTest.java</span>
             </div>
-            <button class="code-toggle" (click)="showCode.set(!showCode())">
+            <button class="code-toggle" (click)="showCode.set(!showCode())" [attr.aria-expanded]="showCode()">
               {{ showCode() ? 'Hide' : 'Show' }} source code
             </button>
             @if (showCode()) {
