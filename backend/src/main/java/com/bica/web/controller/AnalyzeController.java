@@ -3,6 +3,8 @@ package com.bica.web.controller;
 import com.bica.web.dto.*;
 import com.bica.web.service.AnalysisService;
 import com.bica.web.service.TutorialService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class AnalyzeController {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyzeController.class);
+    private static final int MAX_INPUT_LENGTH = 10_000;
 
     private final AnalysisService analysisService;
     private final TutorialService tutorialService;
@@ -23,28 +28,25 @@ public class AnalyzeController {
 
     @PostMapping("/analyze")
     public ResponseEntity<?> analyze(@RequestBody AnalyzeRequest request) {
-        if (request.typeString() == null || request.typeString().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "typeString is required"));
-        }
+        var validation = validateTypeString(request.typeString());
+        if (validation != null) return validation;
         try {
             AnalyzeResponse response = analysisService.analyze(request.typeString().trim());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Analysis failed for input: {}", truncate(request.typeString()), e);
+            return serverError("Internal analysis error");
         }
     }
 
     @PostMapping("/test-gen")
     public ResponseEntity<?> testGen(@RequestBody TestGenRequest request) {
-        if (request.typeString() == null || request.typeString().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "typeString is required"));
-        }
+        var validation = validateTypeString(request.typeString());
+        if (validation != null) return validation;
         if (request.className() == null || request.className().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "className is required"));
+            return badRequest("className is required");
         }
         try {
             TestGenResponse response = analysisService.generateTests(
@@ -54,40 +56,42 @@ public class AnalyzeController {
                     request.maxRevisits()
             );
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Test generation failed for input: {}", truncate(request.typeString()), e);
+            return serverError("Internal error during test generation");
         }
     }
 
     @PostMapping("/coverage-storyboard")
     public ResponseEntity<?> coverageStoryboard(@RequestBody AnalyzeRequest request) {
-        if (request.typeString() == null || request.typeString().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "typeString is required"));
-        }
+        var validation = validateTypeString(request.typeString());
+        if (validation != null) return validation;
         try {
             CoverageStoryboardResponse response = analysisService.coverageStoryboard(
                     request.typeString().trim());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Coverage storyboard failed for input: {}", truncate(request.typeString()), e);
+            return serverError("Internal error during coverage analysis");
         }
     }
 
     @PostMapping("/analyze-global")
     public ResponseEntity<?> analyzeGlobal(@RequestBody GlobalAnalyzeRequest request) {
-        if (request.typeString() == null || request.typeString().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "typeString is required"));
-        }
+        var validation = validateTypeString(request.typeString());
+        if (validation != null) return validation;
         try {
             GlobalAnalyzeResponse response = analysisService.analyzeGlobal(request.typeString().trim());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Global analysis failed for input: {}", truncate(request.typeString()), e);
+            return serverError("Internal error during global type analysis");
         }
     }
 
@@ -95,39 +99,46 @@ public class AnalyzeController {
     public ResponseEntity<?> compare(@RequestBody CompareRequest request) {
         if (request.type1() == null || request.type1().isBlank()
                 || request.type2() == null || request.type2().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Both type1 and type2 are required"));
+            return badRequest("Both type1 and type2 are required");
+        }
+        if (request.type1().length() > MAX_INPUT_LENGTH || request.type2().length() > MAX_INPUT_LENGTH) {
+            return badRequest("Input too long (max " + MAX_INPUT_LENGTH + " characters)");
         }
         try {
             CompareResponse response = analysisService.compareTypes(
                     request.type1().trim(), request.type2().trim());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Comparison failed", e);
+            return serverError("Internal error during type comparison");
         }
     }
 
     @PostMapping("/compose")
     public ResponseEntity<?> compose(@RequestBody CompositionRequest request) {
         if (request.participants() == null || request.participants().size() < 2) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "At least 2 participants are required"));
+            return badRequest("At least 2 participants are required");
         }
         for (var p : request.participants()) {
             if (p.name() == null || p.name().isBlank()
                     || p.typeString() == null || p.typeString().isBlank()) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "Each participant needs a name and typeString"));
+                return badRequest("Each participant needs a name and typeString");
+            }
+            if (p.typeString().length() > MAX_INPUT_LENGTH) {
+                return badRequest("Participant type too long (max " + MAX_INPUT_LENGTH + " characters)");
             }
         }
         try {
             CompositionResponse response = analysisService.compose(
                     request.participants(), request.globalType());
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+            log.error("Composition failed", e);
+            return serverError("Internal error during composition");
         }
     }
 
@@ -148,5 +159,38 @@ public class AnalyzeController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(tutorial);
+    }
+
+    @GetMapping("/health")
+    public Map<String, Object> health() {
+        return Map.of(
+                "status", "UP",
+                "benchmarks", analysisService.getBenchmarks().size(),
+                "tutorials", tutorialService.getTutorials().size()
+        );
+    }
+
+    // --- helpers ---
+
+    private ResponseEntity<?> validateTypeString(String typeString) {
+        if (typeString == null || typeString.isBlank()) {
+            return badRequest("typeString is required");
+        }
+        if (typeString.length() > MAX_INPUT_LENGTH) {
+            return badRequest("Input too long (max " + MAX_INPUT_LENGTH + " characters)");
+        }
+        return null;
+    }
+
+    private static ResponseEntity<?> badRequest(String message) {
+        return ResponseEntity.badRequest().body(Map.of("error", message));
+    }
+
+    private static ResponseEntity<?> serverError(String message) {
+        return ResponseEntity.internalServerError().body(Map.of("error", message));
+    }
+
+    private static String truncate(String s) {
+        return s != null && s.length() > 200 ? s.substring(0, 200) + "..." : s;
     }
 }

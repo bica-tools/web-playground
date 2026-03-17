@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -22,6 +22,10 @@ import {
 export class ApiService {
   private readonly baseUrl = '/api';
 
+  private benchmarksCache$?: Observable<BenchmarkDto[]>;
+  private tutorialsCache$?: Observable<TutorialSummaryDto[]>;
+  private tutorialCache = new Map<string, Observable<TutorialDto>>();
+
   constructor(private http: HttpClient) {}
 
   analyze(typeString: string): Observable<AnalyzeResponse> {
@@ -41,15 +45,31 @@ export class ApiService {
   }
 
   getBenchmarks(): Observable<BenchmarkDto[]> {
-    return this.http.get<BenchmarkDto[]>(`${this.baseUrl}/benchmarks`);
+    if (!this.benchmarksCache$) {
+      this.benchmarksCache$ = this.http
+        .get<BenchmarkDto[]>(`${this.baseUrl}/benchmarks`)
+        .pipe(shareReplay(1));
+    }
+    return this.benchmarksCache$;
   }
 
   getTutorials(): Observable<TutorialSummaryDto[]> {
-    return this.http.get<TutorialSummaryDto[]>(`${this.baseUrl}/tutorials`);
+    if (!this.tutorialsCache$) {
+      this.tutorialsCache$ = this.http
+        .get<TutorialSummaryDto[]>(`${this.baseUrl}/tutorials`)
+        .pipe(shareReplay(1));
+    }
+    return this.tutorialsCache$;
   }
 
   getTutorial(id: string): Observable<TutorialDto> {
-    return this.http.get<TutorialDto>(`${this.baseUrl}/tutorials/${id}`);
+    if (!this.tutorialCache.has(id)) {
+      this.tutorialCache.set(
+        id,
+        this.http.get<TutorialDto>(`${this.baseUrl}/tutorials/${id}`).pipe(shareReplay(1)),
+      );
+    }
+    return this.tutorialCache.get(id)!;
   }
 
   compareTypes(type1: string, type2: string): Observable<CompareResponse> {

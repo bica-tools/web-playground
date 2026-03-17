@@ -11,25 +11,30 @@ import { FooterComponent } from './components/footer/footer.component';
   template: `
     @if (authenticated()) {
       <app-navbar (logoutClicked)="logout()" />
-      <main class="main-content">
+      <main class="main-content" role="main">
         <router-outlet />
       </main>
       <app-footer />
     } @else {
-      <div class="auth-gate">
+      <div class="auth-gate" role="dialog" aria-label="Authentication required">
         <div class="auth-box">
           <h1>BICA Tools</h1>
           <p>Session Types as Algebraic Reticulates</p>
-          <form (ngSubmit)="login()">
+          <form (ngSubmit)="login()" aria-label="Sign in">
+            <label for="auth-password" class="visually-hidden">Password</label>
             <input
+              id="auth-password"
               type="password"
               [(ngModel)]="password"
               name="password"
               placeholder="Enter password"
               autofocus
+              autocomplete="current-password"
+              [attr.aria-invalid]="error() ? 'true' : null"
+              aria-describedby="auth-error"
             />
             @if (error()) {
-              <span class="auth-error">Incorrect password</span>
+              <span id="auth-error" class="auth-error" role="alert">Incorrect password</span>
             }
             <button type="submit">Enter</button>
           </form>
@@ -98,6 +103,17 @@ import { FooterComponent } from './components/footer/footer.component';
       color: #fca5a5;
       font-size: 14px;
       margin-bottom: 12px;
+    }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
   `],
 })

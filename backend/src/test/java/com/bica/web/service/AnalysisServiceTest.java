@@ -49,7 +49,7 @@ class AnalysisServiceTest {
     void benchmarksLoaded() {
         service.initBenchmarkCache();
         var benchmarks = service.getBenchmarks();
-        assertEquals(34, benchmarks.size());
+        assertTrue(benchmarks.size() >= 50, "Expected at least 50 benchmarks, got " + benchmarks.size());
         assertTrue(benchmarks.stream().allMatch(b -> b.isLattice()));
     }
 

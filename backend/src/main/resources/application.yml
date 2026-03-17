@@ -1,6 +1,18 @@
 server:
   port: 8080
+  tomcat:
+    max-http-form-post-size: 1MB
+    max-swallow-size: 1MB
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/plain,text/css,application/javascript,image/svg+xml
 
 spring:
   application:
     name: bica-web
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+  codec:
+    max-in-memory-size: 1MB

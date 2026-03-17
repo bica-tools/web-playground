@@ -29,25 +29,28 @@ interface QuickExample {
     <div class="analyzer-layout">
 
       <!-- ════════ LEFT PANE: Input (sticky) ════════ -->
-      <div class="left-pane">
+      <section class="left-pane" aria-label="Input">
         <h1 class="pane-title">Analyzer</h1>
         <p class="pane-subtitle">Type a session type. See the lattice.</p>
 
-        <label class="input-label">Session type</label>
+        <label for="type-input" class="input-label">Session type</label>
         <textarea
+          id="type-input"
           class="type-input"
           [ngModel]="typeString()"
           (ngModelChange)="typeString.set($event)"
           (keydown.control.enter)="analyze()"
           placeholder="rec X . &{read: X, close: end}"
           spellcheck="false"
+          aria-describedby="input-hint"
         ></textarea>
-        <span class="input-hint">Ctrl+Enter to analyze</span>
+        <span id="input-hint" class="input-hint">Ctrl+Enter to analyze</span>
 
         <div class="action-row">
           <button class="analyze-btn"
                   [disabled]="analyzing() || !typeString().trim()"
-                  (click)="analyze()">
+                  (click)="analyze()"
+                  aria-label="Analyze session type">
             @if (analyzing()) {
               <mat-spinner diameter="18" class="analyze-spinner"></mat-spinner>
             } @else {
@@ -57,37 +60,39 @@ interface QuickExample {
           <button class="copy-btn"
                   (click)="copyLink()"
                   [disabled]="!typeString().trim()"
-                  title="Copy shareable link">
+                  aria-label="Copy shareable link">
             <mat-icon>link</mat-icon>
           </button>
         </div>
 
         <!-- Examples -->
-        <div class="examples-section">
+        <div class="examples-section" role="group" aria-label="Quick examples">
           <div class="examples-label">Examples</div>
           <div class="examples-grid">
             @for (ex of quickExamples; track ex.label) {
-              <button class="example-chip" (click)="loadExample(ex)">{{ ex.label }}</button>
+              <button class="example-chip" (click)="loadExample(ex)" [attr.aria-label]="'Load ' + ex.label + ' example'">{{ ex.label }}</button>
             }
           </div>
         </div>
 
         <!-- Grammar toggle -->
-        <button class="grammar-toggle" (click)="showGrammar.set(!showGrammar())">
+        <button class="grammar-toggle"
+                (click)="showGrammar.set(!showGrammar())"
+                [attr.aria-expanded]="showGrammar()">
           {{ showGrammar() ? 'Hide' : 'Show' }} grammar reference
         </button>
         @if (showGrammar()) {
-          <div class="grammar-block">{{ grammarRef }}</div>
+          <div class="grammar-block" role="region" aria-label="Grammar reference">{{ grammarRef }}</div>
         }
-      </div>
+      </section>
 
       <!-- ════════ RIGHT PANE: Results ════════ -->
-      <div class="right-pane">
+      <section class="right-pane" aria-label="Results" aria-live="polite">
 
         <!-- Empty state -->
         @if (!result() && !analyzing() && !error()) {
           <div class="empty-state">
-            <div class="empty-icon">&#x25C7;</div>
+            <div class="empty-icon" aria-hidden="true">&#x25C7;</div>
             <p class="empty-text">Type a session type and click Analyze</p>
             <p class="empty-hint">or click an example on the left</p>
           </div>
@@ -95,15 +100,15 @@ interface QuickExample {
 
         <!-- Loading -->
         @if (analyzing()) {
-          <div class="empty-state">
+          <div class="empty-state" role="status" aria-label="Analyzing">
             <mat-spinner diameter="40"></mat-spinner>
           </div>
         }
 
         <!-- Error -->
         @if (error()) {
-          <div class="error-banner">
-            <mat-icon>error_outline</mat-icon>
+          <div class="error-banner" role="alert">
+            <mat-icon aria-hidden="true">error_outline</mat-icon>
             {{ error() }}
           </div>
         }
@@ -112,7 +117,8 @@ interface QuickExample {
         @if (result()) {
           <!-- Header badges -->
           <div class="result-header">
-            <span class="result-badge" [class.badge-lattice]="result()!.isLattice" [class.badge-not-lattice]="!result()!.isLattice">
+            <span class="result-badge" [class.badge-lattice]="result()!.isLattice" [class.badge-not-lattice]="!result()!.isLattice"
+                  [attr.aria-label]="result()!.isLattice ? 'Verdict: is a lattice' : 'Verdict: not a lattice'">
               {{ result()!.isLattice ? 'Lattice' : 'Not a lattice' }}
             </span>
             <span class="result-stat">{{ result()!.numStates }} states</span>
@@ -124,53 +130,53 @@ interface QuickExample {
           </div>
 
           <!-- Pretty-printed -->
-          <div class="pretty-block">{{ result()!.pretty }}</div>
+          <div class="pretty-block" aria-label="Pretty-printed session type">{{ result()!.pretty }}</div>
 
           <!-- Hasse diagram (front and center) -->
           @if (result()!.svgHtml) {
-            <div class="hasse-section" [innerHTML]="safeSvg()"></div>
+            <figure class="hasse-section" role="img" [attr.aria-label]="'Hasse diagram of ' + result()!.pretty" [innerHTML]="safeSvg()"></figure>
           }
 
           <!-- Verdict chips -->
-          <div class="verdict-row">
-            <span class="verdict-chip" [class.verdict-pass]="result()!.isLattice" [class.verdict-fail]="!result()!.isLattice">
+          <div class="verdict-row" role="list" aria-label="Property verdicts">
+            <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.isLattice" [class.verdict-fail]="!result()!.isLattice">
               {{ result()!.isLattice ? '\u2713' : '\u2717' }} Lattice
             </span>
-            <span class="verdict-chip" [class.verdict-pass]="result()!.terminates" [class.verdict-fail]="!result()!.terminates">
+            <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.terminates" [class.verdict-fail]="!result()!.terminates">
               {{ result()!.terminates ? '\u2713' : '\u2717' }} Terminates
             </span>
-            <span class="verdict-chip" [class.verdict-pass]="result()!.wfParallel" [class.verdict-fail]="!result()!.wfParallel">
+            <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.wfParallel" [class.verdict-fail]="!result()!.wfParallel">
               {{ result()!.wfParallel ? '\u2713' : '\u2717' }} WF-Par
             </span>
             @if (result()!.usesParallel) {
-              <span class="verdict-chip" [class.verdict-pass]="result()!.threadSafe" [class.verdict-fail]="!result()!.threadSafe">
+              <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.threadSafe" [class.verdict-fail]="!result()!.threadSafe">
                 {{ result()!.threadSafe ? '\u2713' : '\u2717' }} Thread Safe
               </span>
             }
           </div>
 
           @if (result()!.counterexample) {
-            <div class="counterexample-text">Counterexample: {{ result()!.counterexample }}</div>
+            <div class="counterexample-text" role="alert">Counterexample: {{ result()!.counterexample }}</div>
           }
 
           <!-- Details grid -->
-          <div class="details-grid">
-            <div class="detail-card">
+          <div class="details-grid" role="list" aria-label="Analysis details">
+            <div class="detail-card" role="listitem">
               <div class="detail-label">States</div>
               <div class="detail-value">{{ result()!.numStates }}</div>
               <div class="detail-sub">{{ result()!.numSccs }} SCCs</div>
             </div>
-            <div class="detail-card">
+            <div class="detail-card" role="listitem">
               <div class="detail-label">Transitions</div>
               <div class="detail-value">{{ result()!.numTransitions }}</div>
               <div class="detail-sub">{{ result()!.numMethods }} methods</div>
             </div>
-            <div class="detail-card">
+            <div class="detail-card" role="listitem">
               <div class="detail-label">Test Paths</div>
               <div class="detail-value">{{ result()!.numTests }}</div>
               <div class="detail-sub">{{ result()!.numValidPaths }} valid &middot; {{ result()!.numViolations }} violations</div>
             </div>
-            <div class="detail-card">
+            <div class="detail-card" role="listitem">
               <div class="detail-label">Properties</div>
               <div class="detail-value" style="font-size:14px">
                 {{ result()!.isRecursive ? 'Recursive (depth ' + result()!.recDepth + ')' : 'Non-recursive' }}
@@ -183,9 +189,9 @@ interface QuickExample {
           @if (result()!.methods && result()!.methods.length > 0) {
             <div class="methods-section">
               <div class="methods-label">Methods</div>
-              <div class="methods-list">
+              <div class="methods-list" role="list" aria-label="Method names">
                 @for (m of result()!.methods; track m) {
-                  <span class="method-chip">{{ m }}</span>
+                  <span class="method-chip" role="listitem">{{ m }}</span>
                 }
               </div>
             </div>
@@ -193,22 +199,24 @@ interface QuickExample {
 
           <!-- DOT source toggle -->
           @if (result()!.dotSource) {
-            <button class="dot-toggle" (click)="showDot.set(!showDot())">
+            <button class="dot-toggle"
+                    (click)="showDot.set(!showDot())"
+                    [attr.aria-expanded]="showDot()">
               {{ showDot() ? 'Hide' : 'Show' }} DOT source
             </button>
             @if (showDot()) {
-              <div class="dot-block">{{ result()!.dotSource }}</div>
+              <div class="dot-block" role="region" aria-label="DOT source code">{{ result()!.dotSource }}</div>
             }
           }
 
           <!-- Cross-tool navigation -->
-          <div class="cross-links">
+          <nav class="cross-links" aria-label="Related tools">
             <a class="cross-link" [routerLink]="['/tools/test-generator']" [queryParams]="{type: typeString()}">Generate Tests &rarr;</a>
             <a class="cross-link" [routerLink]="['/tools/compare']">Compare with Dual &rarr;</a>
             <a class="cross-link" [routerLink]="['/tools/test-generator']" [queryParams]="{type: typeString()}">View Coverage &rarr;</a>
-          </div>
+          </nav>
         }
-      </div>
+      </section>
     </div>
   `,
   styleUrl: './analyzer.component.scss',

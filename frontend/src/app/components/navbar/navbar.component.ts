@@ -17,9 +17,9 @@ import { filter } from 'rxjs/operators';
     MatIconModule,
   ],
   template: `
-    <mat-toolbar color="primary" class="navbar">
-      <a routerLink="/" class="brand">
-        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28">
+    <mat-toolbar color="primary" class="navbar" role="banner">
+      <a routerLink="/" class="brand" aria-label="BICA Tools home">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
           <line x1="16" y1="4" x2="6" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
           <line x1="16" y1="4" x2="26" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
           <line x1="6" y1="16" x2="16" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
@@ -35,29 +35,33 @@ import { filter } from 'rxjs/operators';
       <span class="spacer"></span>
 
       <!-- Desktop nav -->
-      <nav class="nav-links desktop-nav">
+      <nav class="nav-links desktop-nav" aria-label="Main navigation">
         <a mat-button routerLink="/tools/analyzer" routerLinkActive="active">Playground</a>
         <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
 
         @if (!isAuthenticated) {
-          <button mat-button class="auth-btn" (click)="signInClicked.emit()">Sign in</button>
+          <button mat-button class="auth-btn" (click)="signInClicked.emit()" aria-label="Sign in">Sign in</button>
         } @else {
-          <button mat-icon-button class="logout-btn" title="Logout" (click)="logoutClicked.emit()">
+          <button mat-icon-button class="logout-btn" aria-label="Logout" (click)="logoutClicked.emit()">
             <mat-icon>logout</mat-icon>
           </button>
         }
       </nav>
 
       <!-- Mobile hamburger -->
-      <button mat-icon-button class="mobile-menu-btn" (click)="toggleMenu()">
+      <button mat-icon-button class="mobile-menu-btn"
+              (click)="toggleMenu()"
+              [attr.aria-expanded]="isMenuOpen"
+              aria-controls="mobile-nav"
+              aria-label="Toggle navigation menu">
         <mat-icon>{{ isMenuOpen ? 'close' : 'menu' }}</mat-icon>
       </button>
     </mat-toolbar>
 
     <!-- Mobile nav overlay -->
     @if (isMenuOpen) {
-      <nav class="mobile-nav">
+      <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()">Playground</a>
         <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Research</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
