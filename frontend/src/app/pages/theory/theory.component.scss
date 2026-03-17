@@ -40,37 +40,18 @@
   }
 }
 
-/* Link card for non-registry tabs */
-.link-card-container {
-  max-width: 600px; margin: 48px auto; padding: 0 16px;
-}
+/* Embedded tab content — hide redundant heroes/headers from child components */
+.embedded-tab-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
 
-.link-card {
-  display: block; padding: 32px; border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.08); background: #fff;
-  text-decoration: none; color: inherit;
-  transition: box-shadow 0.2s, border-color 0.2s;
-  position: relative;
-
-  &:hover {
-    border-color: var(--brand-primary);
-    box-shadow: 0 4px 24px rgba(67,56,202,0.08);
+  ::ng-deep {
+    .proofs-hero,
+    .page-header {
+      display: none;
+    }
   }
-
-  h2 {
-    font-size: 20px; font-weight: 700; margin: 0 0 8px;
-    color: rgba(0,0,0,0.85);
-  }
-  p {
-    font-size: 14px; color: rgba(0,0,0,0.55); margin: 0;
-    line-height: 1.6;
-  }
-  .link-card-arrow {
-    position: absolute; top: 32px; right: 32px;
-    font-size: 20px; color: var(--brand-primary); opacity: 0;
-    transition: opacity 0.15s;
-  }
-  &:hover .link-card-arrow { opacity: 1; }
 }
 
 .summary-bar {

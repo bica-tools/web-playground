@@ -16,14 +16,24 @@
   }
 </nav>
 
-<!-- Link card for non-registry tabs -->
-@if (activeTab() !== 'registry') {
-  <div class="link-card-container">
-    <a class="link-card" [routerLink]="linkCards[activeTab()].route">
-      <h2>{{ linkCards[activeTab()].title }}</h2>
-      <p>{{ linkCards[activeTab()].description }}</p>
-      <span class="link-card-arrow">&rarr;</span>
-    </a>
+<!-- Proofs tab content -->
+@if (activeTab() === 'proofs') {
+  <div class="embedded-tab-content">
+    <app-proofs></app-proofs>
+  </div>
+}
+
+<!-- Publications tab content -->
+@if (activeTab() === 'publications') {
+  <div class="embedded-tab-content">
+    <app-publications></app-publications>
+  </div>
+}
+
+<!-- Pipeline tab content -->
+@if (activeTab() === 'pipeline') {
+  <div class="embedded-tab-content">
+    <app-pipeline></app-pipeline>
   </div>
 }
 
