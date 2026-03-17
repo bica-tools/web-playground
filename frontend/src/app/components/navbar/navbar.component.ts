@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,13 +40,6 @@ import { filter } from 'rxjs/operators';
         <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
 
-        @if (!isAuthenticated) {
-          <button mat-button class="auth-btn" (click)="signInClicked.emit()" aria-label="Sign in">Sign in</button>
-        } @else {
-          <button mat-icon-button class="logout-btn" aria-label="Logout" (click)="logoutClicked.emit()">
-            <mat-icon>logout</mat-icon>
-          </button>
-        }
       </nav>
 
       <!-- Mobile hamburger -->
@@ -65,11 +58,6 @@ import { filter } from 'rxjs/operators';
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()">Playground</a>
         <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Research</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
-        @if (!isAuthenticated) {
-          <a (click)="closeMenu(); signInClicked.emit()" style="cursor:pointer">Sign in</a>
-        } @else {
-          <a (click)="closeMenu(); logoutClicked.emit()" style="cursor:pointer">Logout</a>
-        }
       </nav>
     }
   `,
@@ -108,17 +96,6 @@ import { filter } from 'rxjs/operators';
     .nav-links a.active {
       border-bottom: 2px solid white;
     }
-    .auth-btn {
-      color: inherit;
-      margin-left: 8px;
-    }
-    .logout-btn {
-      opacity: 0.7;
-      margin-left: 4px;
-    }
-    .logout-btn:hover {
-      opacity: 1;
-    }
     .mobile-menu-btn {
       display: none;
       color: inherit;
@@ -156,9 +133,6 @@ import { filter } from 'rxjs/operators';
   `],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  @Input() isAuthenticated = true;
-  @Output() logoutClicked = new EventEmitter<void>();
-  @Output() signInClicked = new EventEmitter<void>();
   isMenuOpen = false;
   private routerSub?: Subscription;
 
