@@ -1,0 +1,214 @@
+/* ══════════════════════════════════════════════════════════ */
+/* BENCHMARK OBSERVATORY                                     */
+/* ══════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+.bench-hero {
+  width: 100vw; margin-left: calc(-50vw + 50%); margin-top: -24px;
+  background: linear-gradient(145deg, #1e1b4b, #312e81 60%, #4338ca);
+  color: #fff; padding: 36px 24px 32px; text-align: center;
+  h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+  p { font-size: 13px; opacity: 0.6; margin: 0; }
+}
+
+/* Stats */
+.stats-bar {
+  width: 100vw; margin-left: calc(-50vw + 50%);
+  background: #fafbfc; border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex; justify-content: center; gap: 40px;
+  padding: 16px; flex-wrap: wrap;
+}
+
+.st-item { text-align: center; }
+.st-val {
+  display: block; font-size: 20px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace; color: var(--brand-primary);
+}
+.st-lbl {
+  font-size: 10px; color: rgba(0,0,0,0.4);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Filters */
+.filter-row {
+  max-width: 1200px; margin: 16px auto 0; padding: 0 16px;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+}
+
+.f-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: rgba(0,0,0,0.4); font-weight: 500;
+}
+
+.f-chip {
+  padding: 4px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px;
+  background: transparent; font-size: 12px; color: rgba(0,0,0,0.55);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  &:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+  &.active { background: var(--brand-primary); border-color: var(--brand-primary); color: #fff; }
+}
+
+/* Loading */
+.loading-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; padding: 64px 0; color: rgba(0,0,0,0.4);
+}
+
+/* Card grid */
+.bench-grid {
+  max-width: 1200px; margin: 16px auto; padding: 0 16px 48px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;
+}
+
+.bench-card {
+  border: 1px solid rgba(0,0,0,0.06); border-radius: 12px;
+  background: #fff; overflow: hidden; transition: all 0.2s;
+  cursor: pointer;
+  &:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-color: rgba(99,102,241,0.2); }
+  &.selected { border-color: var(--brand-primary); box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+}
+
+.bc-header {
+  padding: 12px 16px; display: flex; align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.bc-name { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.85); }
+
+.bc-badges { display: flex; gap: 4px; }
+
+.bc-badge {
+  padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600;
+}
+
+.badge-lattice { background: #ecfdf5; color: #065f46; }
+.badge-par { background: #e0f2fe; color: #075985; }
+.badge-rec { background: #faf5ff; color: #7c3aed; }
+
+.bc-desc {
+  padding: 8px 16px; font-size: 12px; color: rgba(0,0,0,0.45); line-height: 1.5;
+}
+
+.bc-metrics {
+  padding: 8px 16px; display: flex; gap: 12px;
+  font-size: 11px; color: rgba(0,0,0,0.4);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.bc-hasse {
+  padding: 8px 12px; background: #fafbfc;
+  border-top: 1px solid rgba(0,0,0,0.04);
+  display: flex; justify-content: center; min-height: 100px;
+  max-height: 200px; overflow: hidden;
+}
+
+:host ::ng-deep .bc-hasse svg { max-width: 100%; max-height: 180px; }
+
+.bc-actions {
+  padding: 8px 16px; display: flex; gap: 8px;
+  border-top: 1px solid rgba(0,0,0,0.04);
+}
+
+.bc-link {
+  font-size: 12px; color: var(--brand-primary); text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+/* ── Detail panel (selected benchmark) ── */
+.detail-overlay {
+  max-width: 1200px; margin: 0 auto 24px; padding: 0 16px;
+}
+
+.detail-panel {
+  border: 1px solid rgba(0,0,0,0.08); border-radius: 14px;
+  background: #fff; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.dp-header {
+  padding: 16px 20px; display: flex; align-items: center;
+  justify-content: space-between;
+  background: #f8f9fb; border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.dp-title { font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.85); }
+
+.dp-close {
+  background: none; border: none; cursor: pointer;
+  color: rgba(0,0,0,0.3); font-size: 20px;
+  &:hover { color: rgba(0,0,0,0.6); }
+}
+
+.dp-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+}
+
+.dp-left {
+  padding: 20px; border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.dp-right {
+  padding: 16px; display: flex; align-items: center; justify-content: center;
+  background: #fafbfc;
+}
+
+:host ::ng-deep .dp-right svg { max-width: 100%; max-height: 400px; }
+
+.dp-pretty {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  background: #f8f9fb; border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 16px;
+  line-height: 1.6; color: rgba(0,0,0,0.65); white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.dp-desc {
+  font-size: 13px; color: rgba(0,0,0,0.55); line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.dp-metrics {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
+}
+
+.dp-metric {
+  background: #f8f9fb; border-radius: 8px; padding: 10px 14px;
+}
+
+.dp-m-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+  color: rgba(0,0,0,0.35); font-weight: 500;
+}
+
+.dp-m-value {
+  font-family: 'JetBrains Mono', monospace; font-size: 16px;
+  font-weight: 700; color: rgba(0,0,0,0.75);
+}
+
+.dp-methods {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+
+.dp-method {
+  padding: 2px 10px; background: #f1f5f9; border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: rgba(0,0,0,0.6);
+}
+
+.dp-links {
+  margin-top: 16px; display: flex; gap: 12px;
+}
+
+.dp-link {
+  font-size: 13px; color: var(--brand-primary); text-decoration: none;
+  font-weight: 500;
+  &:hover { text-decoration: underline; }
+}
+
+@media (max-width: 768px) {
+  .dp-body { grid-template-columns: 1fr; }
+  .dp-left { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .bench-grid { grid-template-columns: 1fr; }
+}
