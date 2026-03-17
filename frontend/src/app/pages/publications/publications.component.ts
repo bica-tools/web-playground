@@ -128,7 +128,7 @@ interface Publication {
         }
         <div class="card-links">
           @if (p.pdfPath) {
-            <a class="link-btn" (click)="openPdf(p.pdfPath!)">PDF</a>
+            <a class="link-btn" [attr.href]="p.pdfPath" target="_blank" rel="noopener">PDF</a>
           }
           @if (p.demoRoute) {
             <a [routerLink]="p.demoRoute" class="link-btn link-demo">Live Demo</a>
@@ -460,10 +460,6 @@ export class PublicationsComponent {
 
   setFilter(id: string): void {
     this.activeFilter.set(id);
-  }
-
-  openPdf(path: string): void {
-    window.open(path, '_blank', 'noopener');
   }
 
   statusLabel(status: PubStatus): string {
