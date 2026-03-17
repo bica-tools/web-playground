@@ -219,13 +219,34 @@ export class ConceptGraphComponent implements AfterViewInit, OnDestroy {
 
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-    // Initialize positions
+    // Initialize positions with hierarchical layout by category
+    const layerY: Record<string, number> = {
+      'ground-truth': 0.15,
+      'morphism': 0.35,
+      'multiparty': 0.50,
+      'structural': 0.50,
+      'advanced': 0.65,
+      'categorical': 0.80,
+      'metatheory': 0.80,
+    };
+    // Group nodes by their layer row for horizontal spreading
+    const layerNodes = new Map<number, GraphNode[]>();
+    this.nodes.forEach(n => {
+      const yFrac = layerY[n.category] ?? 0.5;
+      const key = yFrac;
+      if (!layerNodes.has(key)) layerNodes.set(key, []);
+      layerNodes.get(key)!.push(n);
+    });
     const nodeMap = new Map<string, GraphNode>();
-    this.nodes.forEach((n, i) => {
-      n.x = W / 2 + (Math.random() - 0.5) * W * 0.6;
-      n.y = H / 2 + (Math.random() - 0.5) * H * 0.6;
-      n.vx = 0; n.vy = 0;
-      nodeMap.set(n.id, n);
+    layerNodes.forEach((nodesInLayer, yFrac) => {
+      const count = nodesInLayer.length;
+      nodesInLayer.forEach((n, i) => {
+        const xFrac = (i + 1) / (count + 1);
+        n.x = xFrac * W;
+        n.y = yFrac * H;
+        n.vx = 0; n.vy = 0;
+        nodeMap.set(n.id, n);
+      });
     });
 
     // Create SVG elements
@@ -325,7 +346,7 @@ export class ConceptGraphComponent implements AfterViewInit, OnDestroy {
           let dx = (b.x ?? 0) - (a.x ?? 0);
           let dy = (b.y ?? 0) - (a.y ?? 0);
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const force = 2000 / (dist * dist) * alpha.value;
+          const force = 4000 / (dist * dist) * alpha.value;
           dx *= force / dist; dy *= force / dist;
           if (a.fx == null) { a.vx! -= dx; a.vy! -= dy; }
           if (b.fx == null) { b.vx! += dx; b.vy! += dy; }
@@ -338,7 +359,7 @@ export class ConceptGraphComponent implements AfterViewInit, OnDestroy {
         let dx = (t.x ?? 0) - (s.x ?? 0);
         let dy = (t.y ?? 0) - (s.y ?? 0);
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const force = (dist - 80) * 0.01 * alpha.value;
+        const force = (dist - 120) * 0.01 * alpha.value;
         dx *= force / dist; dy *= force / dist;
         if (s.fx == null) { s.vx! += dx; s.vy! += dy; }
         if (t.fx == null) { t.vx! -= dx; t.vy! -= dy; }
