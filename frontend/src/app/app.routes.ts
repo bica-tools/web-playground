@@ -32,6 +32,21 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tools',
+    loadComponent: () =>
+      import('./pages/tools-hub/tools-hub.component').then(
+        (m) => m.ToolsHubComponent,
+      ),
+  },
+  {
+    path: 'tools',
+    loadComponent: () =>
+      import('./pages/tools-hub/tools-hub.component').then(
+        (m) => m.ToolsHubComponent,
+      ),
+    pathMatch: 'full',
+  },
+  {
     path: 'tools/analyzer',
     loadComponent: () =>
       import('./pages/analyzer/analyzer.component').then(
@@ -112,6 +127,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/documentation/documentation.component').then(
         (m) => m.DocumentationComponent,
+      ),
+  },
+  {
+    path: 'explore',
+    loadComponent: () =>
+      import('./pages/explore/explore.component').then(
+        (m) => m.ExploreComponent,
       ),
   },
   {

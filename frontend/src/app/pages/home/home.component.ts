@@ -233,7 +233,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
              Subtyping, duality, morphisms, multiparty projection, recursion analysis.</p>
           <span class="pillar-link">Explore the registry &rarr;</span>
         </div>
-        <div class="pillar" routerLink="/tools/analyzer">
+        <div class="pillar" routerLink="/tools">
           <div class="pillar-icon">
             <svg viewBox="0 0 48 48" width="48" height="48">
               <rect x="6" y="10" width="36" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -246,7 +246,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
           <h3>Tools</h3>
           <p>Reticulate (Python) and BICA Reborn (Java). Parse, verify, visualise,
              generate tests. 5 interactive tools in the browser.</p>
-          <span class="pillar-link">Open the playground &rarr;</span>
+          <span class="pillar-link">Browse the tools &rarr;</span>
         </div>
         <div class="pillar" routerLink="/proofs">
           <div class="pillar-icon">
@@ -258,7 +258,7 @@ import { HomeStats, AnalyzeResponse } from '../../models/api.models';
               <text x="36" y="36" fill="currentColor" font-size="11" font-weight="bold" opacity="0.6">0</text>
             </svg>
           </div>
-          <h3>Proofs</h3>
+          <h3>Mechanised Proofs</h3>
           <p>28 Lean 4 modules, zero sorry. Progress, preservation, substitution,
              lattice properties, channel duality &mdash; all mechanised.</p>
           <span class="pillar-link">Browse the proofs &rarr;</span>

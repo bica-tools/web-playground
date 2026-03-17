@@ -1,0 +1,139 @@
+/* ══════════════════════════════════════════════════════════ */
+/* HERO                                                      */
+/* ══════════════════════════════════════════════════════════ */
+.hero {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-top: -24px;
+  background: linear-gradient(145deg, #1e1b4b, #312e81 40%, #4338ca 70%, #6366f1);
+  color: #fff;
+  padding: 72px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -15%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.hero-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  opacity: 0.75;
+  margin: 0;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 48px 16px 36px; }
+  .hero-title { font-size: 32px; }
+  .hero-subtitle { font-size: 15px; }
+}
+
+/* ══════════════════════════════════════════════════════════ */
+/* CARD GRID                                                 */
+/* ══════════════════════════════════════════════════════════ */
+.cards-section {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.tool-card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 32px 28px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.card-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0 0 16px;
+}
+
+.card-features {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  flex: 1;
+
+  li {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+    padding: 4px 0 4px 20px;
+    position: relative;
+    line-height: 1.5;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1.5px solid rgba(99, 102, 241, 0.5);
+    }
+  }
+}
+
+.card-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-primary, #4338ca);
+  margin-top: auto;
+}
