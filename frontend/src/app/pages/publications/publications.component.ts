@@ -284,7 +284,7 @@ export class PublicationsComponent {
   readonly publications: Publication[] = [
     // Venue submissions hidden during double-blind review (ICE 2026, Apr 2)
     // Re-add after review results: CONCUR, ICE x3, EPTCS composition
-    // ── Step Papers ──
+    // ── Step Papers (Reticulate Theorem) ──
     {
       title: 'Step 1: State Spaces as Posets',
       category: 'step', status: 'draft',
@@ -300,11 +300,39 @@ export class PublicationsComponent {
       pdfPath: '/papers/step2-benchmarks.pdf',
     },
     {
-      title: 'Step 3: Branching and Meet Operations',
+      title: 'Step 3: When Branching Gives Meet',
       category: 'step', status: 'draft',
-      description: 'Meet and join computation on session-type state spaces. Branch preserves lattice structure.',
+      description: 'Adding a new bottom (method call) to a bounded lattice preserves the structure. Branch constructor proof.',
       steps: ['3'],
       pdfPath: '/papers/step3-branching-meet.pdf',
+    },
+    {
+      title: 'Step 4: When Selection Gives Join',
+      category: 'step', status: 'draft',
+      description: 'Selection (+{...}) dually adds a top. Join existence from internal choice structure.',
+      steps: ['4'],
+      pdfPath: '/papers/step4-selection-join.pdf',
+    },
+    {
+      title: 'Step 5: When Recursion Gets Absorbed',
+      category: 'step', status: 'draft',
+      description: 'SCC quotient of recursive types preserves bounded lattice via bottom absorption lemma.',
+      steps: ['5'],
+      pdfPath: '/papers/step5-recursion-absorption.pdf',
+    },
+    {
+      title: 'Step 5b: When Parallel Gives Product',
+      category: 'step', status: 'draft',
+      description: 'L(S\u2081 \u2225 S\u2082) = L(S\u2081) \u00D7 L(S\u2082) ordered componentwise is a bounded lattice. Product construction.',
+      steps: ['5b'],
+      pdfPath: '/papers/step5b-parallel-product.pdf',
+    },
+    // ── Step Papers (Advanced Theory) ──
+    {
+      title: 'Step 13a: Unfolded Lattices',
+      category: 'step', status: 'draft',
+      description: 'Recursive type unfolding to finite depth. SCC analysis and quotient construction.',
+      steps: ['13'],
     },
     {
       title: 'Step 155b: Polarity and Formal Concept Analysis',
@@ -334,12 +362,7 @@ export class PublicationsComponent {
       steps: ['157b'],
       pdfPath: '/papers/step157b-async-channels.pdf',
     },
-    {
-      title: 'Step 13a: Unfolded Lattices',
-      category: 'step', status: 'draft',
-      description: 'Recursive type unfolding to finite depth. SCC analysis and quotient construction.',
-      steps: ['13'],
-    },
+    // ── Step Papers (Category Theory) ──
     {
       title: 'Step 163: The SessLat Category',
       category: 'step', status: 'draft',
@@ -367,11 +390,12 @@ export class PublicationsComponent {
       description: 'Coequalizer construction for session-type lattice morphisms.',
       steps: ['166'],
     },
+    // ── Step Papers (Lambda Calculus) ──
     {
       title: 'Step 200a: \u03BB_S\u2070 \u2014 Basic Typestate Checking',
       category: 'step', status: 'draft',
       description: 'Progress and preservation for straight-line session-typed object calculus.',
-      steps: ['200b'],
+      steps: ['200a'],
       pdfPath: '/papers/step200a-lambda-s0.pdf',
     },
     {
@@ -382,10 +406,31 @@ export class PublicationsComponent {
       pdfPath: '/papers/step200d-lambda-s1.pdf',
     },
     {
-      title: 'Step 200e\u2013g: \u03BB_S Unified',
+      title: 'Step 200e: \u03BB_S\u00B2 \u2014 Conditionals and Selection',
       category: 'step', status: 'draft',
-      description: 'Unified lambda-S formulation combining branching, concurrency, and recursion extensions.',
-      steps: ['200e', '200f', '200g'],
+      description: 'Extending \u03BB_S\u00B9 with enum returns and protocol branching.',
+      steps: ['200e'],
+      pdfPath: '/papers/step200e-lambda-s2.pdf',
+    },
+    {
+      title: 'Step 200f: \u03BB_S\u00B3 \u2014 Recursion',
+      category: 'step', status: 'draft',
+      description: 'Extending \u03BB_S\u00B2 with recursive session types and loops.',
+      steps: ['200f'],
+      pdfPath: '/papers/step200f-lambda-s3.pdf',
+    },
+    {
+      title: 'Step 200g: \u03BB_S\u2074 \u2014 Parallel Composition',
+      category: 'step', status: 'draft',
+      description: 'The \u2225 constructor and the lattice theorem for the full lambda calculus.',
+      steps: ['200g'],
+      pdfPath: '/papers/step200g-lambda-s4.pdf',
+    },
+    {
+      title: 'Step 200: \u03BB_S Unified',
+      category: 'step', status: 'draft',
+      description: 'Unified lambda-S formulation combining all extensions: branching, concurrency, recursion.',
+      steps: ['200'],
       pdfPath: '/papers/step200-lambda-s-unified.pdf',
     },
     // ── Tool Papers ──
