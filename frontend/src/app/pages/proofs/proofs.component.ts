@@ -1,4 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
+import { FadeInDirective } from '../../shared/fade-in.directive';
+import { CounterComponent } from '../../shared/counter/counter.component';
 
 interface ProofModule {
   file: string;
@@ -14,6 +16,7 @@ interface ProofModule {
 @Component({
   selector: 'app-proofs',
   standalone: true,
+  imports: [FadeInDirective, CounterComponent],
   templateUrl: './proofs.component.html',
   styleUrl: './proofs.component.scss',
 })

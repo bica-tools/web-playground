@@ -7,19 +7,19 @@
 <!-- Summary -->
 <section class="summary-bar">
   <div class="sum-item">
-    <span class="sum-value sum-green">{{ counts().proved }}</span>
+    <span class="sum-value sum-green"><app-counter [target]="counts().proved"></app-counter></span>
     <span class="sum-label">Modules proved</span>
   </div>
   <div class="sum-item">
-    <span class="sum-value sum-purple">{{ counts().thmCount }}</span>
+    <span class="sum-value sum-purple"><app-counter [target]="counts().thmCount"></app-counter></span>
     <span class="sum-label">Key theorems</span>
   </div>
   <div class="sum-item">
-    <span class="sum-value sum-green">{{ counts().total }}</span>
+    <span class="sum-value sum-green"><app-counter [target]="counts().total"></app-counter></span>
     <span class="sum-label">Total modules</span>
   </div>
   <div class="sum-item">
-    <span class="sum-value sum-amber">{{ counts().sorryCount }}</span>
+    <span class="sum-value sum-amber"><app-counter [target]="counts().sorryCount"></app-counter></span>
     <span class="sum-label">Remaining sorry</span>
   </div>
 </section>
@@ -35,8 +35,8 @@
 
 <!-- Module cards -->
 <div class="gallery">
-  @for (m of filtered(); track m.file) {
-    <div class="module-card">
+  @for (m of filtered(); track m.file; let i = $index) {
+    <div class="module-card" [appFadeIn]="i * 80">
       <div class="card-header">
         <span class="card-file">{{ m.file }}</span>
         <span class="card-status" [class.status-proved]="m.status === 'proved'"

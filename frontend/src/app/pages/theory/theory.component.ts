@@ -3,6 +3,8 @@ import { NgClass } from '@angular/common';
 import { ProofsComponent } from '../proofs/proofs.component';
 import { PublicationsComponent } from '../publications/publications.component';
 import { PipelineComponent } from '../pipeline/pipeline.component';
+import { FadeInDirective } from '../../shared/fade-in.directive';
+import { CounterComponent } from '../../shared/counter/counter.component';
 
 interface TheoremEntry {
   step: string;
@@ -22,7 +24,7 @@ interface TheoremEntry {
 @Component({
   selector: 'app-theory',
   standalone: true,
-  imports: [NgClass, ProofsComponent, PublicationsComponent, PipelineComponent],
+  imports: [NgClass, ProofsComponent, PublicationsComponent, PipelineComponent, FadeInDirective, CounterComponent],
   templateUrl: './theory.component.html',
   styleUrl: './theory.component.scss',
 })

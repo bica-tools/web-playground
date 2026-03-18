@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
+import { FadeInDirective } from '../../shared/fade-in.directive';
 
 @Component({
   selector: 'app-pipeline',
   standalone: true,
-  imports: [RouterLink, CodeBlockComponent],
+  imports: [RouterLink, CodeBlockComponent, FadeInDirective],
   template: `
     <header class="page-header">
       <h1>The Verification Pipeline</h1>
@@ -16,8 +17,8 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
 
     <!-- Pipeline diagram -->
     <div class="pipeline-diagram">
-      @for (stage of stages; track stage.num; let last = $last) {
-        <div class="pipeline-stage">
+      @for (stage of stages; track stage.num; let last = $last; let i = $index) {
+        <div class="pipeline-stage" [appFadeIn]="i * 100">
           <span class="stage-num">{{ stage.num }}</span>
           <span class="stage-name">{{ stage.name }}</span>
         </div>
@@ -35,7 +36,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </p>
 
     <!-- Stage 1: Parse -->
-    <section class="doc-section" id="parse">
+    <section class="doc-section" id="parse" appFadeIn>
       <h2>Stage 1: Parse</h2>
       <p>
         The parser transforms a session type string into an abstract syntax tree (AST).
@@ -70,7 +71,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 2: Termination -->
-    <section class="doc-section" id="termination">
+    <section class="doc-section" id="termination" appFadeIn>
       <h2>Stage 2: Termination Check</h2>
       <p>
         Every recursive type must have an exit path that does not pass through the
@@ -94,7 +95,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 3: WF-Par -->
-    <section class="doc-section" id="wf-par">
+    <section class="doc-section" id="wf-par" appFadeIn>
       <h2>Stage 3: WF-Par (Well-Formed Parallel)</h2>
       <p>
         The parallel constructor <code>(S1 || S2)</code> has three well-formedness rules
@@ -115,7 +116,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 4: State Space -->
-    <section class="doc-section" id="statespace">
+    <section class="doc-section" id="statespace" appFadeIn>
       <h2>Stage 4: State Space Construction</h2>
       <p>
         The AST is compiled into a finite state machine. States are integer IDs,
@@ -136,7 +137,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 5: Conformance -->
-    <section class="doc-section" id="conformance">
+    <section class="doc-section" id="conformance" appFadeIn>
       <h2>Stage 5: Object Conformance</h2>
       <p>
         When a method <code>m</code> is followed by a selection <code>+&#123;OP1: S1, OP2: S2&#125;</code>,
@@ -157,7 +158,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 6: Lattice -->
-    <section class="doc-section" id="lattice">
+    <section class="doc-section" id="lattice" appFadeIn>
       <h2>Stage 6: Lattice Check</h2>
       <p>
         The state space, ordered by reachability, must form a lattice. This means
@@ -172,7 +173,7 @@ import { CodeBlockComponent } from '../../components/code-block/code-block.compo
     </section>
 
     <!-- Stage 7: Thread Safety -->
-    <section class="doc-section" id="thread-safety">
+    <section class="doc-section" id="thread-safety" appFadeIn>
       <h2>Stage 7: Thread Safety</h2>
       <p>
         When the session type uses <code>||</code>, methods from different parallel

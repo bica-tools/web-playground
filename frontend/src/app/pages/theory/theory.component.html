@@ -43,23 +43,23 @@
 <!-- Summary counters -->
 <section class="summary-bar">
   <div class="summary-item">
-    <span class="summary-value val-proved">{{ counts().proved }}</span>
+    <span class="summary-value val-proved"><app-counter [target]="counts().proved"></app-counter></span>
     <span class="summary-label">Proved / Mechanised</span>
   </div>
   <div class="summary-item">
-    <span class="summary-value val-mechanised">{{ counts().mechanised }}</span>
+    <span class="summary-value val-mechanised"><app-counter [target]="counts().mechanised"></app-counter></span>
     <span class="summary-label">In Lean 4</span>
   </div>
   <div class="summary-item">
-    <span class="summary-value val-implemented">{{ counts().implemented }}</span>
+    <span class="summary-value val-implemented"><app-counter [target]="counts().implemented"></app-counter></span>
     <span class="summary-label">Implemented</span>
   </div>
   <div class="summary-item">
-    <span class="summary-value">{{ counts().withPaper }}</span>
+    <span class="summary-value"><app-counter [target]="counts().withPaper"></app-counter></span>
     <span class="summary-label">With paper</span>
   </div>
   <div class="summary-item">
-    <span class="summary-value">{{ counts().total }}</span>
+    <span class="summary-value"><app-counter [target]="counts().total"></app-counter></span>
     <span class="summary-label">Total results</span>
   </div>
 </section>
@@ -92,8 +92,8 @@
       </tr>
     </thead>
     <tbody>
-      @for (t of filteredTheorems(); track t.step) {
-        <tr>
+      @for (t of filteredTheorems(); track t.step; let i = $index) {
+        <tr [appFadeIn]="i * 80">
           <td class="step-num">{{ t.step }}</td>
           <td>
             <div class="result-name">{{ t.name }}</div>

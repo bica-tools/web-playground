@@ -2,6 +2,8 @@ import { Component, signal, computed } from '@angular/core';
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
+import { FadeInDirective } from '../../shared/fade-in.directive';
+import { CounterComponent } from '../../shared/counter/counter.component';
 
 type PubStatus = 'draft' | 'submitted' | 'accepted' | 'published';
 type PubCategory = 'venue' | 'step' | 'tool' | 'reference';
@@ -22,7 +24,7 @@ interface Publication {
 @Component({
   selector: 'app-publications',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, RouterLink, CodeBlockComponent],
+  imports: [NgClass, NgTemplateOutlet, RouterLink, CodeBlockComponent, FadeInDirective, CounterComponent],
   template: `
     <header class="page-header">
       <h1>Publications</h1>
@@ -32,19 +34,19 @@ interface Publication {
     <!-- Summary counters -->
     <section class="summary-bar">
       <div class="sum-item">
-        <span class="sum-value sum-step">{{ counts().step }}</span>
+        <span class="sum-value sum-step"><app-counter [target]="counts().step"></app-counter></span>
         <span class="sum-label">Step papers</span>
       </div>
       <div class="sum-item">
-        <span class="sum-value sum-tool">{{ counts().tool }}</span>
+        <span class="sum-value sum-tool"><app-counter [target]="counts().tool"></app-counter></span>
         <span class="sum-label">Tool papers</span>
       </div>
       <div class="sum-item">
-        <span class="sum-value sum-ref">{{ counts().reference }}</span>
+        <span class="sum-value sum-ref"><app-counter [target]="counts().reference"></app-counter></span>
         <span class="sum-label">Reference</span>
       </div>
       <div class="sum-item">
-        <span class="sum-value">{{ counts().total }}</span>
+        <span class="sum-value"><app-counter [target]="counts().total"></app-counter></span>
         <span class="sum-label">Total</span>
       </div>
     </section>
@@ -66,8 +68,8 @@ interface Publication {
           <h2>Step Papers</h2>
           <p class="section-desc">Educational write-ups documenting each research step with formal syntax, semantics, and proofs.</p>
           <div class="pub-grid">
-            @for (p of stepItems(); track p.title) {
-              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p }"></ng-container>
+            @for (p of stepItems(); track p.title; let i = $index) {
+              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p, delay: i * 80 }"></ng-container>
             }
           </div>
         </section>
@@ -81,8 +83,8 @@ interface Publication {
           <h2>Tool Papers</h2>
           <p class="section-desc">Implementation-focused papers describing the software artifacts.</p>
           <div class="pub-grid">
-            @for (p of toolItems(); track p.title) {
-              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p }"></ng-container>
+            @for (p of toolItems(); track p.title; let i = $index) {
+              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p, delay: i * 80 }"></ng-container>
             }
           </div>
         </section>
@@ -96,8 +98,8 @@ interface Publication {
           <h2>Reference Materials</h2>
           <p class="section-desc">Slides, glossaries, and supporting documents.</p>
           <div class="pub-grid">
-            @for (p of referenceItems(); track p.title) {
-              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p }"></ng-container>
+            @for (p of referenceItems(); track p.title; let i = $index) {
+              <ng-container *ngTemplateOutlet="pubCard; context: { $implicit: p, delay: i * 80 }"></ng-container>
             }
           </div>
         </section>
@@ -105,8 +107,8 @@ interface Publication {
     }
 
     <!-- Card template -->
-    <ng-template #pubCard let-p>
-      <div class="pub-card">
+    <ng-template #pubCard let-p let-delay="delay">
+      <div class="pub-card" [appFadeIn]="delay || 0">
         <div class="card-top">
           <span class="status-badge" [ngClass]="'status-' + p.status">{{ statusLabel(p.status) }}</span>
           <span class="cat-badge" [ngClass]="'cat-' + p.category">{{ catLabel(p.category) }}</span>

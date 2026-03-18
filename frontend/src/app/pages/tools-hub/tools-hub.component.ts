@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FadeInDirective } from '../../shared/fade-in.directive';
 
 interface ToolCard {
   title: string;
@@ -11,7 +12,7 @@ interface ToolCard {
 @Component({
   selector: 'app-tools-hub',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, FadeInDirective],
   template: `
     <section class="hero">
       <div class="hero-inner">
@@ -22,8 +23,8 @@ interface ToolCard {
 
     <section class="cards-section">
       <div class="card-grid">
-        @for (tool of tools; track tool.route) {
-          <a class="tool-card" [routerLink]="tool.route">
+        @for (tool of tools; track tool.route; let i = $index) {
+          <a class="tool-card" [appFadeIn]="i * 100" [routerLink]="tool.route">
             <h2 class="card-title">{{ tool.title }}</h2>
             <p class="card-desc">{{ tool.description }}</p>
             <ul class="card-features">

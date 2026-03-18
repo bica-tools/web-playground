@@ -32,3 +32,17 @@ body {
 code, pre, .code-block {
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* Scroll-triggered fade-in animations */
+.fade-in-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-in-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-hidden { transition: none; opacity: 1; transform: none; }
+}

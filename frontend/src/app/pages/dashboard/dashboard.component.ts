@@ -8,11 +8,13 @@ import {
   RETICULATE_MODULES, BICA_PHASES, LEAN_PROOFS, PAPERS, MILESTONES, SUMMARY,
   type ModuleStatus, type PaperStatus, type MilestoneStatus, type LeanStatus,
 } from './project-status';
+import { FadeInDirective } from '../../shared/fade-in.directive';
+import { CounterComponent } from '../../shared/counter/counter.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatCardModule, MatIconModule, MatChipsModule, MatProgressBarModule, MatTableModule],
+  imports: [MatCardModule, MatIconModule, MatChipsModule, MatProgressBarModule, MatTableModule, FadeInDirective, CounterComponent],
   template: `
     <div class="dashboard">
       <h1 class="page-title">Project Dashboard</h1>
@@ -20,28 +22,28 @@ import {
 
       <!-- Summary cards -->
       <section class="summary-row">
-        <mat-card class="stat-card">
-          <div class="stat-value">{{ summary.totalPythonTests + summary.totalJavaTests }}</div>
+        <mat-card class="stat-card" [appFadeIn]="0">
+          <div class="stat-value"><app-counter [target]="summary.totalPythonTests + summary.totalJavaTests"></app-counter></div>
           <div class="stat-label">Total Tests</div>
           <div class="stat-detail">{{ summary.totalPythonTests }} Python · {{ summary.totalJavaTests }} Java</div>
         </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-value">{{ summary.totalBenchmarks }}</div>
+        <mat-card class="stat-card" [appFadeIn]="80">
+          <div class="stat-value"><app-counter [target]="summary.totalBenchmarks"></app-counter></div>
           <div class="stat-label">Benchmarks</div>
           <div class="stat-detail">{{ summary.benchmarksWithParallel }} with ∥ ({{ pctParallel }}%)</div>
         </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-value">{{ summary.leanSorryCount }}</div>
+        <mat-card class="stat-card" [appFadeIn]="160">
+          <div class="stat-value"><app-counter [target]="summary.leanSorryCount"></app-counter></div>
           <div class="stat-label">Lean sorry</div>
           <div class="stat-detail">2 lemmas fully proved</div>
         </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-value">{{ papers.length }}</div>
+        <mat-card class="stat-card" [appFadeIn]="240">
+          <div class="stat-value"><app-counter [target]="papers.length"></app-counter></div>
           <div class="stat-label">Papers</div>
           <div class="stat-detail">{{ draftCount }} draft · {{ submittedCount }} submitted</div>
         </mat-card>
-        <mat-card class="stat-card">
-          <div class="stat-value">{{ summary.generatedTests }}</div>
+        <mat-card class="stat-card" [appFadeIn]="320">
+          <div class="stat-value"><app-counter [target]="summary.generatedTests"></app-counter></div>
           <div class="stat-label">Generated Tests</div>
           <div class="stat-detail">JUnit 5 from 34 protocols</div>
         </mat-card>
@@ -80,8 +82,8 @@ import {
         </h2>
         <mat-progress-bar mode="determinate" [value]="reticulateProgress"></mat-progress-bar>
         <div class="module-grid">
-          @for (mod of reticulateModules; track mod.name) {
-            <mat-card class="module-card">
+          @for (mod of reticulateModules; track mod.name; let i = $index) {
+            <mat-card class="module-card" [appFadeIn]="i * 60">
               <div class="module-header">
                 <mat-icon class="status-icon complete">check_circle</mat-icon>
                 <span class="module-name">{{ mod.name }}</span>
@@ -105,8 +107,8 @@ import {
         </h2>
         <mat-progress-bar mode="determinate" [value]="bicaProgress"></mat-progress-bar>
         <div class="module-grid">
-          @for (phase of bicaPhases; track phase.name) {
-            <mat-card class="module-card">
+          @for (phase of bicaPhases; track phase.name; let i = $index) {
+            <mat-card class="module-card" [appFadeIn]="i * 60">
               <div class="module-header">
                 <mat-icon class="status-icon complete">check_circle</mat-icon>
                 <span class="module-name">{{ phase.name }}</span>
@@ -128,8 +130,8 @@ import {
         </h2>
         <mat-progress-bar mode="determinate" [value]="leanProgress"></mat-progress-bar>
         <div class="module-grid">
-          @for (proof of leanProofs; track proof.name) {
-            <mat-card class="module-card">
+          @for (proof of leanProofs; track proof.name; let i = $index) {
+            <mat-card class="module-card" [appFadeIn]="i * 60">
               <div class="module-header">
                 @if (proof.status === 'complete') {
                   <mat-icon class="status-icon complete">check_circle</mat-icon>
@@ -191,8 +193,8 @@ import {
           Milestones
         </h2>
         <div class="timeline">
-          @for (m of milestones; track m.label) {
-            <div class="timeline-item" [class.done]="m.done">
+          @for (m of milestones; track m.label; let i = $index) {
+            <div class="timeline-item" [appFadeIn]="i * 60" [class.done]="m.done">
               <div class="timeline-dot">
                 @if (m.done) {
                   <mat-icon>check</mat-icon>

@@ -4,11 +4,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
 import { BenchmarkDto } from '../../models/api.models';
+import { FadeInDirective } from '../../shared/fade-in.directive';
+import { CounterComponent } from '../../shared/counter/counter.component';
 
 @Component({
   selector: 'app-benchmarks',
   standalone: true,
-  imports: [RouterLink, MatProgressSpinnerModule],
+  imports: [RouterLink, MatProgressSpinnerModule, FadeInDirective, CounterComponent],
   template: `
     <section class="bench-hero">
       <h1>Benchmark Observatory</h1>
@@ -19,23 +21,23 @@ import { BenchmarkDto } from '../../models/api.models';
     @if (!loading()) {
       <section class="stats-bar">
         <div class="st-item">
-          <span class="st-val">{{ benchmarks().length }}</span>
+          <span class="st-val"><app-counter [target]="benchmarks().length"></app-counter></span>
           <span class="st-lbl">Protocols</span>
         </div>
         <div class="st-item">
-          <span class="st-val">{{ parallelCount() }}</span>
+          <span class="st-val"><app-counter [target]="parallelCount()"></app-counter></span>
           <span class="st-lbl">Use &#x2225;</span>
         </div>
         <div class="st-item">
-          <span class="st-val">{{ recursiveCount() }}</span>
+          <span class="st-val"><app-counter [target]="recursiveCount()"></app-counter></span>
           <span class="st-lbl">Recursive</span>
         </div>
         <div class="st-item">
-          <span class="st-val">{{ totalStates() }}</span>
+          <span class="st-val"><app-counter [target]="totalStates()"></app-counter></span>
           <span class="st-lbl">Total states</span>
         </div>
         <div class="st-item">
-          <span class="st-val">{{ totalTests() }}</span>
+          <span class="st-val"><app-counter [target]="totalTests()"></app-counter></span>
           <span class="st-lbl">Tests generated</span>
         </div>
       </section>
@@ -115,8 +117,8 @@ import { BenchmarkDto } from '../../models/api.models';
     <!-- Card grid -->
     @if (!loading()) {
       <div class="bench-grid">
-        @for (b of filtered(); track b.name) {
-          <div class="bench-card" role="button" tabindex="0" [attr.aria-label]="'View details for ' + b.name" [class.selected]="selected()?.name === b.name" (click)="selectBenchmark(b)" (keydown.enter)="selectBenchmark(b)">
+        @for (b of filtered(); track b.name; let i = $index) {
+          <div class="bench-card" [appFadeIn]="i * 60" role="button" tabindex="0" [attr.aria-label]="'View details for ' + b.name" [class.selected]="selected()?.name === b.name" (click)="selectBenchmark(b)" (keydown.enter)="selectBenchmark(b)">
             <div class="bc-header">
               <span class="bc-name">{{ b.name }}</span>
               <div class="bc-badges">
