@@ -32,6 +32,9 @@ COPY papers/tools/bica-reborn/main.pdf web/backend/src/main/resources/static/pap
 COPY papers/tools/pipeline-article/main.pdf web/backend/src/main/resources/static/papers/pipeline-article.pdf
 COPY papers/notes/presentation/slides.pdf web/backend/src/main/resources/static/papers/slides.pdf
 COPY papers/notes/definitions/definitions.pdf web/backend/src/main/resources/static/papers/definitions.pdf
+# Step 1 paper is built locally and committed as a tracked PDF
+# If the file doesn't exist, the COPY will fail — rebuild with:
+#   cd papers/steps/step1-statespace && pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
 COPY papers/steps/step1-statespace/main.pdf web/backend/src/main/resources/static/papers/step1-statespace.pdf
 
 # Build Spring Boot fat JAR
