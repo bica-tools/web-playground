@@ -37,6 +37,7 @@ import com.bica.web.dto.BenchmarkDto;
 import com.bica.web.dto.CoverageFrameDto;
 import com.bica.web.dto.CoverageStoryboardResponse;
 import com.bica.web.dto.GameDataResponse;
+import com.bica.web.dto.GamePlaysResponse;
 import com.bica.web.dto.GlobalAnalyzeResponse;
 import com.bica.web.dto.TestGenResponse;
 import guru.nidi.graphviz.engine.Format;
@@ -845,6 +846,86 @@ public class AnalysisService {
             return "select";
         }
         return "branch";
+    }
+
+    // --- Game plays: tests as game replays ---
+
+    public GamePlaysResponse gamePlays(String typeString) {
+        var ast = Parser.parse(typeString);
+        var ss = StateSpaceBuilder.build(ast);
+
+        var config = new TestGenConfig("Game", null, "obj", 2, 100, ViolationStyle.CALL_ANYWAY);
+        var enumResult = PathEnumerator.enumerate(ss, config);
+
+        int totalTrans = ss.transitions().size();
+        int totalStates = ss.states().size();
+
+        var plays = new ArrayList<GamePlaysResponse.GamePlay>();
+
+        // Valid paths → winning games
+        for (int i = 0; i < enumResult.validPaths().size(); i++) {
+            var path = enumResult.validPaths().get(i);
+            var gameSteps = toGameSteps(ss, path.steps());
+            var covered = collectCoveredTransitions(ss, path.steps());
+            var covStates = collectCoveredStates(ss, path.steps());
+            double transCov = totalTrans > 0 ? (double) covered.size() / totalTrans : 0;
+            double stateCov = totalStates > 0 ? (double) covStates.size() / totalStates : 0;
+
+            String name = "Play " + (i + 1) + ": " + String.join(" \u2192 ", path.labels());
+            plays.add(new GamePlaysResponse.GamePlay(
+                    name, "valid", gameSteps, null, null, null, transCov, stateCov));
+        }
+
+        // Violations → illegal moves
+        for (int i = 0; i < enumResult.violations().size(); i++) {
+            var viol = enumResult.violations().get(i);
+            var gameSteps = toGameSteps(ss, viol.prefixPath());
+            var covered = collectCoveredTransitions(ss, viol.prefixPath());
+            var covStates = collectCoveredStates(ss, viol.prefixPath());
+            double transCov = totalTrans > 0 ? (double) covered.size() / totalTrans : 0;
+            double stateCov = totalStates > 0 ? (double) covStates.size() / totalStates : 0;
+
+            String prefix = viol.prefixLabels().isEmpty() ? "\u22a4" :
+                    String.join(" \u2192 ", viol.prefixLabels());
+            String name = "Violation: " + prefix + " \u2192 \u2718" + viol.disabledMethod();
+            plays.add(new GamePlaysResponse.GamePlay(
+                    name, "violation", gameSteps, viol.disabledMethod(),
+                    new ArrayList<>(viol.enabledMethods()), null, transCov, stateCov));
+        }
+
+        // Incomplete prefixes → abandoned games
+        for (int i = 0; i < enumResult.incompletePrefixes().size(); i++) {
+            var prefix = enumResult.incompletePrefixes().get(i);
+            var gameSteps = toGameSteps(ss, prefix.steps());
+            var covered = collectCoveredTransitions(ss, prefix.steps());
+            var covStates = collectCoveredStates(ss, prefix.steps());
+            double transCov = totalTrans > 0 ? (double) covered.size() / totalTrans : 0;
+            double stateCov = totalStates > 0 ? (double) covStates.size() / totalStates : 0;
+
+            String labels = prefix.labels().isEmpty() ? "\u22a4" :
+                    String.join(" \u2192 ", prefix.labels());
+            String name = "Incomplete: " + labels + " \u2026";
+            plays.add(new GamePlaysResponse.GamePlay(
+                    name, "incomplete", gameSteps, null, null,
+                    new ArrayList<>(prefix.remainingMethods()), transCov, stateCov));
+        }
+
+        // Build the board data for rendering
+        var board = gameData(typeString);
+
+        return new GamePlaysResponse(plays, totalTrans, totalStates, board);
+    }
+
+    private List<GamePlaysResponse.GameStep> toGameSteps(StateSpace ss,
+                                                          List<PathEnumerator.Step> steps) {
+        var result = new ArrayList<GamePlaysResponse.GameStep>();
+        int current = ss.top();
+        for (var step : steps) {
+            boolean isSel = step.kind() == com.bica.reborn.statespace.TransitionKind.SELECTION;
+            result.add(new GamePlaysResponse.GameStep(step.label(), current, step.target(), isSel));
+            current = step.target();
+        }
+        return result;
     }
 
     private static boolean containsGlobalParallel(GlobalType g) {

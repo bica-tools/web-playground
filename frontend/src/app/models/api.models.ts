@@ -229,6 +229,33 @@ export interface GameDataResponse {
   pretty: string;
 }
 
+// --- Game Plays (tests as game replays) ---
+
+export interface GameStep {
+  label: string;
+  from: number;
+  to: number;
+  isSelection: boolean;
+}
+
+export interface GamePlay {
+  name: string;
+  kind: 'valid' | 'violation' | 'incomplete';
+  steps: GameStep[];
+  violationMethod: string | null;
+  enabledMethods: string[] | null;
+  remainingMethods: string[] | null;
+  transitionCoverage: number;
+  stateCoverage: number;
+}
+
+export interface GamePlaysResponse {
+  plays: GamePlay[];
+  totalTransitions: number;
+  totalStates: number;
+  board: GameDataResponse;
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

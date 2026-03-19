@@ -389,6 +389,207 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TESTS AS GAME PLAYS                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>Tests as Game Plays</h2>
+    <p>
+      Every generated test is a game playthrough. Valid paths are winning games.
+      Violations are illegal moves. Watch them replay on the board.
+    </p>
+  </div>
+
+  <!-- Controls -->
+  <div class="duel-controls" style="justify-content: flex-start; background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+    <select class="duel-select" style="background: #fff; color: #1e293b; border-color: rgba(0,0,0,0.15);"
+            [ngModel]="selectedProtocol()" (ngModelChange)="selectedProtocol.set($event)">
+      @for (proto of protocols; track proto.name; let i = $index) {
+        <option [value]="i">{{ proto.name }}</option>
+      }
+    </select>
+    <button class="duel-btn" style="background: #4338ca" (click)="loadPlays()" [disabled]="playsLoading()">
+      {{ playsData() ? 'Reload' : 'Generate Tests' }}
+    </button>
+    @if (playsData()) {
+      <span style="font-size: 13px; color: rgba(0,0,0,0.55)">
+        {{ playsData()!.plays.length }} test plays &bull;
+        Coverage: {{ coveragePct() }}%
+      </span>
+    }
+  </div>
+
+  @if (playsLoading()) {
+    <p style="color: rgba(0,0,0,0.45)">Generating test plays...</p>
+  }
+  @if (playsError()) {
+    <p style="color: #ef4444">{{ playsError() }}</p>
+  }
+
+  @if (playsData(); as playsResp) {
+    <div class="plays-layout">
+      <!-- Left: play list -->
+      <div class="plays-list">
+        <!-- Valid paths = winning games -->
+        @if (playsByKind().valid.length > 0) {
+          <h4 class="plays-group-title plays-group-valid">Winning Games ({{ playsByKind().valid.length }})</h4>
+          @for (play of playsByKind().valid; track $index; let i = $index) {
+            <button class="play-item play-item-valid"
+                    [class.active]="activePlayIndex() === playsResp.plays.indexOf(play)"
+                    (click)="selectPlay(playsResp.plays.indexOf(play))">
+              <span class="play-icon">&#x2705;</span>
+              <span class="play-info">
+                <span class="play-name">{{ play.name }}</span>
+                <span class="play-meta">{{ play.steps.length }} moves &bull; {{ (play.transitionCoverage * 100).toFixed(0) }}% coverage</span>
+              </span>
+            </button>
+          }
+        }
+
+        <!-- Violations = illegal moves -->
+        @if (playsByKind().violation.length > 0) {
+          <h4 class="plays-group-title plays-group-violation">Violations ({{ playsByKind().violation.length }})</h4>
+          @for (play of playsByKind().violation; track $index) {
+            <button class="play-item play-item-violation"
+                    [class.active]="activePlayIndex() === playsResp.plays.indexOf(play)"
+                    (click)="selectPlay(playsResp.plays.indexOf(play))">
+              <span class="play-icon">&#x274c;</span>
+              <span class="play-info">
+                <span class="play-name">{{ play.name }}</span>
+                <span class="play-meta">{{ play.steps.length }} moves then illegal <code>{{ play.violationMethod }}</code></span>
+              </span>
+            </button>
+          }
+        }
+
+        <!-- Incomplete = abandoned -->
+        @if (playsByKind().incomplete.length > 0) {
+          <h4 class="plays-group-title plays-group-incomplete">Incomplete ({{ playsByKind().incomplete.length }})</h4>
+          @for (play of playsByKind().incomplete; track $index) {
+            <button class="play-item play-item-incomplete"
+                    [class.active]="activePlayIndex() === playsResp.plays.indexOf(play)"
+                    (click)="selectPlay(playsResp.plays.indexOf(play))">
+              <span class="play-icon">&#x23f8;</span>
+              <span class="play-info">
+                <span class="play-name">{{ play.name }}</span>
+                <span class="play-meta">{{ play.steps.length }} moves, stopped early</span>
+              </span>
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Right: playback board -->
+      <div class="plays-board">
+        @if (activePlay(); as play) {
+          <!-- Playback controls -->
+          <div class="playback-controls">
+            <button class="pb-btn" (click)="playbackReset()" title="Reset">&#x23ee;</button>
+            @if (playbackPlaying()) {
+              <button class="pb-btn pb-btn-primary" (click)="playbackPause()" title="Pause">&#x23f8;</button>
+            } @else {
+              <button class="pb-btn pb-btn-primary" (click)="playbackPlay()" title="Play">&#x25b6;</button>
+            }
+            <button class="pb-btn" (click)="playbackStepForward()" title="Step" [disabled]="playbackStep() >= play.steps.length - 1">&#x23ed;</button>
+            <span class="pb-progress">
+              Step {{ playbackStep() + 1 }} / {{ play.steps.length }}
+            </span>
+            <span class="pb-kind" [ngClass]="'pb-kind-' + play.kind">
+              {{ playKindIcon(play.kind) }} {{ playKindLabel(play.kind) }}
+            </span>
+          </div>
+
+          <!-- Board (reuses the same SVG rendering) -->
+          <div class="board-wrap" style="min-height: 300px; border-radius: 12px;">
+            @if (gameData(); as data) {
+              <svg class="board-svg" [attr.viewBox]="'0 0 800 ' + boardHeight()">
+                <defs>
+                  <marker id="ah2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#334155"/>
+                  </marker>
+                  <radialGradient id="grad-top2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/>
+                  </radialGradient>
+                  <radialGradient id="grad-branch2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#3b82f6"/>
+                  </radialGradient>
+                  <radialGradient id="grad-select2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/>
+                  </radialGradient>
+                  <radialGradient id="grad-end2" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#22c55e"/>
+                  </radialGradient>
+                </defs>
+
+                @for (edge of data.edges; track $index) {
+                  <path [attr.d]="edgePath(edge)"
+                        marker-end="url(#ah2)"
+                        [attr.stroke]="isEdgeTraversed(edge) ? '#22c55e' : '#334155'"
+                        [attr.stroke-width]="isEdgeTraversed(edge) ? 2.5 : 1.5"
+                        [attr.stroke-dasharray]="isEdgeTraversed(edge) ? 'none' : 'none'"
+                        fill="none"/>
+                  <text [attr.x]="edgeLabelPos(edge).x" [attr.y]="edgeLabelPos(edge).y"
+                        text-anchor="middle"
+                        [attr.fill]="isEdgeTraversed(edge) ? '#4ade80' : '#64748b'"
+                        [attr.font-weight]="isEdgeTraversed(edge) ? '700' : '400'"
+                        font-size="12" font-family="'JetBrains Mono', monospace">
+                    {{ edge.label }}
+                  </text>
+                }
+
+                @for (node of data.nodes; track node.id) {
+                  @if (node.id === current()) {
+                    <circle [attr.cx]="node.x" [attr.cy]="node.y" r="28"
+                            [attr.fill]="glowColor(node)" opacity="0.25">
+                      <animate attributeName="r" values="28;34;28" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                  }
+                  <circle [attr.cx]="node.x" [attr.cy]="node.y"
+                          [attr.r]="node.id === current() ? 22 : 18"
+                          [attr.fill]="nodeGradient(node)"
+                          [attr.stroke]="node.id === current() ? '#e2e8f0' : 'none'"
+                          [attr.stroke-width]="node.id === current() ? 2.5 : 0"
+                          [attr.opacity]="node.id === current() ? 1 : 0.65"/>
+                  <text [attr.x]="node.x" [attr.y]="node.y + 32"
+                        text-anchor="middle" fill="#94a3b8" font-size="11">
+                    {{ nodeDisplayLabel(node) }}
+                  </text>
+                }
+              </svg>
+            }
+          </div>
+
+          <!-- Violation info -->
+          @if (play.kind === 'violation' && playbackStep() >= play.steps.length - 1) {
+            <div class="violation-banner">
+              Illegal move: tried to call <code>{{ play.violationMethod }}</code>
+              @if (play.enabledMethods && play.enabledMethods.length > 0) {
+                &mdash; only {{ play.enabledMethods!.join(', ') }} allowed here
+              }
+            </div>
+          }
+
+          <!-- Incomplete info -->
+          @if (play.kind === 'incomplete' && playbackStep() >= play.steps.length - 1) {
+            <div class="incomplete-banner">
+              Game abandoned &mdash;
+              @if (play.remainingMethods && play.remainingMethods.length > 0) {
+                {{ play.remainingMethods!.join(', ') }} still available
+              }
+            </div>
+          }
+        } @else {
+          <div style="text-align: center; color: rgba(0,0,0,0.35); padding: 60px 24px;">
+            <p style="font-size: 18px; margin: 0 0 8px">Select a test play from the list</p>
+            <p style="font-size: 13px; margin: 0">Each test is a game. Watch it replay on the board.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
 <!-- THEORY: SESSION TYPES AS GAMES                              -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section">

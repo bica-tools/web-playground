@@ -11,7 +11,14 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FadeInDirective } from '../../shared/fade-in.directive';
 import { ApiService } from '../../services/api.service';
-import { GameDataResponse, GameNode, GameEdge } from '../../models/api.models';
+import {
+  GameDataResponse,
+  GameNode,
+  GameEdge,
+  GamePlaysResponse,
+  GamePlay,
+  GameStep,
+} from '../../models/api.models';
 
 /* ═══════════════════════════════════════════════════════════════ */
 /* Protocol catalogue — small protocols perfect for a quick game  */
@@ -88,6 +95,32 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
   isFinished = signal(false);
   mode = signal<'cooperative' | 'adversarial'>('cooperative');
 
+  /* ── Test Playback state ───────────────────────────── */
+  playsData = signal<GamePlaysResponse | null>(null);
+  playsLoading = signal(false);
+  playsError = signal('');
+  activePlayIndex = signal(-1);
+  playbackStep = signal(-1);
+  playbackPlaying = signal(false);
+  cumulativeCoveredEdges = signal<Set<string>>(new Set());
+
+  activePlay = computed(() => {
+    const data = this.playsData();
+    const idx = this.activePlayIndex();
+    if (!data || idx < 0 || idx >= data.plays.length) return null;
+    return data.plays[idx];
+  });
+
+  playsByKind = computed(() => {
+    const data = this.playsData();
+    if (!data) return { valid: [], violation: [], incomplete: [] };
+    return {
+      valid: data.plays.filter((p) => p.kind === 'valid'),
+      violation: data.plays.filter((p) => p.kind === 'violation'),
+      incomplete: data.plays.filter((p) => p.kind === 'incomplete'),
+    };
+  });
+
   /* ── Computed ──────────────────────────────────────── */
   nodeMap = computed(() => {
     const map: Record<number, GameNode> = {};
@@ -127,6 +160,7 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
   });
 
   private autoTimer: ReturnType<typeof setTimeout> | null = null;
+  private playbackTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private api: ApiService) {}
 
@@ -134,6 +168,7 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.autoTimer) clearTimeout(this.autoTimer);
+    if (this.playbackTimer) clearTimeout(this.playbackTimer);
   }
 
   /* ── Actions ───────────────────────────────────────── */
@@ -393,5 +428,153 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
     if (turn === 'client') return 'turn-client';
     if (turn === 'server') return 'turn-server';
     return 'turn-waiting';
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* TEST PLAYBACK: tests as game replays                    */
+  /* ═══════════════════════════════════════════════════════ */
+
+  loadPlays(): void {
+    const idx = this.selectedProtocol();
+    const proto = this.protocols[idx];
+    const typeStr = this.customType() || proto.typeString;
+
+    this.playsLoading.set(true);
+    this.playsError.set('');
+    this.activePlayIndex.set(-1);
+    this.playbackStep.set(-1);
+    this.playbackPlaying.set(false);
+    this.cumulativeCoveredEdges.set(new Set());
+
+    this.api.gamePlays(typeStr).subscribe({
+      next: (data) => {
+        this.playsData.set(data);
+        // Also set the board data for rendering
+        this.gameData.set(data.board);
+        this.current.set(data.board.top);
+        this.moveHistory.set([]);
+        this.turnCount.set(0);
+        this.traversedEdges.set(new Set());
+        this.isFinished.set(false);
+        this.playsLoading.set(false);
+      },
+      error: (err) => {
+        this.playsError.set(err?.error?.error ?? 'Failed to load game plays');
+        this.playsLoading.set(false);
+      },
+    });
+  }
+
+  selectPlay(index: number): void {
+    if (this.playbackTimer) {
+      clearTimeout(this.playbackTimer);
+      this.playbackTimer = null;
+    }
+    this.activePlayIndex.set(index);
+    this.playbackStep.set(-1);
+    this.playbackPlaying.set(false);
+
+    // Reset board to top
+    const data = this.gameData();
+    if (data) {
+      this.current.set(data.top);
+      this.moveHistory.set([]);
+      this.turnCount.set(0);
+      this.traversedEdges.set(new Set());
+      this.isFinished.set(false);
+    }
+  }
+
+  playbackPlay(): void {
+    const play = this.activePlay();
+    if (!play) return;
+    this.playbackPlaying.set(true);
+    this.playbackAdvance();
+  }
+
+  playbackPause(): void {
+    this.playbackPlaying.set(false);
+    if (this.playbackTimer) {
+      clearTimeout(this.playbackTimer);
+      this.playbackTimer = null;
+    }
+  }
+
+  playbackStepForward(): void {
+    const play = this.activePlay();
+    if (!play) return;
+    const nextStep = this.playbackStep() + 1;
+    if (nextStep >= play.steps.length) return;
+    this.applyPlaybackStep(play.steps[nextStep], nextStep);
+  }
+
+  playbackReset(): void {
+    if (this.playbackTimer) clearTimeout(this.playbackTimer);
+    this.playbackPlaying.set(false);
+    this.playbackStep.set(-1);
+    const data = this.gameData();
+    if (data) {
+      this.current.set(data.top);
+      this.moveHistory.set([]);
+      this.turnCount.set(0);
+      this.traversedEdges.set(new Set());
+      this.isFinished.set(false);
+    }
+  }
+
+  private playbackAdvance(): void {
+    const play = this.activePlay();
+    if (!play || !this.playbackPlaying()) return;
+
+    const nextStep = this.playbackStep() + 1;
+    if (nextStep >= play.steps.length) {
+      this.playbackPlaying.set(false);
+      return;
+    }
+
+    this.applyPlaybackStep(play.steps[nextStep], nextStep);
+
+    this.playbackTimer = setTimeout(() => this.playbackAdvance(), 800);
+  }
+
+  private applyPlaybackStep(step: GameStep, index: number): void {
+    this.playbackStep.set(index);
+
+    const moveType: 'client' | 'server' | 'auto' = step.isSelection ? 'server' : 'client';
+    this.moveHistory.update((h) => [...h, { label: step.label, type: moveType }]);
+    this.current.set(step.to);
+    this.turnCount.update((n) => n + 1);
+
+    const newTraversed = new Set(this.traversedEdges());
+    newTraversed.add(`${step.from}-${step.label}-${step.to}`);
+    this.traversedEdges.set(newTraversed);
+
+    // Track cumulative coverage
+    const cumulative = new Set(this.cumulativeCoveredEdges());
+    cumulative.add(`${step.from}-${step.label}-${step.to}`);
+    this.cumulativeCoveredEdges.set(cumulative);
+
+    if (step.to === this.gameData()?.bottom) {
+      this.isFinished.set(true);
+    }
+  }
+
+  playKindIcon(kind: string): string {
+    if (kind === 'valid') return '\u2705';
+    if (kind === 'violation') return '\u274c';
+    return '\u23f8';
+  }
+
+  playKindLabel(kind: string): string {
+    if (kind === 'valid') return 'Winning';
+    if (kind === 'violation') return 'Violation';
+    return 'Incomplete';
+  }
+
+  coveragePct(): string {
+    const data = this.playsData();
+    if (!data || data.totalTransitions === 0) return '0';
+    const pct = (this.cumulativeCoveredEdges().size / data.totalTransitions) * 100;
+    return pct.toFixed(0);
   }
 }
