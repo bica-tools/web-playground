@@ -1,0 +1,537 @@
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HERO                                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <h1 class="hero-title">Games</h1>
+    <p class="hero-subtitle">
+      Play session types. The lattice is the board, the protocol is the game,
+      and every move is a method call.
+    </p>
+    <p class="hero-tagline">"The Lattice Is the Board" &mdash; Step 900a</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- GAME CARDS                                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>Choose Your Game</h2>
+    <p>Two ways to experience session types as interactive games.</p>
+  </div>
+
+  <div class="game-cards">
+    <!-- Protocol Duel -->
+    <div class="game-card" [appFadeIn]="0">
+      <div class="card-visual card-visual-duel">
+        <svg class="mini-board" viewBox="0 0 300 180">
+          <!-- Mini Hasse diagram decoration -->
+          <defs>
+            <radialGradient id="mg-top" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#818cf8"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </radialGradient>
+            <radialGradient id="mg-branch" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="100%" stop-color="#3b82f6"/>
+            </radialGradient>
+            <radialGradient id="mg-sel" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fbbf24"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </radialGradient>
+            <radialGradient id="mg-end" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4ade80"/>
+              <stop offset="100%" stop-color="#22c55e"/>
+            </radialGradient>
+          </defs>
+          <!-- edges -->
+          <line x1="150" y1="30" x2="80" y2="80" stroke="#334155" stroke-width="1.5"/>
+          <line x1="150" y1="30" x2="220" y2="80" stroke="#334155" stroke-width="1.5"/>
+          <line x1="80" y1="80" x2="80" y2="130" stroke="#3b82f6" stroke-width="2"/>
+          <line x1="220" y1="80" x2="150" y2="130" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2"/>
+          <line x1="220" y1="80" x2="260" y2="130" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 2"/>
+          <line x1="80" y1="130" x2="150" y2="160" stroke="#334155" stroke-width="1.5"/>
+          <line x1="150" y1="130" x2="150" y2="160" stroke="#334155" stroke-width="1.5"/>
+          <line x1="260" y1="130" x2="150" y2="160" stroke="#334155" stroke-width="1.5"/>
+          <!-- nodes -->
+          <circle cx="150" cy="30" r="12" fill="url(#mg-top)" opacity="0.9"/>
+          <circle cx="80" cy="80" r="10" fill="url(#mg-branch)" opacity="0.8"/>
+          <circle cx="220" cy="80" r="10" fill="url(#mg-sel)" opacity="0.8"/>
+          <circle cx="80" cy="130" r="9" fill="url(#mg-branch)" opacity="0.7"/>
+          <circle cx="150" cy="130" r="9" fill="url(#mg-branch)" opacity="0.7"/>
+          <circle cx="260" cy="130" r="9" fill="url(#mg-branch)" opacity="0.7"/>
+          <circle cx="150" cy="160" r="10" fill="url(#mg-end)" opacity="0.9"/>
+          <!-- labels -->
+          <text x="150" y="14" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="sans-serif">&top;</text>
+          <text x="150" y="178" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="sans-serif">&bot;</text>
+          <!-- token glow -->
+          <circle cx="80" cy="80" r="16" fill="#3b82f6" opacity="0.15">
+            <animate attributeName="r" values="16;20;16" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.15;0.05;0.15" dur="2s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>Protocol Duel</h3>
+        <p class="card-desc">
+          Two players &mdash; Client and Server &mdash; move a token from &top; to &bot;
+          on the Hasse diagram. At branch nodes the Client picks; at selection nodes
+          the Server decides. Who controls the protocol?
+        </p>
+        <div class="card-tags">
+          <span class="tag">2 Players</span>
+          <span class="tag tag-orange">Strategy</span>
+          <span class="tag tag-green">Interactive Board</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Reticulate -->
+    <div class="game-card" [appFadeIn]="100">
+      <div class="card-visual card-visual-reticulate">
+        <svg class="mini-board" viewBox="0 0 300 180">
+          <!-- Dungeon atmosphere -->
+          <rect x="0" y="0" width="300" height="180" fill="none"/>
+          <!-- rooms -->
+          <rect x="120" y="10" width="60" height="30" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <rect x="40" y="70" width="60" height="30" rx="4" fill="rgba(99,102,241,0.1)" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+          <rect x="200" y="70" width="60" height="30" rx="4" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+          <rect x="80" y="130" width="60" height="30" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <rect x="180" y="130" width="60" height="30" rx="4" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.3)" stroke-width="1"/>
+          <!-- corridors -->
+          <line x1="150" y1="40" x2="70" y2="70" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="150" y1="40" x2="230" y2="70" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="70" y1="100" x2="110" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="230" y1="100" x2="210" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
+          <!-- room labels -->
+          <text x="150" y="30" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace">Entrance</text>
+          <text x="70" y="90" text-anchor="middle" fill="rgba(99,102,241,0.6)" font-size="8" font-family="monospace">Your choice</text>
+          <text x="230" y="90" text-anchor="middle" fill="rgba(245,158,11,0.6)" font-size="8" font-family="monospace">Fate decides</text>
+          <text x="210" y="150" text-anchor="middle" fill="rgba(34,197,94,0.6)" font-size="8" font-family="monospace">Exit</text>
+          <!-- player dot -->
+          <circle cx="70" cy="85" r="4" fill="#60a5fa">
+            <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>The Reticulate</h3>
+        <p class="card-desc">
+          Descend through a dungeon whose rooms are the states of a session type.
+          Some doors are yours to choose; others are decided by fate.
+          Every dungeon is a lattice. Can you reach the exit?
+        </p>
+        <div class="card-tags">
+          <span class="tag">Solo</span>
+          <span class="tag tag-orange">Narrative</span>
+          <span class="tag tag-green">12 Dungeons</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theory Connection -->
+    <div class="game-card" [appFadeIn]="200">
+      <div class="card-visual card-visual-theory">
+        <svg class="mini-board" viewBox="0 0 300 180">
+          <!-- Game tree / extensive form -->
+          <text x="150" y="20" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="10" font-family="sans-serif">Extensive-form game</text>
+          <!-- tree structure -->
+          <circle cx="150" cy="45" r="8" fill="none" stroke="rgba(167,139,250,0.6)" stroke-width="1.5"/>
+          <text x="150" y="48" text-anchor="middle" fill="rgba(167,139,250,0.8)" font-size="8">P1</text>
+          <line x1="150" y1="53" x2="90" y2="95" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+          <line x1="150" y1="53" x2="210" y2="95" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+          <circle cx="90" cy="100" r="8" fill="none" stroke="rgba(251,191,36,0.6)" stroke-width="1.5"/>
+          <text x="90" y="103" text-anchor="middle" fill="rgba(251,191,36,0.8)" font-size="8">P2</text>
+          <circle cx="210" cy="100" r="6" fill="rgba(74,222,128,0.3)" stroke="rgba(74,222,128,0.6)" stroke-width="1"/>
+          <line x1="90" y1="108" x2="60" y2="145" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+          <line x1="90" y1="108" x2="120" y2="145" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+          <circle cx="60" cy="150" r="6" fill="rgba(74,222,128,0.3)" stroke="rgba(74,222,128,0.6)" stroke-width="1"/>
+          <circle cx="120" cy="150" r="6" fill="rgba(74,222,128,0.3)" stroke="rgba(74,222,128,0.6)" stroke-width="1"/>
+          <!-- labels -->
+          <text x="115" y="72" text-anchor="middle" fill="rgba(96,165,250,0.5)" font-size="8" font-family="monospace">&amp;</text>
+          <text x="185" y="72" text-anchor="middle" fill="rgba(96,165,250,0.5)" font-size="8" font-family="monospace">&amp;</text>
+          <text x="70" y="128" text-anchor="middle" fill="rgba(251,191,36,0.5)" font-size="8" font-family="monospace">+</text>
+          <text x="110" y="128" text-anchor="middle" fill="rgba(251,191,36,0.5)" font-size="8" font-family="monospace">+</text>
+          <text x="150" y="175" text-anchor="middle" fill="rgba(255,255,255,0.25)" font-size="9" font-family="sans-serif">P1 = Client (&amp;) &bull; P2 = Server (+)</text>
+        </svg>
+      </div>
+      <div class="card-body">
+        <h3>The Theory</h3>
+        <p class="card-desc">
+          Session types are extensive-form games. Branch = Player 1 moves.
+          Selection = Player 2 moves. The Hasse diagram is the game tree.
+          Strategies are paths from &top; to &bot;.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Game Theory</span>
+          <span class="tag tag-orange">Education</span>
+          <span class="tag tag-green">Step 900a</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- INTERACTIVE PROTOCOL DUEL                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="duel-section">
+  <div class="duel-inner">
+    <div class="duel-header">
+      <h2>Protocol Duel</h2>
+      <p>Pick a protocol, click edges to move. Reach &bot; (end) to win.</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="duel-controls">
+      <select class="duel-select" [ngModel]="selectedProtocol()" (ngModelChange)="selectedProtocol.set($event)">
+        @for (proto of protocols; track proto.name; let i = $index) {
+          <option [value]="i">{{ proto.name }} ({{ proto.difficulty }})</option>
+        }
+      </select>
+      <button class="duel-btn" (click)="startGame()" [disabled]="loading()">
+        {{ gameData() ? 'New Game' : 'Start' }}
+      </button>
+      @if (gameData()) {
+        <button class="duel-btn duel-btn-ghost" (click)="restart()">Restart</button>
+      }
+      <select class="duel-select" [ngModel]="mode()" (ngModelChange)="mode.set($event)">
+        <option value="cooperative">Cooperative</option>
+        <option value="adversarial">Adversarial</option>
+      </select>
+    </div>
+
+    <!-- Game layout -->
+    <div class="duel-layout">
+      <!-- Board -->
+      <div class="board-wrap">
+        @if (gameData(); as data) {
+          <svg #boardSvg class="board-svg" [attr.viewBox]="'0 0 800 ' + boardHeight()">
+            <defs>
+              <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#334155"/>
+              </marker>
+              <radialGradient id="grad-top" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#6366f1"/>
+              </radialGradient>
+              <radialGradient id="grad-branch" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#60a5fa"/>
+                <stop offset="100%" stop-color="#3b82f6"/>
+              </radialGradient>
+              <radialGradient id="grad-select" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fbbf24"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
+              </radialGradient>
+              <radialGradient id="grad-end" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#4ade80"/>
+                <stop offset="100%" stop-color="#22c55e"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Edges -->
+            @for (edge of data.edges; track $index) {
+              <!-- Hitbox for clicking -->
+              @if (isEdgeAvailable(edge)) {
+                <path [attr.d]="edgePath(edge)"
+                      stroke="transparent" stroke-width="20" fill="none"
+                      style="cursor: pointer"
+                      (click)="makeMove(edge)"/>
+              }
+              <!-- Visible line -->
+              <path [attr.d]="edgePath(edge)"
+                    marker-end="url(#ah)"
+                    [attr.stroke]="isEdgeAvailable(edge) ? (edge.isSelection ? '#f59e0b' : '#3b82f6') : (isEdgeTraversed(edge) ? '#22c55e' : '#334155')"
+                    [attr.stroke-width]="isEdgeAvailable(edge) ? 2.5 : (isEdgeTraversed(edge) ? 2 : 1.5)"
+                    [attr.stroke-dasharray]="isEdgeTraversed(edge) && !isEdgeAvailable(edge) ? '6 3' : 'none'"
+                    [attr.opacity]="isEdgeTraversed(edge) && !isEdgeAvailable(edge) ? 0.6 : 1"
+                    fill="none"
+                    [style.cursor]="isEdgeAvailable(edge) ? 'pointer' : 'default'"
+                    [style.filter]="isEdgeAvailable(edge) ? 'drop-shadow(0 0 4px ' + (edge.isSelection ? 'rgba(245,158,11,0.4)' : 'rgba(59,130,246,0.4)') + ')' : 'none'"
+                    (click)="isEdgeAvailable(edge) && makeMove(edge)"/>
+              <!-- Edge label -->
+              <text [attr.x]="edgeLabelPos(edge).x"
+                    [attr.y]="edgeLabelPos(edge).y"
+                    text-anchor="middle"
+                    [attr.fill]="isEdgeAvailable(edge) ? '#e2e8f0' : '#64748b'"
+                    [attr.font-weight]="isEdgeAvailable(edge) ? '700' : '400'"
+                    font-size="12"
+                    font-family="'JetBrains Mono', monospace"
+                    [style.pointer-events]="isEdgeAvailable(edge) ? 'auto' : 'none'"
+                    [style.cursor]="isEdgeAvailable(edge) ? 'pointer' : 'default'"
+                    (click)="isEdgeAvailable(edge) && makeMove(edge)">
+                {{ edge.label }}
+              </text>
+            }
+
+            <!-- Nodes -->
+            @for (node of data.nodes; track node.id) {
+              <!-- Glow for current -->
+              @if (node.id === current()) {
+                <circle [attr.cx]="node.x" [attr.cy]="node.y"
+                        r="28" [attr.fill]="glowColor(node)" opacity="0.25">
+                  <animate attributeName="r" values="28;34;28" dur="2s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.25;0.1;0.25" dur="2s" repeatCount="indefinite"/>
+                </circle>
+              }
+              <!-- Node circle -->
+              <circle [attr.cx]="node.x" [attr.cy]="node.y"
+                      [attr.r]="node.id === current() ? 22 : 18"
+                      [attr.fill]="nodeGradient(node)"
+                      [attr.stroke]="node.id === current() ? '#e2e8f0' : 'none'"
+                      [attr.stroke-width]="node.id === current() ? 2.5 : 0"
+                      [attr.opacity]="node.id === current() ? 1 : (isNodeTarget(node) ? 0.9 : 0.65)"
+                      [style.cursor]="isNodeTarget(node) ? 'pointer' : 'default'"
+                      (click)="isNodeTarget(node) && clickNode(node)"/>
+              <!-- Node label -->
+              <text [attr.x]="node.x" [attr.y]="node.y + 32"
+                    text-anchor="middle" fill="#94a3b8"
+                    font-size="11" font-family="'Segoe UI', system-ui, sans-serif">
+                {{ nodeDisplayLabel(node) }}
+              </text>
+            }
+          </svg>
+
+          <!-- Victory overlay -->
+          @if (isFinished()) {
+            <div class="victory-overlay">
+              <div class="victory-card">
+                <h3>Protocol Complete!</h3>
+                <p>The token reached &bot; (end)</p>
+                <div class="victory-score">{{ victoryEfficiency() }}%</div>
+                <p class="victory-path">&top; &rarr; {{ victoryPath() }} &rarr; &bot;</p>
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="board-placeholder">
+            @if (loading()) {
+              <p>Loading protocol...</p>
+            } @else if (error()) {
+              <p style="color: #ef4444">{{ error() }}</p>
+            } @else {
+              <p>Select a protocol and press Start</p>
+              <p style="font-size: 12px; color: #334155">The Hasse diagram becomes your game board</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Side panel -->
+      <div class="game-panel">
+        <div class="turn-badge" [ngClass]="turnClass()">
+          {{ turnLabel() }}
+        </div>
+
+        @if (gameData()) {
+          <div class="panel-block">
+            <h4>Available Moves</h4>
+            @if (!isFinished() && availableMoves().length > 1) {
+              @for (edge of availableMoves(); track $index; let i = $index) {
+                <button class="move-option"
+                        [ngClass]="edge.isSelection ? 'move-option-select' : 'move-option-branch'"
+                        (click)="makeMove(edge)">
+                  {{ i + 1 }}. {{ edge.label }}
+                </button>
+              }
+            } @else if (isFinished()) {
+              <p style="color: #4ade80; font-size: 13px; margin: 0">Game over &mdash; protocol complete</p>
+            } @else {
+              <p style="color: #64748b; font-size: 13px; margin: 0">Auto-moving...</p>
+            }
+          </div>
+
+          <div class="panel-block">
+            <h4>Move History</h4>
+            <ul class="history-list">
+              @for (move of moveHistory(); track $index; let i = $index) {
+                <li>
+                  <span class="move-num">{{ i + 1 }}.</span>
+                  <span [style.color]="move.type === 'client' ? '#60a5fa' : (move.type === 'server' ? '#fbbf24' : '#64748b')">
+                    {{ move.label }}
+                  </span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <div class="panel-block">
+            <h4>Stats</h4>
+            <div class="stat-row">
+              <span class="stat-label">States</span>
+              <span class="stat-value">{{ gameData()!.numStates }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Transitions</span>
+              <span class="stat-value">{{ gameData()!.numTransitions }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Moves</span>
+              <span class="stat-value">{{ turnCount() }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Mode</span>
+              <span class="stat-value">{{ mode() }}</span>
+            </div>
+          </div>
+
+          <div class="legend-row">
+            <span class="legend-item"><span class="legend-dot" style="background:#6366f1"></span> Start</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span> Branch</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span> Select</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#22c55e"></span> End</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- THEORY: SESSION TYPES AS GAMES                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>The Lattice Is the Board</h2>
+    <p>Session types and game theory share deep structural connections.</p>
+  </div>
+
+  <div class="theory-grid">
+    <div class="theory-card" [appFadeIn]="0">
+      <span class="theory-icon">&#x1F3AF;</span>
+      <h4>Two Players</h4>
+      <p>
+        Client controls external choice (<code>&amp;&#123;...&#125;</code>).
+        Server controls internal choice (<code>+&#123;...&#125;</code>).
+        Every protocol is a two-player game.
+      </p>
+    </div>
+    <div class="theory-card" [appFadeIn]="100">
+      <span class="theory-icon">&#x1F3C1;</span>
+      <h4>Strategies Are Paths</h4>
+      <p>
+        A strategy is a path from &top; to &bot; through the Hasse diagram.
+        The lattice guarantees every game terminates with a well-defined outcome.
+      </p>
+    </div>
+    <div class="theory-card" [appFadeIn]="200">
+      <span class="theory-icon">&#x2696;</span>
+      <h4>Meet &amp; Join</h4>
+      <p>
+        Meet is where two execution paths converge.
+        Join is where they split. The lattice structure
+        guarantees these always exist.
+      </p>
+    </div>
+    <div class="theory-card" [appFadeIn]="300">
+      <span class="theory-icon">&#x1F504;</span>
+      <h4>Recursion = Loops</h4>
+      <p>
+        Recursive types create cycles in the game tree.
+        The game can loop &mdash; but termination analysis
+        guarantees it will eventually reach &bot;.
+      </p>
+    </div>
+  </div>
+
+  <table class="mapping-table" appFadeIn>
+    <thead>
+      <tr>
+        <th>Game Theory</th>
+        <th>Session Types</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Game board</td>
+        <td>Hasse diagram (state space)</td>
+      </tr>
+      <tr>
+        <td>Player 1 (environment)</td>
+        <td>Client &mdash; picks method via <code>&amp;&#123;...&#125;</code></td>
+      </tr>
+      <tr>
+        <td>Player 2 (object)</td>
+        <td>Server &mdash; picks outcome via <code>+&#123;...&#125;</code></td>
+      </tr>
+      <tr>
+        <td>Move</td>
+        <td>Transition (method call or selection)</td>
+      </tr>
+      <tr>
+        <td>Terminal node</td>
+        <td><code>end</code> &mdash; protocol complete</td>
+      </tr>
+      <tr>
+        <td>Strategy</td>
+        <td>Valid path from &top; to &bot;</td>
+      </tr>
+      <tr>
+        <td>Nash equilibrium</td>
+        <td>Shortest path (cooperative) / minimax (adversarial)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- MORE GAME IDEAS                                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>Explore More</h2>
+    <p>Ideas for interactive explorations of session type theory.</p>
+  </div>
+
+  <div class="ideas-grid">
+    <div class="idea-card" [appFadeIn]="0">
+      <span class="idea-icon">&#x1F50D;</span>
+      <h4>Find the Meet</h4>
+      <p>
+        Given two states in a lattice, find their greatest lower bound.
+        A puzzle that builds intuition for lattice operations.
+      </p>
+    </div>
+    <div class="idea-card" [appFadeIn]="100">
+      <span class="idea-icon">&#x1F6A8;</span>
+      <h4>Spot the Violation</h4>
+      <p>
+        A sequence of method calls is shown. Is it a valid protocol execution?
+        Find the first illegal move.
+      </p>
+    </div>
+    <div class="idea-card" [appFadeIn]="200">
+      <span class="idea-icon">&#x1F9E9;</span>
+      <h4>Build a Protocol</h4>
+      <p>
+        Drag-and-drop branches, selections, and recursion
+        to construct a session type. Watch the Hasse diagram build in real time.
+      </p>
+    </div>
+    <div class="idea-card" [appFadeIn]="300">
+      <span class="idea-icon">&#x1F30A;</span>
+      <h4>Coverage Race</h4>
+      <p>
+        Given a protocol, find the minimum set of test paths
+        that cover all transitions. Beat the generated test suite!
+      </p>
+    </div>
+    <div class="idea-card" [appFadeIn]="400">
+      <span class="idea-icon">&#x1F52E;</span>
+      <h4>Dual Mirror</h4>
+      <p>
+        Play as the Client while your reflection plays the dual type.
+        Every branch you take, your mirror takes the opposite selection.
+      </p>
+    </div>
+    <div class="idea-card" [appFadeIn]="500">
+      <span class="idea-icon">&#x1F3AD;</span>
+      <h4>Multiparty Arena</h4>
+      <p>
+        Three or more players, each controlling a projected role from
+        a global type. Coordinate to complete the protocol.
+      </p>
+    </div>
+  </div>
+</section>

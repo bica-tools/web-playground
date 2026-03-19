@@ -16,6 +16,7 @@ import {
   CompareResponse,
   CompositionRequest,
   CompositionResponse,
+  GameDataResponse,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -87,5 +88,11 @@ export class ApiService {
     return this.http.post<GlobalAnalyzeResponse>(`${this.baseUrl}/analyze-global`, {
       typeString,
     } as GlobalAnalyzeRequest);
+  }
+
+  gameData(typeString: string): Observable<GameDataResponse> {
+    return this.http.post<GameDataResponse>(`${this.baseUrl}/game-data`, {
+      typeString,
+    } as AnalyzeRequest);
   }
 }

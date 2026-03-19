@@ -200,6 +200,35 @@ export interface CompositionResponse {
   globalComparison: GlobalComparisonDto | null;
 }
 
+// --- Game Data ---
+
+export interface GameNode {
+  id: number;
+  x: number;
+  y: number;
+  label: string;
+  kind: 'top' | 'branch' | 'select' | 'end';
+  isTop: boolean;
+  isBottom: boolean;
+}
+
+export interface GameEdge {
+  src: number;
+  tgt: number;
+  label: string;
+  isSelection: boolean;
+}
+
+export interface GameDataResponse {
+  nodes: GameNode[];
+  edges: GameEdge[];
+  top: number;
+  bottom: number;
+  numStates: number;
+  numTransitions: number;
+  pretty: string;
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;

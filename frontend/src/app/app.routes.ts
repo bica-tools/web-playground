@@ -85,6 +85,14 @@ export const routes: Routes = [
     title: 'Composition — BICA Tools',
   },
   {
+    path: 'games',
+    loadComponent: () =>
+      import('./pages/games/games.component').then(
+        (m) => m.GamesComponent,
+      ),
+    title: 'Games — BICA Tools',
+  },
+  {
     path: 'benchmarks',
     loadComponent: () =>
       import('./pages/benchmarks/benchmarks.component').then(

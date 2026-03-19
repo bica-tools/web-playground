@@ -37,6 +37,7 @@ import { filter } from 'rxjs/operators';
       <!-- Desktop nav -->
       <nav class="nav-links desktop-nav" aria-label="Main navigation">
         <a mat-button routerLink="/tools/analyzer" routerLinkActive="active">Playground</a>
+        <a mat-button routerLink="/games" routerLinkActive="active">Games</a>
         <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
 
@@ -56,6 +57,7 @@ import { filter } from 'rxjs/operators';
     @if (isMenuOpen) {
       <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
         <a routerLink="/tools/analyzer" routerLinkActive="active" (click)="closeMenu()">Playground</a>
+        <a routerLink="/games" routerLinkActive="active" (click)="closeMenu()">Games</a>
         <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Research</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
       </nav>
