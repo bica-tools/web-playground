@@ -231,7 +231,7 @@ export const MILESTONES: MilestoneStatus[] = [
     "done": true
   },
   {
-    "label": "Website live (bica.zuacaldeira.com)",
+    "label": "Website live (bica-tools.org)",
     "date": "2026-03",
     "done": true
   },
