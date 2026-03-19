@@ -815,3 +815,147 @@
   color: #7c3aed;
   font-size: 14px;
 }
+
+/* ══════════════════════════════════════════════════════════ */
+/* MINI-GAMES SHARED                                          */
+/* ══════════════════════════════════════════════════════════ */
+.mini-game-container {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.mini-game-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mini-game-score {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(0,0,0,0.7);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.mini-game-result {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+}
+
+.result-correct {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #15803d;
+}
+
+.result-wrong {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+/* ══════════════════════════════════════════════════════════ */
+/* SPOT THE VIOLATION                                          */
+/* ══════════════════════════════════════════════════════════ */
+.violation-sequence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 10px;
+}
+
+.seq-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 2px solid rgba(0,0,0,0.1);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+
+  &:hover:not(.seq-correct):not(.seq-wrong-guess):not(.seq-good) {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.04);
+  }
+}
+
+.seq-num {
+  font-size: 11px;
+  color: rgba(0,0,0,0.35);
+  font-weight: 500;
+}
+
+.seq-label {
+  font-weight: 600;
+  color: rgba(0,0,0,0.8);
+}
+
+.seq-correct {
+  border-color: #dc2626;
+  background: rgba(239, 68, 68, 0.06);
+
+  .seq-label { color: #dc2626; }
+}
+
+.seq-wrong-guess {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.seq-good {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.04);
+  opacity: 0.7;
+}
+
+.seq-arrow {
+  color: rgba(0,0,0,0.25);
+  font-size: 16px;
+}
+
+.seq-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.seq-badge-bad {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.seq-badge-ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+/* ══════════════════════════════════════════════════════════ */
+/* FIND THE MEET                                               */
+/* ══════════════════════════════════════════════════════════ */
+.meet-board-wrap {
+  background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 70%);
+  border-radius: 12px;
+  border: 1px solid #334155;
+  overflow: hidden;
+  min-height: 300px;
+}

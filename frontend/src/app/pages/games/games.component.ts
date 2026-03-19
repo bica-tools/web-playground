@@ -159,6 +159,8 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
       .join(' \u2192 ');
   });
 
+  readonly Math = Math;
+
   private autoTimer: ReturnType<typeof setTimeout> | null = null;
   private playbackTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -576,5 +578,261 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
     if (!data || data.totalTransitions === 0) return '0';
     const pct = (this.cumulativeCoveredEdges().size / data.totalTransitions) * 100;
     return pct.toFixed(0);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* MINI-GAME: SPOT THE VIOLATION                               */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  violationGameData = signal<GameDataResponse | null>(null);
+  violationSequence = signal<{ label: string; valid: boolean }[]>([]);
+  violationGuess = signal(-1);
+  violationRevealed = signal(false);
+  violationCorrectIndex = signal(-1);
+  violationScore = signal(0);
+  violationRound = signal(0);
+  violationLoading = signal(false);
+
+  private readonly VIOLATION_PROTOCOLS = [
+    { name: 'Iterator', type: 'rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}' },
+    { name: 'File', type: '&{open: rec X . &{read: +{data: X, eof: &{close: end}}}}' },
+    { name: 'Vault', type: '&{auth: +{OK: &{balance: end, withdraw: +{OK: end, DENIED: end}}, FAIL: end}}' },
+    { name: 'Oracle', type: '&{ask: +{YES: end, NO: end}}' },
+  ];
+
+  newViolationRound(): void {
+    this.violationLoading.set(true);
+    this.violationGuess.set(-1);
+    this.violationRevealed.set(false);
+    this.violationRound.update((n) => n + 1);
+
+    const proto = this.VIOLATION_PROTOCOLS[this.violationRound() % this.VIOLATION_PROTOCOLS.length];
+
+    this.api.gamePlays(proto.type).subscribe({
+      next: (data) => {
+        this.violationGameData.set(data.board);
+
+        // Pick a random violation if available, otherwise generate one
+        const violations = data.plays.filter((p) => p.kind === 'violation');
+        const valids = data.plays.filter((p) => p.kind === 'valid');
+
+        if (violations.length > 0) {
+          const viol = violations[Math.floor(Math.random() * violations.length)];
+          // Build sequence: valid prefix steps + the illegal method
+          const seq: { label: string; valid: boolean }[] = viol.steps.map((s) => ({
+            label: s.label,
+            valid: true,
+          }));
+          seq.push({ label: viol.violationMethod!, valid: false });
+          this.violationSequence.set(seq);
+          this.violationCorrectIndex.set(seq.length - 1);
+        } else if (valids.length > 0) {
+          // Use a valid path and insert a random bad method
+          const path = valids[Math.floor(Math.random() * valids.length)];
+          const insertAt = Math.floor(Math.random() * Math.max(1, path.steps.length));
+          const seq: { label: string; valid: boolean }[] = [];
+          for (let i = 0; i < path.steps.length; i++) {
+            if (i === insertAt) {
+              seq.push({ label: 'INVALID', valid: false });
+            }
+            seq.push({ label: path.steps[i].label, valid: true });
+          }
+          if (insertAt >= path.steps.length) {
+            seq.push({ label: 'INVALID', valid: false });
+          }
+          this.violationSequence.set(seq);
+          this.violationCorrectIndex.set(insertAt);
+        }
+
+        this.violationLoading.set(false);
+      },
+      error: () => {
+        this.violationLoading.set(false);
+      },
+    });
+  }
+
+  guessViolation(index: number): void {
+    if (this.violationRevealed()) return;
+    this.violationGuess.set(index);
+    this.violationRevealed.set(true);
+    if (index === this.violationCorrectIndex()) {
+      this.violationScore.update((n) => n + 1);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* MINI-GAME: FIND THE MEET                                    */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  meetGameData = signal<GameDataResponse | null>(null);
+  meetNodeA = signal(-1);
+  meetNodeB = signal(-1);
+  meetCorrectId = signal(-1);
+  meetGuess = signal(-1);
+  meetRevealed = signal(false);
+  meetScore = signal(0);
+  meetRound = signal(0);
+  meetLoading = signal(false);
+
+  newMeetRound(): void {
+    this.meetLoading.set(true);
+    this.meetGuess.set(-1);
+    this.meetRevealed.set(false);
+    this.meetRound.update((n) => n + 1);
+
+    const protos = [
+      '&{a: +{OK: end, ERR: end}, b: end}',
+      '&{auth: +{OK: &{balance: end, withdraw: +{OK: end, DENIED: end}}, FAIL: end}}',
+      '&{a: &{c: end}, b: &{d: end}}',
+      '&{open: rec X . &{read: +{data: X, eof: &{close: end}}}}',
+    ];
+    const typeStr = protos[this.meetRound() % protos.length];
+
+    this.api.gameData(typeStr).subscribe({
+      next: (data) => {
+        this.meetGameData.set(data);
+
+        // Pick two non-bottom, non-identical states
+        const candidates = data.nodes.filter((n) => !n.isBottom && !n.isTop);
+        if (candidates.length >= 2) {
+          const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+          this.meetNodeA.set(shuffled[0].id);
+          this.meetNodeB.set(shuffled[1].id);
+        } else if (candidates.length === 1) {
+          this.meetNodeA.set(data.top);
+          this.meetNodeB.set(candidates[0].id);
+        } else {
+          this.meetNodeA.set(data.top);
+          this.meetNodeB.set(data.bottom);
+        }
+
+        // Compute meet: greatest lower bound
+        // Meet = the highest node reachable from both A and B
+        const reachFromA = this.computeReachable(data, this.meetNodeA());
+        const reachFromB = this.computeReachable(data, this.meetNodeB());
+        const common = data.nodes.filter(
+          (n) => reachFromA.has(n.id) && reachFromB.has(n.id),
+        );
+
+        // The meet is the one with minimum rank (highest in diagram) among common
+        if (common.length > 0) {
+          common.sort((a, b) => a.y - b.y); // lowest y = highest in diagram
+          this.meetCorrectId.set(common[0].id);
+        } else {
+          this.meetCorrectId.set(data.bottom);
+        }
+
+        this.meetLoading.set(false);
+      },
+      error: () => {
+        this.meetLoading.set(false);
+      },
+    });
+  }
+
+  guessMeet(nodeId: number): void {
+    if (this.meetRevealed()) return;
+    this.meetGuess.set(nodeId);
+    this.meetRevealed.set(true);
+    if (nodeId === this.meetCorrectId()) {
+      this.meetScore.update((n) => n + 1);
+    }
+  }
+
+  private computeReachable(data: GameDataResponse, from: number): Set<number> {
+    const visited = new Set<number>([from]);
+    const queue = [from];
+    while (queue.length > 0) {
+      const node = queue.shift()!;
+      for (const e of data.edges.filter((e) => e.src === node)) {
+        if (!visited.has(e.tgt)) {
+          visited.add(e.tgt);
+          queue.push(e.tgt);
+        }
+      }
+    }
+    return visited;
+  }
+
+  meetNodeColor(nodeId: number): string {
+    if (nodeId === this.meetNodeA()) return '#3b82f6';
+    if (nodeId === this.meetNodeB()) return '#f59e0b';
+    if (this.meetRevealed() && nodeId === this.meetCorrectId()) return '#22c55e';
+    return 'none';
+  }
+
+  meetNodeStroke(nodeId: number): number {
+    if (nodeId === this.meetNodeA() || nodeId === this.meetNodeB()) return 3;
+    if (this.meetRevealed() && nodeId === this.meetCorrectId()) return 3;
+    return 0;
+  }
+
+  meetNodeGradient(node: GameNode): string {
+    if (node.kind === 'top') return 'url(#grad-top3)';
+    if (node.kind === 'end') return 'url(#grad-end3)';
+    if (node.kind === 'select') return 'url(#grad-select3)';
+    return 'url(#grad-branch3)';
+  }
+
+  /* ── Edge helpers for arbitrary GameDataResponse ──── */
+
+  edgePathFromData(edge: GameEdge, data: GameDataResponse): string {
+    const nodeMap: Record<number, GameNode> = {};
+    for (const n of data.nodes) nodeMap[n.id] = n;
+    const src = nodeMap[edge.src];
+    const tgt = nodeMap[edge.tgt];
+    if (!src || !tgt) return '';
+
+    const dx = tgt.x - src.x;
+    const dy = tgt.y - src.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len === 0) return '';
+
+    const r = 20;
+    const x1 = src.x + (dx / len) * r;
+    const y1 = src.y + (dy / len) * r;
+    const x2 = src.x + (dx / len) * (len - r - 6);
+    const y2 = src.y + (dy / len) * (len - r - 6);
+
+    const sameDir = data.edges.filter((e) => e.src === edge.src && e.tgt === edge.tgt);
+    const idx = sameDir.indexOf(edge);
+    const total = sameDir.length;
+
+    if (total > 1) {
+      const offset = (idx - (total - 1) / 2) * 30;
+      const mx = (src.x + tgt.x) / 2 - (dy / len) * offset;
+      const my = (src.y + tgt.y) / 2 + (dx / len) * offset;
+      return `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`;
+    }
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
+  }
+
+  edgeLabelPosFromData(edge: GameEdge, data: GameDataResponse): { x: number; y: number } {
+    const nodeMap: Record<number, GameNode> = {};
+    for (const n of data.nodes) nodeMap[n.id] = n;
+    const src = nodeMap[edge.src];
+    const tgt = nodeMap[edge.tgt];
+    if (!src || !tgt) return { x: 0, y: 0 };
+
+    const dx = tgt.x - src.x;
+    const dy = tgt.y - src.y;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+
+    const sameDir = data.edges.filter((e) => e.src === edge.src && e.tgt === edge.tgt);
+    const idx = sameDir.indexOf(edge);
+    const total = sameDir.length;
+
+    if (total > 1) {
+      const offset = (idx - (total - 1) / 2) * 30;
+      return {
+        x: (src.x + tgt.x) / 2 - (dy / len) * offset,
+        y: (src.y + tgt.y) / 2 + (dx / len) * offset - 6,
+      };
+    }
+    return {
+      x: (src.x + tgt.x) / 2 - (dy / len) * 12,
+      y: (src.y + tgt.y) / 2 + (dx / len) * 12 - 4,
+    };
   }
 }

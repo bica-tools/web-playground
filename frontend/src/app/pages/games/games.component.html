@@ -677,32 +677,195 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- MORE GAME IDEAS                                             -->
+<!-- MINI-GAME: SPOT THE VIOLATION                                -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section">
   <div class="section-header" appFadeIn>
-    <h2>Explore More</h2>
-    <p>Ideas for interactive explorations of session type theory.</p>
+    <h2>Spot the Violation</h2>
+    <p>A sequence of method calls is shown. One is illegal. Find it.</p>
+  </div>
+
+  <div class="mini-game-container" appFadeIn>
+    <div class="mini-game-top-bar">
+      <button class="duel-btn" style="background: #dc2626"
+              (click)="newViolationRound()" [disabled]="violationLoading()">
+        {{ violationRound() === 0 ? 'Start' : 'Next Round' }}
+      </button>
+      @if (violationRound() > 0) {
+        <span class="mini-game-score">
+          Score: {{ violationScore() }} / {{ violationRound() }}
+        </span>
+      }
+    </div>
+
+    @if (violationSequence().length > 0) {
+      <div class="violation-sequence">
+        @for (step of violationSequence(); track $index; let i = $index) {
+          <button class="seq-chip"
+                  [class.seq-correct]="violationRevealed() && !step.valid"
+                  [class.seq-wrong-guess]="violationRevealed() && violationGuess() === i && step.valid"
+                  [class.seq-good]="violationRevealed() && step.valid && violationGuess() !== i"
+                  [class.seq-selected]="!violationRevealed() && violationGuess() === i"
+                  (click)="guessViolation(i)">
+            <span class="seq-num">{{ i + 1 }}</span>
+            <span class="seq-label">{{ step.label }}</span>
+            @if (violationRevealed() && !step.valid) {
+              <span class="seq-badge seq-badge-bad">illegal</span>
+            }
+            @if (violationRevealed() && step.valid) {
+              <span class="seq-badge seq-badge-ok">valid</span>
+            }
+          </button>
+          @if (i < violationSequence().length - 1) {
+            <span class="seq-arrow">&rarr;</span>
+          }
+        }
+      </div>
+
+      @if (violationRevealed()) {
+        <div class="mini-game-result"
+             [class.result-correct]="violationGuess() === violationCorrectIndex()"
+             [class.result-wrong]="violationGuess() !== violationCorrectIndex()">
+          @if (violationGuess() === violationCorrectIndex()) {
+            Correct! Step {{ violationCorrectIndex() + 1 }}
+            (<code>{{ violationSequence()[violationCorrectIndex()].label }}</code>)
+            is the illegal move.
+          } @else {
+            Wrong! The illegal move was step {{ violationCorrectIndex() + 1 }}
+            (<code>{{ violationSequence()[violationCorrectIndex()].label }}</code>),
+            not step {{ violationGuess() + 1 }}.
+          }
+        </div>
+      }
+    }
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- MINI-GAME: FIND THE MEET                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>Find the Meet</h2>
+    <p>
+      Two states are highlighted. Click their greatest lower bound (meet) &mdash;
+      the highest node reachable from both.
+    </p>
+  </div>
+
+  <div class="mini-game-container" appFadeIn>
+    <div class="mini-game-top-bar">
+      <button class="duel-btn" style="background: #4338ca"
+              (click)="newMeetRound()" [disabled]="meetLoading()">
+        {{ meetRound() === 0 ? 'Start' : 'Next Round' }}
+      </button>
+      @if (meetRound() > 0) {
+        <span class="mini-game-score">
+          Score: {{ meetScore() }} / {{ meetRound() }}
+        </span>
+      }
+    </div>
+
+    @if (meetGameData(); as mData) {
+      <div class="meet-board-wrap">
+        <svg class="board-svg" [attr.viewBox]="'0 0 800 ' + (Math.max(400, Math.max(...mData.nodes.map(n => n.y)) + 80))">
+          <defs>
+            <marker id="ah3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#334155"/>
+            </marker>
+            <radialGradient id="grad-top3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/>
+            </radialGradient>
+            <radialGradient id="grad-branch3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#3b82f6"/>
+            </radialGradient>
+            <radialGradient id="grad-select3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/>
+            </radialGradient>
+            <radialGradient id="grad-end3" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#22c55e"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Edges -->
+          @for (edge of mData.edges; track $index) {
+            <path [attr.d]="edgePathFromData(edge, mData)"
+                  marker-end="url(#ah3)"
+                  stroke="#334155" stroke-width="1.5" fill="none"/>
+            <text [attr.x]="edgeLabelPosFromData(edge, mData).x"
+                  [attr.y]="edgeLabelPosFromData(edge, mData).y"
+                  text-anchor="middle" fill="#64748b"
+                  font-size="12" font-family="'JetBrains Mono', monospace">
+              {{ edge.label }}
+            </text>
+          }
+
+          <!-- Nodes -->
+          @for (node of mData.nodes; track node.id) {
+            <!-- Selection highlight rings -->
+            @if (meetNodeStroke(node.id) > 0) {
+              <circle [attr.cx]="node.x" [attr.cy]="node.y" r="26"
+                      fill="none" [attr.stroke]="meetNodeColor(node.id)"
+                      [attr.stroke-width]="meetNodeStroke(node.id)"
+                      stroke-dasharray="4 2" opacity="0.7">
+                <animate attributeName="stroke-dashoffset" values="0;12" dur="1s" repeatCount="indefinite"/>
+              </circle>
+            }
+            <circle [attr.cx]="node.x" [attr.cy]="node.y" r="18"
+                    [attr.fill]="meetNodeGradient(node)"
+                    style="cursor: pointer"
+                    (click)="guessMeet(node.id)"/>
+            <text [attr.x]="node.x" [attr.y]="node.y + 32"
+                  text-anchor="middle" fill="#94a3b8" font-size="11"
+                  style="pointer-events: none">
+              {{ nodeDisplayLabel(node) }}
+            </text>
+            <!-- A / B labels -->
+            @if (node.id === meetNodeA()) {
+              <text [attr.x]="node.x" [attr.y]="node.y + 5"
+                    text-anchor="middle" fill="#fff" font-size="12" font-weight="700"
+                    style="pointer-events: none">A</text>
+            }
+            @if (node.id === meetNodeB()) {
+              <text [attr.x]="node.x" [attr.y]="node.y + 5"
+                    text-anchor="middle" fill="#fff" font-size="12" font-weight="700"
+                    style="pointer-events: none">B</text>
+            }
+            @if (meetRevealed() && node.id === meetCorrectId() && node.id !== meetNodeA() && node.id !== meetNodeB()) {
+              <text [attr.x]="node.x" [attr.y]="node.y + 5"
+                    text-anchor="middle" fill="#fff" font-size="10" font-weight="700"
+                    style="pointer-events: none">A&#x2293;B</text>
+            }
+          }
+        </svg>
+      </div>
+
+      @if (meetRevealed()) {
+        <div class="mini-game-result"
+             [class.result-correct]="meetGuess() === meetCorrectId()"
+             [class.result-wrong]="meetGuess() !== meetCorrectId()">
+          @if (meetGuess() === meetCorrectId()) {
+            Correct! The meet (A &#x2293; B) is the greatest lower bound of both highlighted states.
+          } @else {
+            Not quite. The meet is the <strong>highest</strong> node reachable from both A and B.
+          }
+        </div>
+      }
+    }
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- MORE IDEAS (remaining)                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header" appFadeIn>
+    <h2>Coming Soon</h2>
+    <p>More interactive explorations of session type theory.</p>
   </div>
 
   <div class="ideas-grid">
     <div class="idea-card" [appFadeIn]="0">
-      <span class="idea-icon">&#x1F50D;</span>
-      <h4>Find the Meet</h4>
-      <p>
-        Given two states in a lattice, find their greatest lower bound.
-        A puzzle that builds intuition for lattice operations.
-      </p>
-    </div>
-    <div class="idea-card" [appFadeIn]="100">
-      <span class="idea-icon">&#x1F6A8;</span>
-      <h4>Spot the Violation</h4>
-      <p>
-        A sequence of method calls is shown. Is it a valid protocol execution?
-        Find the first illegal move.
-      </p>
-    </div>
-    <div class="idea-card" [appFadeIn]="200">
       <span class="idea-icon">&#x1F9E9;</span>
       <h4>Build a Protocol</h4>
       <p>
@@ -710,7 +873,7 @@
         to construct a session type. Watch the Hasse diagram build in real time.
       </p>
     </div>
-    <div class="idea-card" [appFadeIn]="300">
+    <div class="idea-card" [appFadeIn]="100">
       <span class="idea-icon">&#x1F30A;</span>
       <h4>Coverage Race</h4>
       <p>
@@ -718,7 +881,7 @@
         that cover all transitions. Beat the generated test suite!
       </p>
     </div>
-    <div class="idea-card" [appFadeIn]="400">
+    <div class="idea-card" [appFadeIn]="200">
       <span class="idea-icon">&#x1F52E;</span>
       <h4>Dual Mirror</h4>
       <p>
@@ -726,7 +889,7 @@
         Every branch you take, your mirror takes the opposite selection.
       </p>
     </div>
-    <div class="idea-card" [appFadeIn]="500">
+    <div class="idea-card" [appFadeIn]="300">
       <span class="idea-icon">&#x1F3AD;</span>
       <h4>Multiparty Arena</h4>
       <p>
