@@ -170,6 +170,14 @@ export const routes: Routes = [
     title: 'Dashboard — BICA Tools',
   },
   {
+    path: 'tools/reverse-search',
+    loadComponent: () =>
+      import('./pages/reverse-search/reverse-search.component').then(
+        (m) => m.ReverseSearchComponent,
+      ),
+    title: 'Reverse Search — BICA Tools',
+  },
+  {
     path: 'embed/analyzer',
     loadComponent: () =>
       import('./pages/embed/embed-analyzer.component').then(

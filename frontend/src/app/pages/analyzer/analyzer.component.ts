@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
 import { AnalyzeResponse } from '../../models/api.models';
+import { MiniAnalyzerComponent } from '../../components/mini-analyzer/mini-analyzer.component';
 
 interface QuickExample {
   label: string;
@@ -24,6 +25,7 @@ interface QuickExample {
     MatIconModule,
     MatSnackBarModule,
     RouterLink,
+    MiniAnalyzerComponent,
   ],
   template: `
     <div class="analyzer-layout">
@@ -194,7 +196,17 @@ interface QuickExample {
           </div>
 
           @if (result()!.counterexample) {
-            <div class="counterexample-text" role="alert">Counterexample: {{ result()!.counterexample }}</div>
+            <div class="counterexample-section">
+              <div class="counterexample-text" role="alert">Counterexample: {{ result()!.counterexample }}</div>
+              <button class="explain-toggle" (click)="showFixer.set(!showFixer())"
+                      [attr.aria-expanded]="showFixer()">
+                {{ showFixer() ? 'Hide playground' : 'Fix it — edit and try again' }}
+              </button>
+              @if (showFixer()) {
+                <div class="fixer-hint">Modify the type below until the lattice check passes:</div>
+                <app-mini-analyzer [typeString]="typeString()"></app-mini-analyzer>
+              }
+            </div>
           }
 
           <!-- Details grid -->
@@ -276,6 +288,7 @@ export class AnalyzerComponent implements OnInit {
   readonly loadingStory = signal(false);
   readonly uploadMessage = signal('');
   readonly uploadError = signal(false);
+  readonly showFixer = signal(false);
   readonly safeSvg = signal<SafeHtml>('');
 
   readonly quickExamples: QuickExample[] = [

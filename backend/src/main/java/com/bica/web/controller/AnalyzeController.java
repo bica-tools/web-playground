@@ -242,6 +242,35 @@ public class AnalyzeController {
         }
     }
 
+    @GetMapping("/reverse-search")
+    public ResponseEntity<?> reverseSearch(@RequestParam String q) {
+        if (q == null || q.isBlank()) {
+            return badRequest("q parameter is required");
+        }
+        try {
+            String query = q.trim().toLowerCase();
+            var benchmarks = analysisService.getBenchmarks();
+            var matches = benchmarks.stream()
+                    .filter(b -> b.name().toLowerCase().contains(query)
+                            || b.description().toLowerCase().contains(query)
+                            || b.methods().stream().anyMatch(m -> m.toLowerCase().contains(query))
+                            || b.tags().stream().anyMatch(t -> t.toLowerCase().contains(query))
+                            || b.typeString().toLowerCase().contains(query))
+                    .map(b -> Map.of(
+                            "name", b.name(),
+                            "description", b.description(),
+                            "typeString", b.typeString(),
+                            "numStates", String.valueOf(b.numStates()),
+                            "numTransitions", String.valueOf(b.numTransitions()),
+                            "isLattice", String.valueOf(b.isLattice())
+                    ))
+                    .toList();
+            return ResponseEntity.ok(Map.of("results", matches, "total", matches.size()));
+        } catch (Exception e) {
+            return serverError("Search failed: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/explain")
     public ResponseEntity<?> explain(@RequestParam String type) {
         if (type == null || type.isBlank()) {
