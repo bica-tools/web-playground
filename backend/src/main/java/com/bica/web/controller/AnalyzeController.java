@@ -10,10 +10,15 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api")
@@ -203,6 +208,38 @@ public class AnalyzeController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(tutorial);
+    }
+
+    private static final Pattern SESSION_ANNOTATION = Pattern.compile(
+            "@Session\\s*\\(\\s*(?:value\\s*=\\s*)?\"([^\"]+)\"");
+    private static final Pattern TYPE_DECLARATION = Pattern.compile(
+            "(?:class|interface|record|enum)\\s+(\\w+)");
+
+    @PostMapping(value = "/extract-session", consumes = "multipart/form-data")
+    public ResponseEntity<?> extractSession(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return badRequest("No file uploaded");
+        }
+        try {
+            String source = new String(file.getBytes(), StandardCharsets.UTF_8);
+            var results = new ArrayList<Map<String, String>>();
+            Matcher annMatcher = SESSION_ANNOTATION.matcher(source);
+            while (annMatcher.find()) {
+                String typeString = annMatcher.group(1);
+                // Find the class name after the annotation
+                String remaining = source.substring(annMatcher.end());
+                Matcher classMatcher = TYPE_DECLARATION.matcher(remaining);
+                String className = classMatcher.find() ? classMatcher.group(1) : "Unknown";
+                results.add(Map.of("className", className, "typeString", typeString));
+            }
+            if (results.isEmpty()) {
+                return ResponseEntity.ok(Map.of("found", false, "message", "No @Session annotations found", "annotations", List.of()));
+            }
+            return ResponseEntity.ok(Map.of("found", true, "annotations", results));
+        } catch (Exception e) {
+            log.warn("Extract session failed", e);
+            return serverError("Failed to process file: " + e.getMessage());
+        }
     }
 
     @GetMapping("/explain")

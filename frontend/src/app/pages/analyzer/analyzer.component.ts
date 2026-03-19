@@ -84,6 +84,18 @@ interface QuickExample {
         @if (showGrammar()) {
           <div class="grammar-block" role="region" aria-label="Grammar reference">{{ grammarRef }}</div>
         }
+
+        <!-- Upload Java file -->
+        <div class="upload-section">
+          <label class="upload-label" for="java-upload">
+            Or upload a Java file with &#64;Session annotations
+          </label>
+          <input type="file" id="java-upload" accept=".java" class="upload-input"
+                 (change)="onFileUpload($event)" />
+          @if (uploadMessage()) {
+            <div class="upload-msg" [class.upload-error]="uploadError()">{{ uploadMessage() }}</div>
+          }
+        </div>
       </section>
 
       <!-- ════════ RIGHT PANE: Results ════════ -->
@@ -262,6 +274,8 @@ export class AnalyzerComponent implements OnInit {
   readonly storyText = signal('');
   readonly storyHtml = signal<SafeHtml>('');
   readonly loadingStory = signal(false);
+  readonly uploadMessage = signal('');
+  readonly uploadError = signal(false);
   readonly safeSvg = signal<SafeHtml>('');
 
   readonly quickExamples: QuickExample[] = [
@@ -382,6 +396,34 @@ export class AnalyzerComponent implements OnInit {
         this.loadingStory.set(false);
       },
     });
+  }
+
+  onFileUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.uploadMessage.set('');
+    this.uploadError.set(false);
+
+    this.api.extractSession(file).subscribe({
+      next: (res) => {
+        if (res.found && res.annotations.length > 0) {
+          const ann = res.annotations[0];
+          this.typeString.set(ann.typeString);
+          this.uploadMessage.set(`Found @Session on ${ann.className}` +
+            (res.annotations.length > 1 ? ` (+${res.annotations.length - 1} more)` : ''));
+          this.analyze();
+        } else {
+          this.uploadMessage.set(res.message || 'No @Session annotations found');
+          this.uploadError.set(true);
+        }
+      },
+      error: () => {
+        this.uploadMessage.set('Failed to process file');
+        this.uploadError.set(true);
+      },
+    });
+    input.value = '';
   }
 
   copyLink(): void {

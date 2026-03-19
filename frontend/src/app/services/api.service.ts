@@ -91,6 +91,12 @@ export class ApiService {
     } as GlobalAnalyzeRequest);
   }
 
+  extractSession(file: File): Observable<{ found: boolean; message?: string; annotations: { className: string; typeString: string }[] }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/extract-session`, formData);
+  }
+
   explain(typeString: string): Observable<{ explanation: string }> {
     return this.http.get<{ explanation: string }>(`${this.baseUrl}/explain`, {
       params: { type: typeString },
