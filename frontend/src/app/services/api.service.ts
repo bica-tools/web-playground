@@ -97,6 +97,12 @@ export class ApiService {
     });
   }
 
+  story(typeString: string): Observable<{ story: string }> {
+    return this.http.get<{ story: string }>(`${this.baseUrl}/story`, {
+      params: { type: typeString },
+    });
+  }
+
   gameData(typeString: string): Observable<GameDataResponse> {
     return this.http.post<GameDataResponse>(`${this.baseUrl}/game-data`, {
       typeString,

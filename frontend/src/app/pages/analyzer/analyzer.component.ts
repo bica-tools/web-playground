@@ -150,6 +150,19 @@ interface QuickExample {
             <div class="explain-panel explain-loading">Loading explanation...</div>
           }
 
+          <!-- Protocol Story -->
+          <button class="explain-toggle"
+                  (click)="toggleStory()"
+                  [attr.aria-expanded]="showStory()">
+            {{ showStory() ? 'Hide story' : 'Tell as a story' }}
+          </button>
+          @if (showStory() && storyHtml()) {
+            <div class="explain-panel story-panel" role="region" aria-label="Protocol story" [innerHTML]="storyHtml()"></div>
+          }
+          @if (showStory() && !storyText() && loadingStory()) {
+            <div class="explain-panel explain-loading">Crafting story...</div>
+          }
+
           <!-- Verdict chips -->
           <div class="verdict-row" role="list" aria-label="Property verdicts">
             <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.isLattice" [class.verdict-fail]="!result()!.isLattice">
@@ -245,6 +258,10 @@ export class AnalyzerComponent implements OnInit {
   readonly explanation = signal('');
   readonly explanationHtml = signal<SafeHtml>('');
   readonly loadingExplain = signal(false);
+  readonly showStory = signal(false);
+  readonly storyText = signal('');
+  readonly storyHtml = signal<SafeHtml>('');
+  readonly loadingStory = signal(false);
   readonly safeSvg = signal<SafeHtml>('');
 
   readonly quickExamples: QuickExample[] = [
@@ -295,6 +312,9 @@ export class AnalyzerComponent implements OnInit {
     this.showExplain.set(false);
     this.explanation.set('');
     this.explanationHtml.set('');
+    this.showStory.set(false);
+    this.storyText.set('');
+    this.storyHtml.set('');
 
     this.api.analyze(this.typeString()).subscribe({
       next: (res) => {
@@ -333,6 +353,33 @@ export class AnalyzerComponent implements OnInit {
         this.explanation.set('Could not generate explanation.');
         this.explanationHtml.set('Could not generate explanation.');
         this.loadingExplain.set(false);
+      },
+    });
+  }
+
+  toggleStory(): void {
+    if (this.showStory()) {
+      this.showStory.set(false);
+      return;
+    }
+    this.showStory.set(true);
+    if (this.storyText()) return;
+    this.loadingStory.set(true);
+    this.api.story(this.typeString()).subscribe({
+      next: (res) => {
+        this.storyText.set(res.story);
+        const html = res.story
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n- /g, '<br>&bull; ')
+          .replace(/\n/g, '<br>');
+        this.storyHtml.set(this.sanitizer.bypassSecurityTrustHtml('<p>' + html + '</p>'));
+        this.loadingStory.set(false);
+      },
+      error: () => {
+        this.storyText.set('Could not generate story.');
+        this.storyHtml.set('Could not generate story.');
+        this.loadingStory.set(false);
       },
     });
   }

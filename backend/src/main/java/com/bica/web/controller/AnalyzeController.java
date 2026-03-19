@@ -222,6 +222,29 @@ public class AnalyzeController {
         }
     }
 
+    @GetMapping("/story")
+    public ResponseEntity<?> story(@RequestParam String type,
+                                   @RequestParam(required = false) Map<String, String> allParams) {
+        if (type == null || type.isBlank()) {
+            return badRequest("type parameter is required");
+        }
+        if (type.length() > MAX_INPUT_LENGTH) {
+            return badRequest("Input too long");
+        }
+        try {
+            // Extract glossary entries: any param that isn't "type" is a glossary mapping
+            Map<String, String> glossary = new java.util.HashMap<>();
+            allParams.forEach((k, v) -> {
+                if (!"type".equals(k)) glossary.put(k, v);
+            });
+            String narrative = explainService.story(type.trim(), glossary.isEmpty() ? null : glossary);
+            return ResponseEntity.ok(Map.of("story", narrative));
+        } catch (Exception e) {
+            log.warn("Story failed for type: {}", truncate(type), e);
+            return badRequest("Could not generate story: " + e.getMessage());
+        }
+    }
+
     @GetMapping(value = "/og-image", produces = "image/svg+xml")
     public ResponseEntity<?> ogImage(@RequestParam String type) {
         if (type == null || type.isBlank()) {
