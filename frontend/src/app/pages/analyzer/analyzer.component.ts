@@ -9,6 +9,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../services/api.service';
 import { AnalyzeResponse } from '../../models/api.models';
 import { MiniAnalyzerComponent } from '../../components/mini-analyzer/mini-analyzer.component';
+import { ProgressService } from '../../services/progress.service';
 
 interface QuickExample {
   label: string;
@@ -314,6 +315,7 @@ export class AnalyzerComponent implements OnInit {
     private router: Router,
     private snackBar: MatSnackBar,
     private sanitizer: DomSanitizer,
+    private progress: ProgressService,
   ) {}
 
   ngOnInit(): void {
@@ -348,6 +350,7 @@ export class AnalyzerComponent implements OnInit {
         this.result.set(res);
         this.safeSvg.set(this.sanitizer.bypassSecurityTrustHtml(res.svgHtml));
         this.analyzing.set(false);
+        this.progress.recordAnalysis();
       },
       error: (err) => {
         this.error.set(err.error?.error || err.message || 'Analysis failed');

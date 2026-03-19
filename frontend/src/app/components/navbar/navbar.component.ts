@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { ProgressService } from '../../services/progress.service';
 
 @Component({
   selector: 'app-navbar',
@@ -40,8 +41,16 @@ import { filter } from 'rxjs/operators';
         <a mat-button routerLink="/games" routerLinkActive="active">Games</a>
         <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
-
       </nav>
+
+      <!-- XP Badge -->
+      <div class="xp-badge" [attr.title]="progress.level().name + ' — ' + progress.xp() + ' XP'">
+        <span class="xp-level">{{ progress.level().name }}</span>
+        <div class="xp-bar-outer">
+          <div class="xp-bar-inner" [style.width.%]="progress.progressPercent()"></div>
+        </div>
+        <span class="xp-val">{{ progress.xp() }}</span>
+      </div>
 
       <!-- Mobile hamburger -->
       <button mat-icon-button class="mobile-menu-btn"
@@ -98,6 +107,28 @@ import { filter } from 'rxjs/operators';
     .nav-links a.active {
       border-bottom: 2px solid white;
     }
+    /* XP Badge */
+    .xp-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 2px 10px; border-radius: 12px;
+      background: rgba(255,255,255,0.12); margin-right: 8px;
+    }
+    .xp-level {
+      font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.9);
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .xp-bar-outer {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.2);
+    }
+    .xp-bar-inner {
+      height: 100%; border-radius: 2px;
+      background: #fbbf24; transition: width 0.3s;
+    }
+    .xp-val {
+      font-size: 10px; color: rgba(255,255,255,0.7);
+      font-family: 'JetBrains Mono', monospace;
+    }
     .mobile-menu-btn {
       display: none;
       color: inherit;
@@ -135,6 +166,7 @@ import { filter } from 'rxjs/operators';
   `],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  progress = inject(ProgressService);
   isMenuOpen = false;
   private routerSub?: Subscription;
 

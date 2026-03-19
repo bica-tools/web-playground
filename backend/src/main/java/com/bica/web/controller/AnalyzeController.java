@@ -242,6 +242,29 @@ public class AnalyzeController {
         }
     }
 
+    @GetMapping("/lattice-zoo")
+    public ResponseEntity<?> latticeZoo() {
+        try {
+            var benchmarks = analysisService.getBenchmarks();
+            // Select visually interesting benchmarks (varied sizes)
+            var zoo = benchmarks.stream()
+                    .filter(b -> b.numStates() >= 3 && b.numStates() <= 30)
+                    .map(b -> Map.of(
+                            "name", b.name(),
+                            "numStates", b.numStates(),
+                            "numTransitions", b.numTransitions(),
+                            "isLattice", b.isLattice(),
+                            "svgHtml", b.svgHtml(),
+                            "typeString", b.typeString(),
+                            "tags", b.tags()
+                    ))
+                    .toList();
+            return ResponseEntity.ok(zoo);
+        } catch (Exception e) {
+            return serverError("Zoo generation failed: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/reverse-search")
     public ResponseEntity<?> reverseSearch(@RequestParam String q) {
         if (q == null || q.isBlank()) {

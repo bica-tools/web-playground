@@ -170,6 +170,14 @@ export const routes: Routes = [
     title: 'Dashboard — BICA Tools',
   },
   {
+    path: 'explore/zoo',
+    loadComponent: () =>
+      import('./pages/zoo/zoo.component').then(
+        (m) => m.ZooComponent,
+      ),
+    title: 'Lattice Zoo — BICA Tools',
+  },
+  {
     path: 'tools/reverse-search',
     loadComponent: () =>
       import('./pages/reverse-search/reverse-search.component').then(
