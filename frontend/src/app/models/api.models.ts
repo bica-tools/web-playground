@@ -277,4 +277,5 @@ export interface BenchmarkDto {
   svgHtml: string;
   toolUrl: string;
   numTests: number;
+  tags: string[];
 }

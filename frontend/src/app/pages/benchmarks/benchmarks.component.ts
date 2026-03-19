@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -10,7 +11,7 @@ import { CounterComponent } from '../../shared/counter/counter.component';
 @Component({
   selector: 'app-benchmarks',
   standalone: true,
-  imports: [RouterLink, MatProgressSpinnerModule, FadeInDirective, CounterComponent],
+  imports: [FormsModule, RouterLink, MatProgressSpinnerModule, FadeInDirective, CounterComponent],
   template: `
     <section class="bench-hero">
       <h1>Benchmark Observatory</h1>
@@ -43,7 +44,19 @@ import { CounterComponent } from '../../shared/counter/counter.component';
       </section>
     }
 
-    <!-- Filters -->
+    <!-- Search + Filters + Sort -->
+    <div class="search-row">
+      <input class="search-input" type="text" placeholder="Search protocols..." [ngModel]="search()" (ngModelChange)="search.set($event)" aria-label="Search benchmarks" />
+      <select class="sort-select" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" aria-label="Sort benchmarks">
+        <option value="name">Name</option>
+        <option value="states-asc">States (asc)</option>
+        <option value="states-desc">States (desc)</option>
+        <option value="transitions-desc">Transitions (desc)</option>
+        <option value="tests-desc">Tests (desc)</option>
+        <option value="methods-desc">Methods (desc)</option>
+      </select>
+    </div>
+
     <div class="filter-row" role="group" aria-label="Benchmark filters">
       <span class="f-label" id="filter-label">Filter:</span>
       <button class="f-chip" [class.active]="filter() === 'all'" [attr.aria-pressed]="filter() === 'all'" (click)="filter.set('all')">All</button>
@@ -52,6 +65,26 @@ import { CounterComponent } from '../../shared/counter/counter.component';
       <button class="f-chip" [class.active]="filter() === 'simple'" [attr.aria-pressed]="filter() === 'simple'" (click)="filter.set('simple')">Simple</button>
       <button class="f-chip" [class.active]="filter() === 'large'" [attr.aria-pressed]="filter() === 'large'" (click)="filter.set('large')">Large (&gt;5 states)</button>
     </div>
+
+    <!-- Tag filters -->
+    @if (allTags().length > 0) {
+      <div class="filter-row" role="group" aria-label="Tag filters">
+        <span class="f-label">Tags:</span>
+        @for (tag of allTags(); track tag) {
+          <button class="f-chip tag-chip" [class.active]="activeTag() === tag" [attr.aria-pressed]="activeTag() === tag" (click)="toggleTag(tag)">{{ tag }}</button>
+        }
+      </div>
+    }
+
+    <!-- Result count -->
+    @if (!loading()) {
+      <div class="result-count">
+        {{ filtered().length }} of {{ benchmarks().length }} protocols
+        @if (search() || activeTag() || filter() !== 'all') {
+          <button class="clear-btn" (click)="clearFilters()">Clear filters</button>
+        }
+      </div>
+    }
 
     <!-- Loading -->
     @if (loading()) {
@@ -127,6 +160,13 @@ import { CounterComponent } from '../../shared/counter/counter.component';
                 @if (b.isRecursive) { <span class="bc-badge badge-rec">rec</span> }
               </div>
             </div>
+            @if (b.tags && b.tags.length > 0) {
+              <div class="bc-tags">
+                @for (tag of b.tags; track tag) {
+                  <span class="bc-tag" (click)="$event.stopPropagation(); toggleTag(tag)">{{ tag }}</span>
+                }
+              </div>
+            }
             <div class="bc-desc">{{ b.description }}</div>
             <div class="bc-metrics">
               <span>{{ b.numStates }}s</span>
@@ -157,6 +197,9 @@ export class BenchmarksComponent implements OnInit {
   readonly benchmarks = signal<BenchmarkDto[]>([]);
   readonly loading = signal(true);
   readonly filter = signal('all');
+  readonly search = signal('');
+  readonly activeTag = signal('');
+  readonly sortBy = signal('name');
   readonly selected = signal<BenchmarkDto | null>(null);
   readonly selectedSvg = signal<SafeHtml>('');
 
@@ -167,17 +210,68 @@ export class BenchmarksComponent implements OnInit {
 
   private svgCache = new Map<string, SafeHtml>();
 
+  readonly allTags = computed(() => {
+    const tagSet = new Set<string>();
+    for (const b of this.benchmarks()) {
+      if (b.tags) b.tags.forEach(t => tagSet.add(t));
+    }
+    return [...tagSet].sort();
+  });
+
   readonly filtered = computed(() => {
     const f = this.filter();
-    const all = this.benchmarks();
+    const q = this.search().toLowerCase().trim();
+    const tag = this.activeTag();
+    const sort = this.sortBy();
+    let list = this.benchmarks();
+
+    // Property filter
     switch (f) {
-      case 'parallel': return all.filter(b => b.usesParallel);
-      case 'recursive': return all.filter(b => b.isRecursive);
-      case 'simple': return all.filter(b => !b.usesParallel && !b.isRecursive);
-      case 'large': return all.filter(b => b.numStates > 5);
-      default: return all;
+      case 'parallel': list = list.filter(b => b.usesParallel); break;
+      case 'recursive': list = list.filter(b => b.isRecursive); break;
+      case 'simple': list = list.filter(b => !b.usesParallel && !b.isRecursive); break;
+      case 'large': list = list.filter(b => b.numStates > 5); break;
     }
+
+    // Tag filter
+    if (tag) {
+      list = list.filter(b => b.tags && b.tags.includes(tag));
+    }
+
+    // Search filter
+    if (q) {
+      list = list.filter(b =>
+        b.name.toLowerCase().includes(q) ||
+        b.description.toLowerCase().includes(q) ||
+        (b.methods && b.methods.some(m => m.toLowerCase().includes(q))) ||
+        (b.tags && b.tags.some(t => t.toLowerCase().includes(q)))
+      );
+    }
+
+    // Sort
+    list = [...list];
+    switch (sort) {
+      case 'name': list.sort((a, b) => a.name.localeCompare(b.name)); break;
+      case 'states-asc': list.sort((a, b) => a.numStates - b.numStates); break;
+      case 'states-desc': list.sort((a, b) => b.numStates - a.numStates); break;
+      case 'transitions-desc': list.sort((a, b) => b.numTransitions - a.numTransitions); break;
+      case 'tests-desc': list.sort((a, b) => b.numTests - a.numTests); break;
+      case 'methods-desc': list.sort((a, b) => b.numMethods - a.numMethods); break;
+    }
+
+    return list;
   });
+
+  toggleTag(tag: string): void {
+    this.activeTag.set(this.activeTag() === tag ? '' : tag);
+  }
+
+  clearFilters(): void {
+    this.search.set('');
+    this.filter.set('all');
+    this.activeTag.set('');
+    this.sortBy.set('name');
+  }
 
   constructor(private api: ApiService, private sanitizer: DomSanitizer) {}
 

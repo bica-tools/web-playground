@@ -22,5 +22,6 @@ public record BenchmarkDto(
         boolean threadSafe,
         int numValidPaths,
         int numViolations,
-        int numIncomplete
+        int numIncomplete,
+        List<String> tags
 ) {}
