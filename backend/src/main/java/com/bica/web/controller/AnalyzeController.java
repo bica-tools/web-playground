@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -199,6 +200,26 @@ public class AnalyzeController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(tutorial);
+    }
+
+    @GetMapping(value = "/og-image", produces = "image/svg+xml")
+    public ResponseEntity<?> ogImage(@RequestParam String type) {
+        if (type == null || type.isBlank()) {
+            return badRequest("type parameter is required");
+        }
+        if (type.length() > MAX_INPUT_LENGTH) {
+            return badRequest("Input too long");
+        }
+        try {
+            String svg = analysisService.renderOgSvg(type.trim());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf("image/svg+xml"))
+                    .header("Cache-Control", "public, max-age=86400")
+                    .body(svg);
+        } catch (Exception e) {
+            log.warn("OG image failed for type: {}", truncate(type), e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/health")

@@ -468,6 +468,15 @@ public class AnalysisService {
         return Graphviz.fromString(dotSource).render(Format.SVG).toString();
     }
 
+    /** Render a session type's Hasse diagram as SVG string for OG image previews. */
+    public String renderOgSvg(String typeString) {
+        SessionType ast = Parser.parse(typeString);
+        StateSpace ss = StateSpaceBuilder.build(ast);
+        LatticeResult lr = LatticeChecker.checkLattice(ss);
+        String dot = BicaCli.buildDot(ss, lr, null, true, true);
+        return Graphviz.fromString(dot).width(800).render(Format.SVG).toString();
+    }
+
     // --- AST helper methods ---
 
     private static boolean containsParallel(SessionType type) {
