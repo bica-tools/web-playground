@@ -1,5 +1,7 @@
 package com.bica.web.dto;
 
+import java.util.List;
+
 public record CompareResponse(
         String pretty1,
         String pretty2,
@@ -31,5 +33,9 @@ public record CompareResponse(
         boolean isRecursive2,
         boolean isGuarded2,
         boolean isContractive2,
-        boolean isTailRecursive2
+        boolean isTailRecursive2,
+        // Method diff
+        List<String> sharedMethods,
+        List<String> uniqueMethods1,
+        List<String> uniqueMethods2
 ) {}

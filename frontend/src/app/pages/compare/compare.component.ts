@@ -133,6 +133,45 @@ import { CompareResponse } from '../../models/api.models';
         </div>
       </div>
 
+      <!-- Method Diff -->
+      @if (r.sharedMethods.length > 0 || r.uniqueMethods1.length > 0 || r.uniqueMethods2.length > 0) {
+        <div class="diff-section">
+          <h2 class="diff-title">Method Diff</h2>
+          <div class="diff-grid">
+            @if (r.sharedMethods.length > 0) {
+              <div class="diff-group">
+                <span class="diff-label diff-shared-label">Shared</span>
+                <div class="diff-chips">
+                  @for (m of r.sharedMethods; track m) {
+                    <span class="diff-chip diff-shared">{{ m }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (r.uniqueMethods1.length > 0) {
+              <div class="diff-group">
+                <span class="diff-label diff-t1-label">Only in Type 1</span>
+                <div class="diff-chips">
+                  @for (m of r.uniqueMethods1; track m) {
+                    <span class="diff-chip diff-t1">{{ m }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (r.uniqueMethods2.length > 0) {
+              <div class="diff-group">
+                <span class="diff-label diff-t2-label">Only in Type 2</span>
+                <div class="diff-chips">
+                  @for (m of r.uniqueMethods2; track m) {
+                    <span class="diff-chip diff-t2">{{ m }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <!-- Properties comparison table -->
       <div class="props-section">
         <h2 class="props-title">Properties</h2>

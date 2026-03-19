@@ -570,6 +570,19 @@ public class AnalysisService {
         var rec1 = RecursionChecker.analyzeRecursion(ast1);
         var rec2 = RecursionChecker.analyzeRecursion(ast2);
 
+        // Method diff
+        Set<String> methods1 = ThreadSafetyChecker.extractMethods(ast1);
+        Set<String> methods2 = ThreadSafetyChecker.extractMethods(ast2);
+        var shared = new ArrayList<>(methods1);
+        shared.retainAll(methods2);
+        Collections.sort(shared);
+        var unique1 = new ArrayList<>(methods1);
+        unique1.removeAll(methods2);
+        Collections.sort(unique1);
+        var unique2 = new ArrayList<>(methods2);
+        unique2.removeAll(methods1);
+        Collections.sort(unique2);
+
         return new CompareResponse(
                 pretty1, pretty2,
                 sub12, sub21, subtypingRelation,
@@ -578,7 +591,8 @@ public class AnalysisService {
                 ss2.states().size(), ss2.transitions().size(), lr2.isLattice(), svg2,
                 chomsky1.level(), chomsky2.level(),
                 rec1.numRecBinders() > 0, rec1.isGuarded(), rec1.isContractive(), rec1.isTailRecursive(),
-                rec2.numRecBinders() > 0, rec2.isGuarded(), rec2.isContractive(), rec2.isTailRecursive()
+                rec2.numRecBinders() > 0, rec2.isGuarded(), rec2.isContractive(), rec2.isTailRecursive(),
+                shared, unique1, unique2
         );
     }
 

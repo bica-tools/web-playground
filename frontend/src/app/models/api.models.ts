@@ -141,6 +141,9 @@ export interface CompareResponse {
   isGuarded2: boolean;
   isContractive2: boolean;
   isTailRecursive2: boolean;
+  sharedMethods: string[];
+  uniqueMethods1: string[];
+  uniqueMethods2: string[];
 }
 
 // --- Composition ---

@@ -167,6 +167,44 @@
 
 :host ::ng-deep .panel-hasse svg { max-width: 100%; max-height: 400px; }
 
+/* ── Method Diff ── */
+.diff-section {
+  max-width: 1200px; margin: 0 auto 24px; padding: 0 16px;
+}
+
+.diff-title {
+  font-size: 16px; font-weight: 600; margin: 0 0 12px;
+  color: rgba(0,0,0,0.75);
+}
+
+.diff-grid {
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+
+.diff-group {
+  flex: 1; min-width: 180px;
+}
+
+.diff-label {
+  display: block; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.4px; font-weight: 600; margin-bottom: 6px;
+}
+
+.diff-shared-label { color: #6b7280; }
+.diff-t1-label { color: #059669; }
+.diff-t2-label { color: #2563eb; }
+
+.diff-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.diff-chip {
+  padding: 3px 10px; border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+}
+
+.diff-shared { background: #f3f4f6; color: #374151; }
+.diff-t1 { background: #ecfdf5; color: #065f46; border: 1px solid rgba(5,150,105,0.2); }
+.diff-t2 { background: #eff6ff; color: #1e40af; border: 1px solid rgba(37,99,235,0.2); }
+
 /* ── Properties table ── */
 .props-section {
   max-width: 1200px; margin: 0 auto 48px; padding: 0 16px;
