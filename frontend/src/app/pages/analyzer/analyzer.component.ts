@@ -137,6 +137,19 @@ interface QuickExample {
             <figure class="hasse-section" role="img" [attr.aria-label]="'Hasse diagram of ' + result()!.pretty" [innerHTML]="safeSvg()"></figure>
           }
 
+          <!-- Explain this -->
+          <button class="explain-toggle"
+                  (click)="toggleExplain()"
+                  [attr.aria-expanded]="showExplain()">
+            {{ showExplain() ? 'Hide explanation' : 'Explain this protocol' }}
+          </button>
+          @if (showExplain() && explanation()) {
+            <div class="explain-panel" role="region" aria-label="Protocol explanation" [innerHTML]="explanationHtml()"></div>
+          }
+          @if (showExplain() && !explanation() && loadingExplain()) {
+            <div class="explain-panel explain-loading">Loading explanation...</div>
+          }
+
           <!-- Verdict chips -->
           <div class="verdict-row" role="list" aria-label="Property verdicts">
             <span class="verdict-chip" role="listitem" [class.verdict-pass]="result()!.isLattice" [class.verdict-fail]="!result()!.isLattice">
@@ -228,6 +241,10 @@ export class AnalyzerComponent implements OnInit {
   readonly analyzing = signal(false);
   readonly showGrammar = signal(false);
   readonly showDot = signal(false);
+  readonly showExplain = signal(false);
+  readonly explanation = signal('');
+  readonly explanationHtml = signal<SafeHtml>('');
+  readonly loadingExplain = signal(false);
   readonly safeSvg = signal<SafeHtml>('');
 
   readonly quickExamples: QuickExample[] = [
@@ -275,6 +292,9 @@ export class AnalyzerComponent implements OnInit {
     this.result.set(null);
     this.error.set('');
     this.showDot.set(false);
+    this.showExplain.set(false);
+    this.explanation.set('');
+    this.explanationHtml.set('');
 
     this.api.analyze(this.typeString()).subscribe({
       next: (res) => {
@@ -285,6 +305,34 @@ export class AnalyzerComponent implements OnInit {
       error: (err) => {
         this.error.set(err.error?.error || err.message || 'Analysis failed');
         this.analyzing.set(false);
+      },
+    });
+  }
+
+  toggleExplain(): void {
+    if (this.showExplain()) {
+      this.showExplain.set(false);
+      return;
+    }
+    this.showExplain.set(true);
+    if (this.explanation()) return; // already loaded
+    this.loadingExplain.set(true);
+    this.api.explain(this.typeString()).subscribe({
+      next: (res) => {
+        this.explanation.set(res.explanation);
+        // Convert markdown-like **bold** to <strong> and newlines to <br>/<p>
+        const html = res.explanation
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n- /g, '<br>&bull; ')
+          .replace(/\n/g, '<br>');
+        this.explanationHtml.set(this.sanitizer.bypassSecurityTrustHtml('<p>' + html + '</p>'));
+        this.loadingExplain.set(false);
+      },
+      error: () => {
+        this.explanation.set('Could not generate explanation.');
+        this.explanationHtml.set('Could not generate explanation.');
+        this.loadingExplain.set(false);
       },
     });
   }

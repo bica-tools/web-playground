@@ -24,15 +24,18 @@ public class AnalyzeController {
 
     private final AnalysisService analysisService;
     private final TutorialService tutorialService;
+    private final com.bica.web.service.ExplainService explainService;
     private final CacheManager cacheManager;
     private final RedisConnectionFactory redisConnectionFactory;
 
     public AnalyzeController(AnalysisService analysisService,
                              TutorialService tutorialService,
+                             com.bica.web.service.ExplainService explainService,
                              CacheManager cacheManager,
                              RedisConnectionFactory redisConnectionFactory) {
         this.analysisService = analysisService;
         this.tutorialService = tutorialService;
+        this.explainService = explainService;
         this.cacheManager = cacheManager;
         this.redisConnectionFactory = redisConnectionFactory;
     }
@@ -200,6 +203,23 @@ public class AnalyzeController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(tutorial);
+    }
+
+    @GetMapping("/explain")
+    public ResponseEntity<?> explain(@RequestParam String type) {
+        if (type == null || type.isBlank()) {
+            return badRequest("type parameter is required");
+        }
+        if (type.length() > MAX_INPUT_LENGTH) {
+            return badRequest("Input too long");
+        }
+        try {
+            String explanation = explainService.explain(type.trim());
+            return ResponseEntity.ok(Map.of("explanation", explanation));
+        } catch (Exception e) {
+            log.warn("Explain failed for type: {}", truncate(type), e);
+            return badRequest("Could not explain: " + e.getMessage());
+        }
     }
 
     @GetMapping(value = "/og-image", produces = "image/svg+xml")

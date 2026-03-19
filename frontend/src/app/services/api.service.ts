@@ -91,6 +91,12 @@ export class ApiService {
     } as GlobalAnalyzeRequest);
   }
 
+  explain(typeString: string): Observable<{ explanation: string }> {
+    return this.http.get<{ explanation: string }>(`${this.baseUrl}/explain`, {
+      params: { type: typeString },
+    });
+  }
+
   gameData(typeString: string): Observable<GameDataResponse> {
     return this.http.post<GameDataResponse>(`${this.baseUrl}/game-data`, {
       typeString,
