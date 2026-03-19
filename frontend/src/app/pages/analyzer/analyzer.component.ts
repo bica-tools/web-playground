@@ -205,7 +205,7 @@ interface QuickExample {
               </button>
               @if (showFixer()) {
                 <div class="fixer-hint">Modify the type below until the lattice check passes:</div>
-                <app-mini-analyzer [typeString]="typeString()"></app-mini-analyzer>
+                <app-mini-analyzer [typeString]="typeString()" (analyzed)="onFixerAnalyzed($event)"></app-mini-analyzer>
               }
             </div>
           }
@@ -440,6 +440,12 @@ export class AnalyzerComponent implements OnInit {
       },
     });
     input.value = '';
+  }
+
+  onFixerAnalyzed(result: AnalyzeResponse): void {
+    if (result.isLattice) {
+      this.progress.recordCounterexampleFix();
+    }
   }
 
   copyLink(): void {

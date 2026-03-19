@@ -41,6 +41,9 @@ import { ProgressService } from '../../services/progress.service';
         <a mat-button routerLink="/games" routerLinkActive="active">Games</a>
         <a mat-button routerLink="/theory" routerLinkActive="active">Research</a>
         <a mat-button routerLink="/benchmarks" routerLinkActive="active">Benchmarks</a>
+        <a mat-button routerLink="/tools/sandbox" routerLinkActive="active">Sandbox</a>
+        <a mat-button routerLink="/explore/zoo" routerLinkActive="active">Zoo</a>
+        <a mat-button routerLink="/tools/reverse-search" routerLinkActive="active">Search</a>
       </nav>
 
       <!-- XP Badge -->
@@ -69,6 +72,9 @@ import { ProgressService } from '../../services/progress.service';
         <a routerLink="/games" routerLinkActive="active" (click)="closeMenu()">Games</a>
         <a routerLink="/theory" routerLinkActive="active" (click)="closeMenu()">Research</a>
         <a routerLink="/benchmarks" routerLinkActive="active" (click)="closeMenu()">Benchmarks</a>
+        <a routerLink="/tools/sandbox" routerLinkActive="active" (click)="closeMenu()">Sandbox</a>
+        <a routerLink="/explore/zoo" routerLinkActive="active" (click)="closeMenu()">Zoo</a>
+        <a routerLink="/tools/reverse-search" routerLinkActive="active" (click)="closeMenu()">Search</a>
       </nav>
     }
   `,

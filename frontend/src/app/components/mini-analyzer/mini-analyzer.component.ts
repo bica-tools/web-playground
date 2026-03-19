@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -88,6 +88,7 @@ import { AnalyzeResponse } from '../../models/api.models';
 })
 export class MiniAnalyzerComponent implements OnInit, OnChanges {
   @Input() typeString = '';
+  @Output() analyzed = new EventEmitter<AnalyzeResponse>();
 
   readonly currentType = signal('');
   readonly result = signal<AnalyzeResponse | null>(null);
@@ -120,6 +121,7 @@ export class MiniAnalyzerComponent implements OnInit, OnChanges {
         if (res) {
           this.result.set(res);
           this.safeSvg.set(this.sanitizer.bypassSecurityTrustHtml(res.svgHtml));
+          this.analyzed.emit(res);
         }
         this.loading.set(false);
       },

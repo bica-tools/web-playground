@@ -3,13 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-sandbox',
   standalone: true,
-  imports: [FormsModule, MatProgressSpinnerModule, RouterLink],
+  imports: [FormsModule, MatProgressSpinnerModule],
   template: `
     <section class="sb-header">
       <h1>Live Sandbox</h1>
@@ -43,13 +42,30 @@ import { ApiService } from '../../services/api.service';
                 Violation at {{ traceResult()!.violationAt }}
               }
             </div>
+
+            @if (traceResult()!.valid) {
+              <div class="sb-current-state" [class.sb-current-complete]="traceResult()!.complete">
+                <span class="sb-current-label">Current State</span>
+                <span class="sb-current-id">{{ traceResult()!.currentState }}</span>
+                @if (traceResult()!.complete) {
+                  <span class="sb-current-badge">END</span>
+                }
+              </div>
+            }
           }
 
           @if (traceResult()?.path; as path) {
             <div class="sb-path">
               @for (step of path; track $index) {
-                <span class="sb-step" [class.sb-step-valid]="step.valid" [class.sb-step-invalid]="!step.valid">
-                  {{ step.method }}
+                <span class="sb-step"
+                      [class.sb-step-valid]="step.valid"
+                      [class.sb-step-invalid]="!step.valid"
+                      [class.sb-step-last]="step.valid && $last">
+                  <span class="sb-step-state">{{ step.from }}</span>
+                  <span class="sb-step-arrow">→</span>
+                  <span class="sb-step-method">{{ step.method }}</span>
+                  <span class="sb-step-arrow">→</span>
+                  <span class="sb-step-state">{{ step.to }}</span>
                 </span>
               }
             </div>
@@ -116,13 +132,44 @@ import { ApiService } from '../../services/api.service';
     }
     .sb-valid { background: #ecfdf5; color: #065f46; }
     .sb-invalid { background: #fef2f2; color: #b91c1c; }
-    .sb-path { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-    .sb-step {
-      padding: 2px 8px; border-radius: 8px; font-size: 11px;
+    .sb-current-state {
+      display: flex; align-items: center; gap: 10px;
+      margin: 10px 0 4px; padding: 10px 14px;
+      background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+      border: 1px solid #c7d2fe; border-radius: 10px;
+    }
+    .sb-current-complete {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border-color: #6ee7b7;
+    }
+    .sb-current-label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: rgba(0,0,0,0.45); font-weight: 600;
+    }
+    .sb-current-id {
+      font-size: 22px; font-weight: 700; color: #4338ca;
       font-family: 'JetBrains Mono', monospace;
     }
+    .sb-current-complete .sb-current-id { color: #059669; }
+    .sb-current-badge {
+      font-size: 9px; font-weight: 700; color: #fff;
+      background: #059669; padding: 2px 8px; border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .sb-path { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .sb-step {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; border-radius: 8px; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: transform 0.15s ease;
+    }
+    .sb-step:hover { transform: scale(1.05); }
     .sb-step-valid { background: #ecfdf5; color: #065f46; }
     .sb-step-invalid { background: #fef2f2; color: #b91c1c; }
+    .sb-step-last { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    .sb-step-state { font-weight: 700; font-size: 10px; opacity: 0.7; }
+    .sb-step-arrow { font-size: 9px; opacity: 0.4; }
+    .sb-step-method { font-weight: 600; }
     .sb-examples {
       margin-top: 16px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
     }
@@ -149,6 +196,7 @@ export class SandboxComponent {
   readonly loadingType = signal(false);
   readonly hasseSvg = signal<SafeHtml>('');
   readonly traceResult = signal<any>(null);
+  private rawSvg = '';
 
   examples = [
     { name: 'Iterator', type: 'rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}', trace: 'hasNext\nnext\nhasNext' },
@@ -167,6 +215,7 @@ export class SandboxComponent {
     this.loadingType.set(true);
     this.api.analyze(this.typeString.trim()).subscribe({
       next: (res) => {
+        this.rawSvg = res.svgHtml;
         this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(res.svgHtml));
         this.hasseLoaded.set(true);
         this.loadingType.set(false);
@@ -180,15 +229,100 @@ export class SandboxComponent {
     const methods = this.traceText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
     if (methods.length === 0) {
       this.traceResult.set(null);
+      this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(this.rawSvg));
       return;
     }
     this.http.post<any>('/api/validate-trace', {
       typeString: this.typeString.trim(),
       trace: methods,
     }).subscribe({
-      next: (res) => this.traceResult.set(res),
-      error: () => this.traceResult.set(null),
+      next: (res) => {
+        this.traceResult.set(res);
+        this.highlightSvg(res);
+      },
+      error: () => {
+        this.traceResult.set(null);
+        this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(this.rawSvg));
+      },
     });
+  }
+
+  private highlightSvg(result: any): void {
+    if (!this.rawSvg || !result?.path) {
+      this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(this.rawSvg));
+      return;
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(this.rawSvg, 'image/svg+xml');
+    const svg = doc.querySelector('svg');
+    if (!svg) {
+      this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(this.rawSvg));
+      return;
+    }
+
+    // Collect visited states and the current state
+    const visitedStates = new Set<number>();
+    const visitedEdges = new Set<string>(); // "from->to"
+    for (const step of result.path) {
+      visitedStates.add(step.from);
+      if (step.valid) {
+        visitedStates.add(step.to);
+        visitedEdges.add(`${step.from}->${step.to}`);
+      }
+    }
+    const currentState: number = result.currentState;
+
+    // Highlight nodes: graphviz nodes are <g class="node"> with <title>state_id</title>
+    const nodes = svg.querySelectorAll('g.node');
+    nodes.forEach(node => {
+      const title = node.querySelector('title');
+      if (!title) return;
+      const stateId = parseInt(title.textContent || '', 10);
+      if (isNaN(stateId)) return;
+
+      const ellipse = node.querySelector('ellipse');
+      const polygon = node.querySelector('polygon');
+      const shape = ellipse || polygon;
+
+      if (stateId === currentState) {
+        if (shape) {
+          shape.setAttribute('fill', result.complete ? '#d1fae5' : '#e0e7ff');
+          shape.setAttribute('stroke', result.complete ? '#059669' : '#4338ca');
+          shape.setAttribute('stroke-width', '3');
+        }
+      } else if (visitedStates.has(stateId)) {
+        if (shape) {
+          shape.setAttribute('fill', '#f0fdf4');
+          shape.setAttribute('stroke', '#86efac');
+          shape.setAttribute('stroke-width', '2');
+        }
+      }
+    });
+
+    // Highlight edges: <g class="edge"> with <title>from->to</title>
+    const edges = svg.querySelectorAll('g.edge');
+    edges.forEach(edge => {
+      const title = edge.querySelector('title');
+      if (!title) return;
+      const edgeKey = (title.textContent || '').replace(/\s/g, '');
+      if (visitedEdges.has(edgeKey)) {
+        const path = edge.querySelector('path');
+        const polyArrow = edge.querySelector('polygon');
+        if (path) {
+          path.setAttribute('stroke', '#4338ca');
+          path.setAttribute('stroke-width', '2.5');
+        }
+        if (polyArrow) {
+          polyArrow.setAttribute('fill', '#4338ca');
+          polyArrow.setAttribute('stroke', '#4338ca');
+        }
+      }
+    });
+
+    const serializer = new XMLSerializer();
+    const highlighted = serializer.serializeToString(svg);
+    this.hasseSvg.set(this.sanitizer.bypassSecurityTrustHtml(highlighted));
   }
 
   loadExample(ex: { type: string; trace: string }): void {

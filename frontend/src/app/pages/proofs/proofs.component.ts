@@ -1,6 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FadeInDirective } from '../../shared/fade-in.directive';
 import { CounterComponent } from '../../shared/counter/counter.component';
+import { MiniAnalyzerComponent } from '../../components/mini-analyzer/mini-analyzer.component';
 
 interface ProofModule {
   file: string;
@@ -13,15 +16,64 @@ interface ProofModule {
   theorems: { name: string; note?: string }[];
 }
 
+interface ReplayStep {
+  text: string;
+  highlight: string;
+}
+
+interface ProofReplay {
+  theorem: string;
+  leanModule: string;
+  description: string;
+  exampleType: string;
+  highlights: string[];
+  steps: ReplayStep[];
+}
+
 @Component({
   selector: 'app-proofs',
   standalone: true,
-  imports: [FadeInDirective, CounterComponent],
+  imports: [FadeInDirective, CounterComponent, MiniAnalyzerComponent],
   templateUrl: './proofs.component.html',
   styleUrl: './proofs.component.scss',
 })
-export class ProofsComponent {
+export class ProofsComponent implements OnInit {
   readonly activeFilter = signal('all');
+  readonly replays = signal<ProofReplay[]>([]);
+  readonly activeReplay = signal<ProofReplay | null>(null);
+  readonly replayStep = signal(0);
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.http.get<ProofReplay[]>('/api/proof-replay').subscribe({
+      next: (data) => this.replays.set(data),
+    });
+  }
+
+  startReplay(replay: ProofReplay): void {
+    this.activeReplay.set(replay);
+    this.replayStep.set(0);
+  }
+
+  nextStep(): void {
+    const replay = this.activeReplay();
+    if (!replay) return;
+    if (this.replayStep() < replay.steps.length - 1) {
+      this.replayStep.set(this.replayStep() + 1);
+    }
+  }
+
+  prevStep(): void {
+    if (this.replayStep() > 0) {
+      this.replayStep.set(this.replayStep() - 1);
+    }
+  }
+
+  closeReplay(): void {
+    this.activeReplay.set(null);
+    this.replayStep.set(0);
+  }
 
   readonly modules: ProofModule[] = [
     // ── Foundations ──

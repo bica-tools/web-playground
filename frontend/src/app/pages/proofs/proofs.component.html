@@ -24,6 +24,50 @@
   </div>
 </section>
 
+<!-- Proof Replays -->
+@if (replays().length > 0) {
+  <section class="replay-section">
+    <h2 class="replay-title">Proof Replays</h2>
+    <p class="replay-subtitle">Step through key theorems with visual explanations</p>
+    <div class="replay-grid">
+      @for (r of replays(); track r.theorem) {
+        <div class="replay-card" (click)="startReplay(r)">
+          <div class="replay-name">{{ r.theorem }}</div>
+          <div class="replay-desc">{{ r.description }}</div>
+          <div class="replay-meta">{{ r.steps.length }} steps &middot; {{ r.leanModule }}.lean</div>
+        </div>
+      }
+    </div>
+  </section>
+}
+
+<!-- Active Replay Overlay -->
+@if (activeReplay(); as replay) {
+  <div class="replay-overlay">
+    <div class="replay-panel">
+      <div class="replay-header">
+        <h3>{{ replay.theorem }}</h3>
+        <button class="replay-close" (click)="closeReplay()">&times;</button>
+      </div>
+      <div class="replay-body">
+        <div class="replay-step-text">
+          <span class="replay-step-num">Step {{ replayStep() + 1 }}/{{ replay.steps.length }}</span>
+          <p>{{ replay.steps[replayStep()].text }}</p>
+          <div class="replay-highlight-badge">
+            Highlight: <strong>{{ replay.steps[replayStep()].highlight }}</strong>
+          </div>
+        </div>
+        <app-mini-analyzer [typeString]="replay.exampleType"></app-mini-analyzer>
+      </div>
+      <div class="replay-controls">
+        <button class="replay-btn" (click)="prevStep()" [disabled]="replayStep() === 0">Previous</button>
+        <button class="replay-btn" (click)="nextStep()" [disabled]="replayStep() === replay.steps.length - 1">Next</button>
+        <button class="replay-btn replay-done" (click)="closeReplay()">Done</button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- Filter -->
 <div class="filter-bar">
   <span class="filter-label">Filter:</span>

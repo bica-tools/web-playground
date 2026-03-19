@@ -11,6 +11,7 @@ import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FadeInDirective } from '../../shared/fade-in.directive';
 import { ApiService } from '../../services/api.service';
+import { ProgressService } from '../../services/progress.service';
 import {
   GameDataResponse,
   GameNode,
@@ -164,7 +165,7 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
   private autoTimer: ReturnType<typeof setTimeout> | null = null;
   private playbackTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private progress: ProgressService) {}
 
   ngAfterViewInit(): void {}
 
@@ -229,6 +230,7 @@ export class GamesComponent implements AfterViewInit, OnDestroy {
 
     if (edge.tgt === this.gameData()!.bottom) {
       this.isFinished.set(true);
+      this.progress.recordGameWin();
       return;
     }
 

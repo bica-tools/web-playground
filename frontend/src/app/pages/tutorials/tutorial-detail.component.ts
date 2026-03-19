@@ -4,6 +4,7 @@ import { Subscription, forkJoin } from 'rxjs';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
 import { MiniAnalyzerComponent } from '../../components/mini-analyzer/mini-analyzer.component';
 import { ApiService } from '../../services/api.service';
+import { ProgressService } from '../../services/progress.service';
 import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 
 @Component({
@@ -59,6 +60,14 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
               <span class="nav-spacer"></span>
               @if (nextTutorial()) {
                 <a class="nav-next" [routerLink]="['/tutorials', nextTutorial()!.id]">{{ nextTutorial()!.title }} &rarr;</a>
+              }
+            </div>
+
+            <div class="complete-section">
+              @if (completed()) {
+                <span class="complete-badge">Completed</span>
+              } @else {
+                <button class="complete-btn" (click)="markComplete()">Mark as complete</button>
               }
             </div>
           </section>
@@ -236,12 +245,42 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
       font-size: 16px;
       margin: 0;
     }
+
+    .complete-section {
+      text-align: center;
+      padding: 16px 0 8px;
+    }
+    .complete-btn {
+      padding: 8px 24px;
+      border: 1px solid var(--brand-primary, #4338ca);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--brand-primary, #4338ca);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .complete-btn:hover {
+      background: var(--brand-primary, #4338ca);
+      color: #fff;
+    }
+    .complete-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 8px;
+      background: #ecfdf5;
+      color: #065f46;
+      font-size: 14px;
+      font-weight: 600;
+    }
   `],
 })
 export class TutorialDetailComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
+  private progress = inject(ProgressService);
   private sub: Subscription | null = null;
 
   tutorial = signal<TutorialDto | null>(null);
@@ -250,6 +289,7 @@ export class TutorialDetailComponent implements OnInit, OnDestroy {
   nextTutorial = signal<TutorialSummaryDto | null>(null);
   activeStepIndex = signal(-1);
   loading = signal(false);
+  completed = signal(false);
 
   ngOnInit(): void {
     this.sub = this.route.paramMap.subscribe((params) => {
@@ -277,6 +317,7 @@ export class TutorialDetailComponent implements OnInit, OnDestroy {
         this.tutorial.set(tutorial);
         this.allTutorials.set(list);
         this.computePrevNext(tutorial, list);
+        this.completed.set(this.progress.progress().tutorialsCompleted.includes(tutorial.id));
         this.loading.set(false);
         this.cdr.markForCheck();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -292,6 +333,14 @@ export class TutorialDetailComponent implements OnInit, OnDestroy {
     const idx = list.findIndex((t) => t.id === tutorial.id);
     this.prevTutorial.set(idx > 0 ? list[idx - 1] : null);
     this.nextTutorial.set(idx < list.length - 1 ? list[idx + 1] : null);
+  }
+
+  markComplete(): void {
+    const t = this.tutorial();
+    if (t) {
+      this.progress.completeTutorial(t.id);
+      this.completed.set(true);
+    }
   }
 
   scrollToStep(index: number): void {

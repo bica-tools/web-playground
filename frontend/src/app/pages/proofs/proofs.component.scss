@@ -37,6 +37,64 @@
   text-transform: uppercase; letter-spacing: 0.6px;
 }
 
+/* Proof Replays */
+.replay-section {
+  max-width: 1100px; margin: 20px auto 0; padding: 0 16px;
+}
+.replay-title { font-size: 18px; font-weight: 600; margin: 0 0 4px; color: rgba(0,0,0,0.8); }
+.replay-subtitle { font-size: 13px; color: rgba(0,0,0,0.5); margin: 0 0 12px; }
+.replay-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px;
+  margin-bottom: 20px;
+}
+.replay-card {
+  border: 1px solid rgba(99,102,241,0.15); border-radius: 10px;
+  background: #fafbff; padding: 12px 14px; cursor: pointer; transition: all 0.15s;
+  &:hover { box-shadow: 0 2px 12px rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); }
+}
+.replay-name { font-size: 13px; font-weight: 600; color: #4338ca; }
+.replay-desc { font-size: 12px; color: rgba(0,0,0,0.6); margin: 4px 0 6px; line-height: 1.5; }
+.replay-meta { font-size: 10px; color: rgba(0,0,0,0.4); font-family: 'JetBrains Mono', monospace; }
+
+.replay-overlay {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.replay-panel {
+  background: #fff; border-radius: 16px; max-width: 700px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+}
+.replay-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.06);
+  h3 { font-size: 18px; font-weight: 600; margin: 0; color: #4338ca; }
+}
+.replay-close {
+  background: none; border: none; font-size: 24px; cursor: pointer;
+  color: rgba(0,0,0,0.5); &:hover { color: rgba(0,0,0,0.8); }
+}
+.replay-body { padding: 16px 20px; }
+.replay-step-text { margin-bottom: 12px; }
+.replay-step-num {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+  color: rgba(0,0,0,0.45); font-weight: 600;
+}
+.replay-step-text p { font-size: 14px; line-height: 1.6; margin: 6px 0; }
+.replay-highlight-badge {
+  font-size: 11px; color: rgba(0,0,0,0.5);
+  strong { color: #4338ca; }
+}
+.replay-controls {
+  display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.06);
+}
+.replay-btn {
+  padding: 6px 16px; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px;
+  background: #fff; font-size: 12px; cursor: pointer; font-family: inherit;
+  &:hover { border-color: #4338ca; color: #4338ca; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+.replay-done { background: #4338ca; color: #fff; border-color: #4338ca; &:hover { background: #3730a3; } }
+
 /* Filter */
 .filter-bar {
   max-width: 1100px; margin: 20px auto 0; padding: 0 16px;
