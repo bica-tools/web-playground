@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, ChangeDetectorR
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { CodeBlockComponent } from '../../components/code-block/code-block.component';
+import { MiniAnalyzerComponent } from '../../components/mini-analyzer/mini-analyzer.component';
 import { ApiService } from '../../services/api.service';
 import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
 
 @Component({
   selector: 'app-tutorial-detail',
   standalone: true,
-  imports: [CodeBlockComponent, RouterLink],
+  imports: [CodeBlockComponent, MiniAnalyzerComponent, RouterLink],
   template: `
     <div class="tut-layout">
       <!-- Sticky sidebar -->
@@ -44,6 +45,9 @@ import { TutorialSummaryDto, TutorialDto } from '../../models/api.models';
                 <p [innerHTML]="step.prose"></p>
                 @if (step.code) {
                   <app-code-block [code]="step.code" [label]="step.codeLabel || ''"></app-code-block>
+                }
+                @if (step.interactiveType) {
+                  <app-mini-analyzer [typeString]="step.interactiveType"></app-mini-analyzer>
                 }
               </div>
             }

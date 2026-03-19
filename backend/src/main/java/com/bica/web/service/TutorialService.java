@@ -31,11 +31,15 @@ public class TutorialService {
     }
 
     private static TutorialStepDto step(String title, String prose) {
-        return new TutorialStepDto(title, prose, null, null);
+        return new TutorialStepDto(title, prose, null, null, null);
     }
 
     private static TutorialStepDto step(String title, String prose, String code, String codeLabel) {
-        return new TutorialStepDto(title, prose, code, codeLabel);
+        return new TutorialStepDto(title, prose, code, codeLabel, null);
+    }
+
+    private static TutorialStepDto interactive(String title, String prose, String typeString) {
+        return new TutorialStepDto(title, prose, null, null, typeString);
     }
 
     private static List<TutorialDto> buildTutorials() {
@@ -130,7 +134,10 @@ public class TutorialService {
                                         "<strong>4 states</strong>: the protocol stages \u2014 before <code>open</code>, after <code>open</code>, after <code>read</code>, and after <code>close</code> (<code>end</code>). <strong>3 transitions</strong>: one per method call. <strong>4 SCCs</strong>: no cycles, so each state is its own component. <strong>Lattice: yes</strong>: the state space is a bounded lattice \u2014 a linear chain is always a lattice."),
                                 step("Visualize it",
                                         "Generate a Hasse diagram to see the state space as a graph:",
-                                        "python3 -m reticulate --dot \"open . read . close . end\"", "bash")
+                                        "python3 -m reticulate --dot \"open . read . close . end\"", "bash"),
+                                interactive("Try it yourself",
+                                        "Edit the session type below and watch the Hasse diagram update live. Try adding another method (e.g. <code>open . read . write . close . end</code>) or removing one.",
+                                        "open . read . close . end")
                         )),
 
                 // 3. Branching and Selection
@@ -152,7 +159,10 @@ public class TutorialService {
                                 step("The diamond pattern",
                                         "When a branch has two alternatives that converge to the same continuation, the state space forms a <strong>diamond</strong>: one state at the top (before the branch), two in the middle (the alternatives), one at the bottom (the convergence point). This is the simplest non-trivial lattice shape."),
                                 step("Selection vs Branch in the state space",
-                                        "Transitions from <code>&amp;{...}</code> and <code>+{...}</code> look the same in the state space \u2014 both are labeled edges. The difference is <strong>who controls the choice</strong>. The analyzer tracks this distinction with <code>selection_transitions</code>, which matters for test generation: a branch becomes a separate test case, while a selection becomes a <code>switch</code> on the return value.")
+                                        "Transitions from <code>&amp;{...}</code> and <code>+{...}</code> look the same in the state space \u2014 both are labeled edges. The difference is <strong>who controls the choice</strong>. The analyzer tracks this distinction with <code>selection_transitions</code>, which matters for test generation: a branch becomes a separate test case, while a selection becomes a <code>switch</code> on the return value."),
+                                interactive("Build your own ATM",
+                                        "Modify the ATM protocol below. Try adding a <code>transfer</code> option, or adding an <code>ERROR</code> outcome to <code>deposit</code>. Watch how the lattice shape changes.",
+                                        "&{withdraw: +{OK: end, INSUFFICIENT: end}, deposit: end, balance: end}")
                         )),
 
                 // 4. Recursive Protocols
@@ -175,7 +185,10 @@ public class TutorialService {
                                         "A recursive type is <strong>well-formed</strong> only if it has an exit path \u2014 a way to reach <code>end</code> without going through the recursion variable. The type <code>rec X . X</code> is <em>not</em> well-formed (infinite loop, no exit). The analyzer\u2019s termination checker rejects it:",
                                         "python3 -m reticulate \"rec X . X\"\n# Error: non-terminating recursive type", "bash"),
                                 step("Nested recursion",
-                                        "You can nest recursion: <code>rec X . &amp;{a: rec Y . &amp;{b: Y, c: X}, d: end}</code>. The inner loop (<code>Y</code>) can exit to the outer loop (<code>X</code>), which can exit to <code>end</code>. Each level adds its own SCC.")
+                                        "You can nest recursion: <code>rec X . &amp;{a: rec Y . &amp;{b: Y, c: X}, d: end}</code>. The inner loop (<code>Y</code>) can exit to the outer loop (<code>X</code>), which can exit to <code>end</code>. Each level adds its own SCC."),
+                                interactive("Experiment with recursion",
+                                        "Try the iterator below. What happens if you remove the <code>FALSE: end</code> branch? Or add a <code>reset</code> option that goes back to the start?",
+                                        "rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}")
                         )),
 
                 // 5. The Parallel Constructor
@@ -199,7 +212,10 @@ public class TutorialService {
                                         "(query . process . end || ping . end)", "session type"),
                                 step("Analyze it",
                                         "The product gives 3\u00d72 = 6 states:",
-                                        "python3 -m reticulate \"(query . process . end || ping . end)\"", "bash")
+                                        "python3 -m reticulate \"(query . process . end || ping . end)\"", "bash"),
+                                interactive("Build a parallel protocol",
+                                        "Try the concurrent read/write file channel below. What happens to the state count if you add more methods to one branch? Try <code>(read . write . end || ping . pong . end)</code>.",
+                                        "(read . end || write . end)")
                         )),
 
                 // 6. Lattice Properties Explained

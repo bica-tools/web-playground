@@ -55,6 +55,7 @@ export interface TutorialStepDto {
   prose: string;
   code: string | null;
   codeLabel: string | null;
+  interactiveType: string | null;
 }
 
 export interface TutorialDto {
