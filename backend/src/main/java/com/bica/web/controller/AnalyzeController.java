@@ -152,6 +152,21 @@ public class AnalyzeController {
         }
     }
 
+    @PostMapping("/game-data")
+    public ResponseEntity<?> gameData(@RequestBody AnalyzeRequest request) {
+        var validation = validateTypeString(request.typeString());
+        if (validation != null) return validation;
+        try {
+            GameDataResponse response = analysisService.gameData(request.typeString().trim());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return badRequest(e.getMessage());
+        } catch (Exception e) {
+            log.error("Game data failed for input: {}", truncate(request.typeString()), e);
+            return serverError("Internal error during game data generation");
+        }
+    }
+
     @GetMapping("/benchmarks")
     public List<BenchmarkDto> benchmarks() {
         return analysisService.getBenchmarks();

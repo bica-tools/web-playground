@@ -36,6 +36,7 @@ import com.bica.web.dto.CompositionResponse;
 import com.bica.web.dto.BenchmarkDto;
 import com.bica.web.dto.CoverageFrameDto;
 import com.bica.web.dto.CoverageStoryboardResponse;
+import com.bica.web.dto.GameDataResponse;
 import com.bica.web.dto.GlobalAnalyzeResponse;
 import com.bica.web.dto.TestGenResponse;
 import guru.nidi.graphviz.engine.Format;
@@ -759,6 +760,91 @@ public class AnalysisService {
                 dotSource,
                 projections
         );
+    }
+
+    // --- Game data for Protocol Duel ---
+
+    public GameDataResponse gameData(String typeString) {
+        var ast = Parser.parse(typeString);
+        var ss = StateSpaceBuilder.build(ast);
+        var pretty = PrettyPrinter.pretty(ast);
+
+        // Compute ranks via BFS from top
+        Map<Integer, Integer> ranks = new LinkedHashMap<>();
+        Queue<Integer> queue = new ArrayDeque<>();
+        ranks.put(ss.top(), 0);
+        queue.add(ss.top());
+
+        Map<Integer, List<Integer>> adj = new LinkedHashMap<>();
+        for (var t : ss.transitions()) {
+            adj.computeIfAbsent(t.source(), k -> new ArrayList<>()).add(t.target());
+        }
+
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            for (int neighbor : adj.getOrDefault(node, List.of())) {
+                if (!ranks.containsKey(neighbor)) {
+                    ranks.put(neighbor, ranks.get(node) + 1);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        int maxRank = ranks.values().stream().mapToInt(Integer::intValue).max().orElse(0);
+
+        // Group by rank
+        Map<Integer, List<Integer>> byRank = new LinkedHashMap<>();
+        for (var entry : ranks.entrySet()) {
+            byRank.computeIfAbsent(entry.getValue(), k -> new ArrayList<>()).add(entry.getKey());
+        }
+
+        // Compute positions
+        double boardWidth = 800;
+        double ySpacing = 120;
+        double yOffset = 80;
+
+        Map<Integer, double[]> positions = new LinkedHashMap<>();
+        for (int r = 0; r <= maxRank; r++) {
+            var statesAtRank = byRank.getOrDefault(r, List.of());
+            int n = statesAtRank.size();
+            if (n == 0) continue;
+            double xSpacing = boardWidth / (n + 1);
+            for (int i = 0; i < n; i++) {
+                int sid = statesAtRank.get(i);
+                double x = xSpacing * (i + 1);
+                double y = yOffset + r * ySpacing;
+                positions.put(sid, new double[]{x, y});
+            }
+        }
+
+        // Build nodes
+        List<GameDataResponse.GameNode> nodes = new ArrayList<>();
+        for (int sid : ss.states().stream().sorted().toList()) {
+            double[] pos = positions.getOrDefault(sid, new double[]{400, 100});
+            String label = ss.labels().getOrDefault(sid, String.valueOf(sid));
+            String kind = classifyGameNode(ss, sid);
+            nodes.add(new GameDataResponse.GameNode(sid, pos[0], pos[1], label, kind, sid == ss.top(), sid == ss.bottom()));
+        }
+
+        // Build edges
+        List<GameDataResponse.GameEdge> edges = new ArrayList<>();
+        for (var t : ss.transitions()) {
+            boolean isSel = t.kind() == com.bica.reborn.statespace.TransitionKind.SELECTION;
+            edges.add(new GameDataResponse.GameEdge(t.source(), t.target(), t.label(), isSel));
+        }
+
+        return new GameDataResponse(nodes, edges, ss.top(), ss.bottom(), ss.states().size(), ss.transitions().size(), pretty);
+    }
+
+    private String classifyGameNode(com.bica.reborn.statespace.StateSpace ss, int sid) {
+        if (sid == ss.bottom()) return "end";
+        if (sid == ss.top()) return "top";
+        var outgoing = ss.transitionsFrom(sid);
+        if (outgoing.isEmpty()) return "end";
+        if (outgoing.stream().anyMatch(t -> t.kind() == com.bica.reborn.statespace.TransitionKind.SELECTION)) {
+            return "select";
+        }
+        return "branch";
     }
 
     private static boolean containsGlobalParallel(GlobalType g) {
