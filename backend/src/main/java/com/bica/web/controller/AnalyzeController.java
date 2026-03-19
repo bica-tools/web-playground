@@ -30,17 +30,20 @@ public class AnalyzeController {
     private final AnalysisService analysisService;
     private final TutorialService tutorialService;
     private final com.bica.web.service.ExplainService explainService;
+    private final com.bica.web.service.GameRoomService gameRoomService;
     private final CacheManager cacheManager;
     private final RedisConnectionFactory redisConnectionFactory;
 
     public AnalyzeController(AnalysisService analysisService,
                              TutorialService tutorialService,
                              com.bica.web.service.ExplainService explainService,
+                             com.bica.web.service.GameRoomService gameRoomService,
                              CacheManager cacheManager,
                              RedisConnectionFactory redisConnectionFactory) {
         this.analysisService = analysisService;
         this.tutorialService = tutorialService;
         this.explainService = explainService;
+        this.gameRoomService = gameRoomService;
         this.cacheManager = cacheManager;
         this.redisConnectionFactory = redisConnectionFactory;
     }
@@ -240,6 +243,156 @@ public class AnalyzeController {
             log.warn("Extract session failed", e);
             return serverError("Failed to process file: " + e.getMessage());
         }
+    }
+
+    // --- Multiplayer Game Rooms ---
+
+    @PostMapping("/room/create")
+    public ResponseEntity<?> createRoom(@RequestBody Map<String, String> request) {
+        String typeString = request.get("typeString");
+        String player = request.get("player");
+        if (typeString == null || player == null) return badRequest("typeString and player are required");
+        var room = gameRoomService.createRoom(typeString, player);
+        return ResponseEntity.ok(room);
+    }
+
+    @PostMapping("/room/join")
+    public ResponseEntity<?> joinRoom(@RequestBody Map<String, String> request) {
+        String roomId = request.get("roomId");
+        String player = request.get("player");
+        if (roomId == null || player == null) return badRequest("roomId and player are required");
+        var room = gameRoomService.joinRoom(roomId, player);
+        if (room == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(room);
+    }
+
+    @GetMapping("/room/{roomId}")
+    public ResponseEntity<?> getRoom(@PathVariable String roomId) {
+        var room = gameRoomService.getRoom(roomId);
+        if (room == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(room);
+    }
+
+    @PostMapping("/room/move")
+    public ResponseEntity<?> makeMove(@RequestBody Map<String, String> request) {
+        String roomId = request.get("roomId");
+        String player = request.get("player");
+        String method = request.get("method");
+        if (roomId == null || player == null || method == null)
+            return badRequest("roomId, player, and method are required");
+        var room = gameRoomService.makeMove(roomId, player, method);
+        if (room == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(room);
+    }
+
+    @PostMapping("/validate-trace")
+    public ResponseEntity<?> validateTrace(@RequestBody Map<String, Object> request) {
+        String typeString = (String) request.get("typeString");
+        @SuppressWarnings("unchecked")
+        List<String> trace = (List<String>) request.get("trace");
+        if (typeString == null || typeString.isBlank()) return badRequest("typeString is required");
+        if (trace == null) return badRequest("trace is required");
+        try {
+            var ast = com.bica.reborn.parser.Parser.parse(typeString.trim());
+            var ss = com.bica.reborn.statespace.StateSpaceBuilder.build(ast);
+
+            var path = new ArrayList<Map<String, Object>>();
+            int current = ss.top();
+            boolean valid = true;
+            String violationAt = null;
+
+            for (String method : trace) {
+                boolean found = false;
+                for (var t : ss.transitions()) {
+                    if (t.source() == current && t.label().equals(method)) {
+                        path.add(Map.of("method", method, "from", t.source(), "to", t.target(), "valid", true));
+                        current = t.target();
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    var enabled = new ArrayList<String>();
+                    for (var t : ss.transitions()) {
+                        if (t.source() == current) enabled.add(t.label());
+                    }
+                    path.add(Map.of("method", method, "from", current, "to", current, "valid", false,
+                            "enabled", enabled));
+                    valid = false;
+                    violationAt = method;
+                    break;
+                }
+            }
+
+            boolean atEnd = current == ss.bottom();
+            return ResponseEntity.ok(Map.of(
+                    "valid", valid, "complete", valid && atEnd,
+                    "currentState", current, "path", path,
+                    "violationAt", violationAt != null ? violationAt : "",
+                    "atEnd", atEnd
+            ));
+        } catch (Exception e) {
+            return badRequest("Trace validation failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/proof-replay")
+    public ResponseEntity<?> proofReplay() {
+        // Curated proof-to-visual mappings for key theorems
+        var replays = List.of(
+                Map.of("theorem", "UniqueExtrema",
+                        "leanModule", "ReticulateTheorem",
+                        "description", "Every session type state space has a unique top (initial) and bottom (end) state.",
+                        "exampleType", "rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}",
+                        "highlights", List.of("top", "bottom"),
+                        "steps", List.of(
+                                Map.of("text", "The initial state (before any method call) is the unique top element.", "highlight", "top"),
+                                Map.of("text", "The end state (after the protocol terminates) is the unique bottom element.", "highlight", "bottom"),
+                                Map.of("text", "By the Reticulate Theorem, these are the only extrema — guaranteed for all well-formed types.", "highlight", "all")
+                        )),
+                Map.of("theorem", "ProductLattice",
+                        "leanModule", "ProductReticulate",
+                        "description", "The parallel constructor yields a product lattice: L(S1 || S2) = L(S1) x L(S2).",
+                        "exampleType", "(read . end || write . end)",
+                        "highlights", List.of("product"),
+                        "steps", List.of(
+                                Map.of("text", "L(read.end) has 2 states: {before read, end}.", "highlight", "left"),
+                                Map.of("text", "L(write.end) has 2 states: {before write, end}.", "highlight", "right"),
+                                Map.of("text", "The product L(S1) x L(S2) has 2x2 = 4 states, ordered componentwise.", "highlight", "product"),
+                                Map.of("text", "Meets and joins are computed componentwise — guaranteed to exist.", "highlight", "all")
+                        )),
+                Map.of("theorem", "RecursionLemma",
+                        "leanModule", "RecursionReticulate",
+                        "description", "SCC quotient preserves the lattice property for recursive types.",
+                        "exampleType", "rec X . &{a: X, b: end}",
+                        "highlights", List.of("scc"),
+                        "steps", List.of(
+                                Map.of("text", "Recursion creates cycles: variable X loops back to the entry state.", "highlight", "cycle"),
+                                Map.of("text", "The SCC quotient collapses each cycle into a single node.", "highlight", "scc"),
+                                Map.of("text", "The resulting DAG preserves meets, joins, and the lattice property.", "highlight", "all")
+                        )),
+                Map.of("theorem", "SubtypingAntitonicity",
+                        "leanModule", "SubtypingReticulate",
+                        "description", "Gay-Hole subtyping reverses the lattice embedding: S1 <: S2 implies L(S2) embeds in L(S1).",
+                        "exampleType", "&{read: end, write: end}",
+                        "highlights", List.of("embedding"),
+                        "steps", List.of(
+                                Map.of("text", "&{read: end, write: end} has more methods, so it is a subtype of &{read: end}.", "highlight", "subtype"),
+                                Map.of("text", "The subtype has MORE states (more methods = more reachable configurations).", "highlight", "larger"),
+                                Map.of("text", "The supertype's lattice embeds into the subtype's lattice — antitonicity.", "highlight", "embedding")
+                        )),
+                Map.of("theorem", "DualityInvolution",
+                        "leanModule", "DualityReticulate",
+                        "description", "Duality is an involution: dual(dual(S)) = S, and preserves state-space isomorphism.",
+                        "exampleType", "&{request: +{OK: end, ERROR: end}}",
+                        "highlights", List.of("dual"),
+                        "steps", List.of(
+                                Map.of("text", "The dual swaps Branch <-> Select: &{...} becomes +{...} and vice versa.", "highlight", "swap"),
+                                Map.of("text", "dual(S) has the same state space structure — isomorphic lattice.", "highlight", "iso"),
+                                Map.of("text", "Applying dual twice returns the original type: dual(dual(S)) = S.", "highlight", "involution")
+                        ))
+        );
+        return ResponseEntity.ok(replays);
     }
 
     @GetMapping("/lattice-zoo")

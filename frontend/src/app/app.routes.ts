@@ -170,6 +170,14 @@ export const routes: Routes = [
     title: 'Dashboard — BICA Tools',
   },
   {
+    path: 'tools/sandbox',
+    loadComponent: () =>
+      import('./pages/sandbox/sandbox.component').then(
+        (m) => m.SandboxComponent,
+      ),
+    title: 'Live Sandbox — BICA Tools',
+  },
+  {
     path: 'explore/zoo',
     loadComponent: () =>
       import('./pages/zoo/zoo.component').then(
