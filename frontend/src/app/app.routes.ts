@@ -169,5 +169,14 @@ export const routes: Routes = [
       ),
     title: 'Dashboard — BICA Tools',
   },
+  {
+    path: 'embed/analyzer',
+    loadComponent: () =>
+      import('./pages/embed/embed-analyzer.component').then(
+        (m) => m.EmbedAnalyzerComponent,
+      ),
+    title: 'BICA Tools — Embed',
+    data: { embed: true },
+  },
   { path: '**', redirectTo: '' },
 ];

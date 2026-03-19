@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, computed } from '@angular/core';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
 
@@ -8,11 +10,11 @@ import { FooterComponent } from './components/footer/footer.component';
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, FooterComponent],
   template: `
-    <app-navbar />
-    <main class="main-content" role="main">
+    @if (!isEmbed()) { <app-navbar /> }
+    <main [class]="isEmbed() ? 'embed-content' : 'main-content'" role="main">
       <router-outlet />
     </main>
-    <app-footer />
+    @if (!isEmbed()) { <app-footer /> }
   `,
   styles: [`
     .main-content {
@@ -21,6 +23,20 @@ import { FooterComponent } from './components/footer/footer.component';
       padding: 24px 16px;
       min-height: calc(100vh - 64px - 100px);
     }
+    .embed-content {
+      padding: 0;
+      margin: 0;
+    }
   `],
 })
-export class App {}
+export class App {
+  private router = inject(Router);
+  private url = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => e.urlAfterRedirects),
+    ),
+    { initialValue: '' },
+  );
+  isEmbed = computed(() => this.url().startsWith('/embed'));
+}
