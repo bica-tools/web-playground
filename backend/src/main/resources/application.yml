@@ -10,8 +10,12 @@ server:
 spring:
   application:
     name: bica-web
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   cache:
-    type: redis
+    type: ${CACHE_TYPE:simple}
   data:
     redis:
       host: ${REDIS_HOST:localhost}

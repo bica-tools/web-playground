@@ -5,6 +5,7 @@ import com.bica.web.service.AnalysisService;
 import com.bica.web.service.TutorialService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.MediaType;
@@ -32,20 +33,19 @@ public class AnalyzeController {
     private final com.bica.web.service.ExplainService explainService;
     private final com.bica.web.service.GameRoomService gameRoomService;
     private final CacheManager cacheManager;
-    private final RedisConnectionFactory redisConnectionFactory;
+    @Autowired(required = false)
+    private RedisConnectionFactory redisConnectionFactory;
 
     public AnalyzeController(AnalysisService analysisService,
                              TutorialService tutorialService,
                              com.bica.web.service.ExplainService explainService,
                              com.bica.web.service.GameRoomService gameRoomService,
-                             CacheManager cacheManager,
-                             RedisConnectionFactory redisConnectionFactory) {
+                             CacheManager cacheManager) {
         this.analysisService = analysisService;
         this.tutorialService = tutorialService;
         this.explainService = explainService;
         this.gameRoomService = gameRoomService;
         this.cacheManager = cacheManager;
-        this.redisConnectionFactory = redisConnectionFactory;
     }
 
     @PostMapping("/analyze")
@@ -520,13 +520,16 @@ public class AnalyzeController {
     public Map<String, Object> cacheStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
         boolean connected = false;
-        try {
-            redisConnectionFactory.getConnection().ping();
-            connected = true;
-        } catch (Exception e) {
-            log.debug("Redis not available: {}", e.getMessage());
+        if (redisConnectionFactory != null) {
+            try {
+                redisConnectionFactory.getConnection().ping();
+                connected = true;
+            } catch (Exception e) {
+                log.debug("Redis not available: {}", e.getMessage());
+            }
         }
-        stats.put("enabled", connected);
+        stats.put("redis", connected);
+        stats.put("cacheType", redisConnectionFactory != null ? "redis" : "simple");
         stats.put("cacheNames", cacheManager.getCacheNames());
         return stats;
     }
