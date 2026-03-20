@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, title: 'BICA Tools — Session Types as Algebraic Reticulates' },
@@ -106,6 +107,7 @@ export const routes: Routes = [
       import('./pages/pipeline/pipeline.component').then(
         (m) => m.PipelineComponent,
       ),
+    canActivate: [authGuard],
     title: 'Pipeline — BICA Tools',
   },
   {
@@ -162,11 +164,20 @@ export const routes: Routes = [
     title: 'About — BICA Tools',
   },
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login.component').then(
+        (m) => m.LoginComponent,
+      ),
+    title: 'Login — BICA Tools',
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component').then(
         (m) => m.DashboardComponent,
       ),
+    canActivate: [authGuard],
     title: 'Dashboard — BICA Tools',
   },
   {

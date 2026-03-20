@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ProgressService } from '../../services/progress.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -46,6 +47,14 @@ import { ProgressService } from '../../services/progress.service';
         <a mat-button routerLink="/tools/reverse-search" routerLinkActive="active">Search</a>
       </nav>
 
+      <!-- Auth links -->
+      @if (auth.isLoggedIn()) {
+        <a mat-button routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+        <button mat-button (click)="auth.logout()">Logout</button>
+      } @else {
+        <a mat-button routerLink="/login" routerLinkActive="active">Login</a>
+      }
+
       <!-- XP Badge -->
       <div class="xp-badge" [attr.title]="progress.level().name + ' — ' + progress.xp() + ' XP'">
         <span class="xp-level">{{ progress.level().name }}</span>
@@ -75,6 +84,12 @@ import { ProgressService } from '../../services/progress.service';
         <a routerLink="/tools/sandbox" routerLinkActive="active" (click)="closeMenu()">Sandbox</a>
         <a routerLink="/explore/zoo" routerLinkActive="active" (click)="closeMenu()">Zoo</a>
         <a routerLink="/tools/reverse-search" routerLinkActive="active" (click)="closeMenu()">Search</a>
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+          <a href="javascript:void(0)" (click)="auth.logout(); closeMenu()">Logout</a>
+        } @else {
+          <a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Login</a>
+        }
       </nav>
     }
   `,
@@ -173,6 +188,7 @@ import { ProgressService } from '../../services/progress.service';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   progress = inject(ProgressService);
+  auth = inject(AuthService);
   isMenuOpen = false;
   private routerSub?: Subscription;
 
