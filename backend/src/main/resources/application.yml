@@ -23,3 +23,10 @@ spring:
       max-request-size: 1MB
   codec:
     max-in-memory-size: 1MB
+
+bica:
+  security:
+    jwt-secret: ${BICA_JWT_SECRET:bica-reticulate-session-types-2026-secret-key-minimum-256-bits-long}
+    admin-username: ${BICA_ADMIN_USER:admin}
+    admin-password: ${BICA_ADMIN_PASSWORD:reticulate}
+    token-expiry-hours: ${BICA_TOKEN_EXPIRY:24}
