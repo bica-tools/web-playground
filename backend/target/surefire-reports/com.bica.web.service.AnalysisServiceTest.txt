@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bica.web.service.AnalysisServiceTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.407 s -- in com.bica.web.service.AnalysisServiceTest
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.08 s -- in com.bica.web.service.AnalysisServiceTest

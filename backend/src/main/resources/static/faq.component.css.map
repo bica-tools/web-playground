@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/faq/faq.component.ts"],
+  "sourcesContent": ["\n    .page-header {\n      padding: 24px 0 16px;\n    }\n    .page-header h1 {\n      font-size: 24px;\n      font-weight: 600;\n      margin: 0 0 8px;\n    }\n    .page-header p {\n      color: rgba(0, 0, 0, 0.6);\n      margin: 0;\n    }\n\n    .faq-controls {\n      margin: 16px 0;\n    }\n    .search-field {\n      width: 100%;\n    }\n    .category-chips {\n      margin: 8px 0 16px;\n    }\n    mat-chip {\n      cursor: pointer;\n    }\n\n    .faq-viewport {\n      height: calc(100vh - 320px);\n      min-height: 400px;\n    }\n\n    .no-results {\n      text-align: center;\n      padding: 48px 16px;\n      color: rgba(0, 0, 0, 0.5);\n    }\n    .no-results mat-icon {\n      font-size: 48px;\n      width: 48px;\n      height: 48px;\n      margin-bottom: 12px;\n    }\n    .no-results p {\n      font-size: 16px;\n      margin: 0;\n    }\n  "],
+  "mappings": ";AACI,CAAA;AACE,WAAA,KAAA,EAAA;;AAEF,CAHA,YAGA;AACE,aAAA;AACA,eAAA;AACA,UAAA,EAAA,EAAA;;AAEF,CARA,YAQA;AACE,SAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACA,UAAA;;AAGF,CAAA;AACE,UAAA,KAAA;;AAEF,CAAA;AACE,SAAA;;AAEF,CAAA;AACE,UAAA,IAAA,EAAA;;AAEF;AACE,UAAA;;AAGF,CAAA;AACE,UAAA,KAAA,MAAA,EAAA;AACA,cAAA;;AAGF,CAAA;AACE,cAAA;AACA,WAAA,KAAA;AACA,SAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;AAEF,CALA,WAKA;AACE,aAAA;AACA,SAAA;AACA,UAAA;AACA,iBAAA;;AAEF,CAXA,WAWA;AACE,aAAA;AACA,UAAA;;",
+  "names": []
+}

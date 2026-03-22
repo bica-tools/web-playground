@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/components/code-block/code-block.component.ts"],
+  "sourcesContent": ["\n    .code-block {\n      border: 1px solid rgba(0, 0, 0, 0.12);\n      border-radius: 8px;\n      overflow: hidden;\n      margin: 8px 0;\n    }\n    .code-header {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      padding: 4px 12px;\n      background: rgba(0, 0, 0, 0.04);\n      border-bottom: 1px solid rgba(0, 0, 0, 0.12);\n    }\n    .code-label {\n      font-size: 12px;\n      font-weight: 500;\n      text-transform: uppercase;\n      color: rgba(0, 0, 0, 0.6);\n    }\n    pre {\n      margin: 0;\n      padding: 16px;\n      overflow-x: auto;\n      font-size: 13px;\n      line-height: 1.5;\n      background: #fafafa;\n    }\n    code {\n      font-family: 'JetBrains Mono', 'Fira Code', monospace;\n    }\n  "],
+  "mappings": ";AACI,CAAA;AACE,UAAA,IAAA,MAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACA,iBAAA;AACA,YAAA;AACA,UAAA,IAAA;;AAEF,CAAA;AACE,WAAA;AACA,mBAAA;AACA,eAAA;AACA,WAAA,IAAA;AACA,cAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACA,iBAAA,IAAA,MAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;AAEF,CAAA;AACE,aAAA;AACA,eAAA;AACA,kBAAA;AACA,SAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;AAEF;AACE,UAAA;AACA,WAAA;AACA,cAAA;AACA,aAAA;AACA,eAAA;AACA,cAAA;;AAEF;AACE;IAAA,gBAAA;IAAA,WAAA;IAAA;;",
+  "names": []
+}

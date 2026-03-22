@@ -1,1 +1,4 @@
 com/bica/web/service/AnalysisServiceTest.class
+com/bica/web/service/TutorialServiceTest.class
+com/bica/web/security/AdminUserDetailsServiceTest.class
+com/bica/web/security/JwtServiceTest.class

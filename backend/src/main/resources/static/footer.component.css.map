@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/components/footer/footer.component.ts"],
+  "sourcesContent": ["\n    .footer {\n      padding: 24px 16px;\n      text-align: center;\n      color: rgba(0, 0, 0, 0.5);\n      font-size: 13px;\n      border-top: 1px solid rgba(0, 0, 0, 0.08);\n      margin-top: 48px;\n      line-height: 1.8;\n    }\n    .footer-content {\n      max-width: 960px;\n      margin: 0 auto;\n    }\n    .footer-brand {\n      font-weight: 600;\n      color: rgba(0, 0, 0, 0.65);\n    }\n    .footer-sep {\n      margin: 0 6px;\n    }\n    .footer-meta {\n      margin-top: 4px;\n    }\n    .footer-meta a {\n      color: var(--brand-primary, #4338ca);\n      text-decoration: none;\n    }\n    .footer-meta a:hover {\n      text-decoration: underline;\n    }\n  "],
+  "mappings": ";AACI,CAAA;AACE,WAAA,KAAA;AACA,cAAA;AACA,SAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACA,aAAA;AACA,cAAA,IAAA,MAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;AACA,cAAA;AACA,eAAA;;AAEF,CAAA;AACE,aAAA;AACA,UAAA,EAAA;;AAEF,CAAA;AACE,eAAA;AACA,SAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;AAEF,CAAA;AACE,UAAA,EAAA;;AAEF,CAAA;AACE,cAAA;;AAEF,CAHA,YAGA;AACE,SAAA,IAAA,eAAA,EAAA;AACA,mBAAA;;AAEF,CAPA,YAOA,CAAA;AACE,mBAAA;;",
+  "names": []
+}
