@@ -213,5 +213,13 @@ export const routes: Routes = [
     title: 'BICA Tools — Embed',
     data: { embed: true },
   },
+  {
+    path: 'monitoring',
+    loadComponent: () =>
+      import('./pages/monitoring/monitoring.component').then(
+        (m) => m.MonitoringComponent,
+      ),
+    title: 'Monitoring — BICA Tools',
+  },
   { path: '**', redirectTo: '' },
 ];

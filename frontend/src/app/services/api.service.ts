@@ -18,6 +18,9 @@ import {
   CompositionResponse,
   GameDataResponse,
   GamePlaysResponse,
+  AgentTypeDto,
+  ProgrammeStatusDto,
+  StepEvaluationDto,
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -119,5 +122,17 @@ export class ApiService {
     return this.http.post<GamePlaysResponse>(`${this.baseUrl}/game-plays`, {
       typeString,
     } as AnalyzeRequest);
+  }
+
+  getAgentTypes(): Observable<AgentTypeDto[]> {
+    return this.http.get<AgentTypeDto[]>(`${this.baseUrl}/monitor/agents`);
+  }
+
+  getProgrammeStatus(): Observable<ProgrammeStatusDto> {
+    return this.http.get<ProgrammeStatusDto>(`${this.baseUrl}/monitor/status`);
+  }
+
+  evaluateStep(step: string): Observable<StepEvaluationDto> {
+    return this.http.post<StepEvaluationDto>(`${this.baseUrl}/monitor/evaluate`, { step });
   }
 }

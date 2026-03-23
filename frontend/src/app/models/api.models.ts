@@ -260,6 +260,33 @@ export interface GamePlaysResponse {
   board: GameDataResponse;
 }
 
+// --- Monitoring ---
+
+export interface AgentTypeDto {
+  name: string;
+  protocol: string;
+  sessionType: string;
+  description: string;
+  transport: string;
+}
+
+export interface StepEvaluationDto {
+  stepNumber: string;
+  title: string;
+  grade: string;
+  score: number;
+  accepted: boolean;
+  fixes: string[];
+}
+
+export interface ProgrammeStatusDto {
+  totalSteps: number;
+  acceptedSteps: number;
+  totalModules: number;
+  totalTests: number;
+  steps: StepEvaluationDto[];
+}
+
 export interface BenchmarkDto {
   name: string;
   description: string;
