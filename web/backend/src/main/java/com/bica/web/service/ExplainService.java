@@ -97,6 +97,8 @@ public class ExplainService {
                 sb.append(" ");
                 story(seq.right(), sb, ctx, false);
             }
+
+            default -> sb.append("The interaction continues.");
         }
     }
 
@@ -161,6 +163,8 @@ public class ExplainService {
                 sb.append(" Then: ");
                 explain(seq.right(), sb, depth, false);
             }
+
+            default -> sb.append("The protocol continues.");
         }
     }
 }
