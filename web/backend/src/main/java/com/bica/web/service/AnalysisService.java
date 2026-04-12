@@ -492,6 +492,7 @@ public class AnalysisService {
             case Parallel p -> true;
             case Rec r -> containsParallel(r.body());
             case Sequence seq -> containsParallel(seq.left()) || containsParallel(seq.right());
+            default -> false;
         };
     }
 
@@ -504,6 +505,7 @@ public class AnalysisService {
             case Parallel p -> containsRec(p.left()) || containsRec(p.right());
             case Rec r -> true;
             case Sequence seq -> containsRec(seq.left()) || containsRec(seq.right());
+            default -> false;
         };
     }
 
@@ -516,6 +518,7 @@ public class AnalysisService {
             case Parallel p -> Math.max(recDepth(p.left()), recDepth(p.right()));
             case Rec r -> 1 + recDepth(r.body());
             case Sequence seq -> Math.max(recDepth(seq.left()), recDepth(seq.right()));
+            default -> 0;
         };
     }
 

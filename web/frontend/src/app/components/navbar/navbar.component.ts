@@ -45,6 +45,7 @@ import { AuthService } from '../../services/auth.service';
         <a mat-button routerLink="/tools/sandbox" routerLinkActive="active">Sandbox</a>
         <a mat-button routerLink="/explore/zoo" routerLinkActive="active">Zoo</a>
         <a mat-button routerLink="/tools/reverse-search" routerLinkActive="active">Search</a>
+        <a mat-button routerLink="/papers" routerLinkActive="active">Papers</a>
         <a mat-button routerLink="/blog" routerLinkActive="active">Blog</a>
       </nav>
 
@@ -85,6 +86,7 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/tools/sandbox" routerLinkActive="active" (click)="closeMenu()">Sandbox</a>
         <a routerLink="/explore/zoo" routerLinkActive="active" (click)="closeMenu()">Zoo</a>
         <a routerLink="/tools/reverse-search" routerLinkActive="active" (click)="closeMenu()">Search</a>
+        <a routerLink="/papers" routerLinkActive="active" (click)="closeMenu()">Papers</a>
         <a routerLink="/blog" routerLinkActive="active" (click)="closeMenu()">Blog</a>
         @if (auth.isLoggedIn()) {
           <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbital Dashboard | Session Types Research</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0d0d1a;
+  --bg-secondary: #151528;
+  --bg-tertiary: #1a1a2e;
+  --bg-card: #1e1e38;
+  --bg-hover: #252545;
+  --text-primary: #e8e8f0;
+  --text-secondary: #a0a0b8;
+  --text-muted: #6a6a88;
+  --border: #2a2a4a;
+  --T: #4CAF50; --I: #2196F3; --V: #FF9800; --P: #E91E63;
+  --B: #9C27B0; --W: #00BCD4; --E: #FFC107;
+  --health-green: #4CAF50; --health-yellow: #FFC107;
+  --health-amber: #FF9800; --health-red: #f44336;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.header-title span { color: var(--text-primary); }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-date {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-reset {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-reset:hover { border-color: var(--health-amber); color: var(--health-amber); }
+
+/* ── Sector Health Bar ──────────────────────────── */
+.sector-bar {
+  display: flex;
+  gap: 4px;
+  padding: 12px 24px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.sector-card {
+  flex: 1;
+  min-width: 110px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 2px solid transparent;
+  text-align: center;
+  position: relative;
+}
+.sector-card:hover { background: var(--bg-hover); }
+.sector-card.active { border-color: var(--sector-color); background: var(--bg-hover); }
+
+.sector-indicator {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.sector-indicator.pulse { animation: pulse 2s ease-in-out infinite; }
+
+.sector-code {
+  font-weight: 700;
+  font-size: 15px;
+  display: inline;
+  vertical-align: middle;
+}
+
+.sector-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.sector-metric {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.sector-trend {
+  font-size: 11px;
+  margin-top: 1px;
+}
+.sector-trend.up { color: var(--health-green); }
+.sector-trend.steady { color: var(--text-muted); }
+.sector-trend.flat { color: var(--health-amber); }
+
+/* ── Main Layout ────────────────────────────────── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: 1fr auto;
+  height: calc(100vh - 120px);
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+  }
+}
+
+/* ── Orbital View ───────────────────────────────── */
+.orbital-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.orbital-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 700px;
+  max-height: 700px;
+}
+
+/* ── Sidebar ────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ── Capacity Budget ────────────────────────────── */
+.capacity-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.capacity-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+.capacity-segment.depth { background: #5c6bc0; }
+.capacity-segment.breadth { background: #26a69a; }
+.capacity-segment.maint { background: #8d6e63; }
+.capacity-segment.explore { background: #ab47bc; }
+
+.capacity-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.capacity-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.capacity-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Detail Panel ───────────────────────────────── */
+.detail-panel {
+  display: none;
+}
+.detail-panel.visible { display: block; }
+
+.detail-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.detail-sector-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.detail-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.detail-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.detail-close {
+  float: right;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+}
+.detail-close:hover { color: var(--text-primary); }
+
+/* ── Inner Orbit Checklist ──────────────────────── */
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item.done { opacity: 0.5; }
+.checklist-item.done .checklist-text { text-decoration: line-through; }
+
+.checklist-checkbox {
+  width: 16px; height: 16px;
+  border: 2px solid var(--text-muted);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.checklist-item.done .checklist-checkbox {
+  background: var(--health-green);
+  border-color: var(--health-green);
+}
+.checklist-item.done .checklist-checkbox::after {
+  content: '';
+  width: 6px; height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.checklist-sector {
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checklist-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Publication Pipeline ──────────────────────── */
+.pipeline-container {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  overflow-x: auto;
+}
+
+.pipeline-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pipeline-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pipeline-toggle:hover { border-color: var(--V); color: var(--V); }
+.pipeline-toggle.active { border-color: var(--V); color: var(--V); background: rgba(255,152,0,0.1); }
+
+.pipeline-content { display: none; }
+.pipeline-content.visible { display: block; }
+
+.pipeline-acts {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pipeline-act {
+  flex: 1;
+  min-width: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pipeline-act-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.act-I .pipeline-act-header { background: rgba(33,150,243,0.2); color: #64B5F6; }
+.act-II .pipeline-act-header { background: rgba(76,175,80,0.2); color: #81C784; }
+.act-III .pipeline-act-header { background: rgba(255,152,0,0.2); color: #FFB74D; }
+.act-IV .pipeline-act-header { background: rgba(156,39,176,0.2); color: #CE93D8; }
+
+.pipeline-act-body {
+  background: var(--bg-card);
+  padding: 8px;
+}
+
+.pipeline-paper {
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
+}
+.pipeline-paper:last-child { margin-bottom: 0; }
+.pipeline-paper:hover { background: var(--bg-hover); }
+.pipeline-paper.status-ready { border-left-color: var(--health-green); }
+.pipeline-paper.status-polishing { border-left-color: var(--health-yellow); }
+.pipeline-paper.status-draft { border-left-color: var(--health-amber); }
+.pipeline-paper.status-planned { border-left-color: var(--text-muted); }
+.pipeline-paper.status-contingency { border-left-color: var(--border); }
+.pipeline-paper.status-urgent { border-left-color: var(--health-red); }
+
+.pipeline-paper-venue {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.pipeline-paper-title {
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.pipeline-paper-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+}
+
+.pipeline-paper-deadline {
+  color: var(--health-amber);
+  font-weight: 600;
+}
+.pipeline-paper-deadline.urgent {
+  color: var(--health-red);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.pipeline-paper-status {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.pipeline-paper-status.ready { background: rgba(76,175,80,0.2); color: #81C784; }
+.pipeline-paper-status.polishing { background: rgba(255,193,7,0.2); color: #FFD54F; }
+.pipeline-paper-status.draft { background: rgba(255,152,0,0.2); color: #FFB74D; }
+.pipeline-paper-status.planned { background: rgba(100,100,130,0.2); color: #8888aa; }
+.pipeline-paper-status.contingency { background: rgba(60,60,80,0.2); color: #666688; }
+.pipeline-paper-status.urgent { background: rgba(244,67,54,0.2); color: #ef5350; }
+
+/* ── Timeline ──────────────────────────────────── */
+.timeline-bar {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 12px;
+  position: relative;
+}
+
+.timeline-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  position: relative;
+  min-width: 30px;
+  transition: opacity 0.2s;
+}
+.timeline-segment:hover { opacity: 0.85; }
+
+.timeline-now {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: #fff;
+  z-index: 10;
+  border-radius: 1px;
+}
+.timeline-now::after {
+  content: 'NOW';
+  position: absolute;
+  top: -14px;
+  left: -10px;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.timeline-labels {
+  display: flex;
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.timeline-labels span {
+  text-align: center;
+}
+
+/* ── Footer ─────────────────────────────────────── */
+.footer {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+/* ── Tooltip ────────────────────────────────────── */
+.tooltip {
+  position: fixed;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+  pointer-events: none;
+  z-index: 200;
+  max-width: 250px;
+  display: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+/* ── Orbit labels ───────────────────────────────── */
+.orbit-label {
+  font-size: 10px;
+  fill: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* ── SVG nodes ──────────────────────────────────── */
+.orbit-node { cursor: pointer; transition: transform 0.2s; }
+.orbit-node:hover { filter: brightness(1.3); }
+.orbit-node circle { transition: r 0.15s; }
+.orbit-node:hover circle { r: 14; }
+
+@keyframes orbitRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.orbit-ring { fill: none; stroke: var(--border); stroke-dasharray: 4 8; }
+.orbit-ring-inner { stroke-width: 1; opacity: 0.6; }
+.orbit-ring-middle { stroke-width: 1; opacity: 0.4; }
+.orbit-ring-outer { stroke-width: 1; opacity: 0.25; }
+
+.node-hidden { opacity: 0.08; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title"><span>Orbital Dashboard</span> &mdash; Session Types Research</div>
+  <div class="header-right">
+    <span class="header-date">Week of Mar 30 &ndash; Apr 5, 2026</span>
+    <button class="btn-reset" onclick="resetState()">Reset</button>
+  </div>
+</div>
+
+<!-- Sector Health Bar -->
+<div class="sector-bar" id="sectorBar"></div>
+
+<!-- Main Layout -->
+<div class="main-layout">
+  <!-- Orbital View -->
+  <div class="orbital-container">
+    <svg class="orbital-svg" id="orbitalSvg" viewBox="0 0 700 700"></svg>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Capacity Budget -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Capacity Budget</div>
+      <div class="capacity-bar">
+        <div class="capacity-segment depth" style="width:40%">40%</div>
+        <div class="capacity-segment breadth" style="width:30%">30%</div>
+        <div class="capacity-segment maint" style="width:20%">20%</div>
+        <div class="capacity-segment explore" style="width:10%">10%</div>
+      </div>
+      <div class="capacity-legend">
+        <div class="capacity-legend-item"><div class="capacity-dot" style="background:#5c6bc0"></div>Depth ~22h</div>
+        <div class="capacity-legend-item"><div class="capacity-dot" style="background:#26a69a"></div>Breadth ~16h</div>
+        <div class="capacity-legend-item"><div class="capacity-dot" style="background:#8d6e63"></div>Maint ~11h</div>
+        <div class="capacity-legend-item"><div class="capacity-dot" style="background:#ab47bc"></div>Explore ~5h</div>
+      </div>
+    </div>
+
+    <!-- Inner Orbit Checklist -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Inner Orbit &mdash; This Week</div>
+      <div id="checklist"></div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="sidebar-section detail-panel" id="detailPanel">
+      <div class="sidebar-section-title">Details <button class="detail-close" onclick="closeDetail()">&times;</button></div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Publication Pipeline -->
+  <div class="pipeline-container">
+    <div class="pipeline-title">
+      <span>Publication Pipeline &mdash; 4 Acts, 10 Submissions, 2 Years</span>
+      <button class="pipeline-toggle" id="pipelineToggle" onclick="togglePipeline()">Show Pipeline</button>
+    </div>
+    <div class="pipeline-content" id="pipelineContent"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer" id="footer"></div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────
+const SECTOR_COLORS = { T:'#4CAF50', I:'#2196F3', V:'#FF9800', P:'#E91E63', B:'#9C27B0', W:'#00BCD4', E:'#FFC107' };
+const HEALTH_COLORS = { green:'#4CAF50', yellow:'#FFC107', amber:'#FF9800', red:'#f44336' };
+
+const innerOrbit = [
+  { id: 1, sector: 'V', task: 'ICE 2026 — submit research paper (15pp)', done: false, deadline: '2026-04-02' },
+  { id: 2, sector: 'V', task: 'ICE 2026 — submit oral communication (2pp)', done: false, deadline: '2026-04-02' },
+  { id: 3, sector: 'V', task: 'CONCUR 2026 abstract polish (200 words)', done: false, deadline: '2026-04-20' },
+  { id: 4, sector: 'V', task: 'CONCUR 2026 full paper submit (15pp LIPIcs)', done: false, deadline: '2026-04-27' },
+  { id: 5, sector: 'T', task: 'Step 30l proofs.tex', done: false },
+  { id: 6, sector: 'T', task: 'Step 30m proofs.tex', done: false },
+  { id: 7, sector: 'T', task: 'Step 30q heat kernel expansion', done: false },
+  { id: 8, sector: 'I', task: 'LGV module implementation', done: false },
+  { id: 9, sector: 'W', task: 'Agenda v2', done: true },
+];
+
+// ── PUBLICATION PIPELINE (10 submissions, 4 acts) ──────
+const publicationPipeline = [
+  // Act I — The Discovery
+  { id: 'P1', act: 'I', actName: 'The Discovery', title: 'Session Type State Spaces Form Lattices',
+    venue: 'ICE 2026', format: 'EPTCS', pages: '8→15pp', deadline: '2026-04-02',
+    status: 'ready', sector: 'V', portal: 'https://ice26.hotcrp.com/',
+    description: 'Workshop introduction of the core lattice result. Expand current 8pp to 15pp. Double-anonymous, EPTCS format.' },
+  { id: 'P1-oral', act: 'I', actName: 'The Discovery', title: 'Reticulate: A Tool for Lattice Analysis of Session Type State Spaces',
+    venue: 'ICE 2026 (oral)', format: 'EPTCS', pages: '2pp', deadline: '2026-04-02',
+    status: 'ready', sector: 'V', portal: 'https://ice26.hotcrp.com/',
+    description: 'Companion oral communication showcasing the Reticulate tool. Not anonymized.' },
+  { id: 'P2', act: 'I', actName: 'The Discovery', title: 'The Reticulate Theorem: Session Type State Spaces are Bounded Lattices',
+    venue: 'CONCUR 2026', format: 'LIPIcs', pages: '15pp', deadline: '2026-04-27',
+    status: 'polishing', sector: 'V', portal: 'https://easychair.org/',
+    description: 'Full conference paper establishing the core theorem. Single-blind, Liverpool Sep 1-4. Abstract due Apr 20.' },
+  { id: 'P2-fallback', act: 'I', actName: 'The Discovery', title: 'The Reticulate Theorem (extended)',
+    venue: 'ICTAC 2026', format: 'LNCS', pages: '15pp', deadline: '2026-06-15',
+    status: 'contingency', sector: 'V',
+    description: 'Fallback if CONCUR rejects. ICTAC has ~40% acceptance rate, good theory venue.' },
+
+  // Act II — The Consequences
+  { id: 'P3', act: 'II', actName: 'The Consequences', title: 'Modularity is Distributivity: What Lattice Theory Tells Us About Software Design',
+    venue: 'ECOOP 2027 R1', format: 'LIPIcs', pages: '25pp', deadline: '2026-10-01',
+    status: 'draft', sector: 'V',
+    description: 'Combines modularity (Step 70f) + OO principles (Step 51b). Most accessible paper — bridges lattice theory to everyday software engineering. N₅/M₃ forbidden sublattice = non-modular design.' },
+  { id: 'P4', act: 'II', actName: 'The Consequences', title: 'Lattice-Based Safety Verification for Session Types',
+    venue: 'FoSSaCS 2027', format: 'LNCS', pages: '15pp', deadline: '2026-10-01',
+    status: 'draft', sector: 'V',
+    description: '7 novel deadlock detection techniques + 10 safety/security properties (livelock, starvation, resource leaks, noninterference, replay, covert channels) all via lattice operations.' },
+  { id: 'P5', act: 'II', actName: 'The Consequences', title: 'The lambda_S Hierarchy: A Stratified Calculus for Session-Typed Objects',
+    venue: 'ESOP 2027', format: 'LNCS', pages: '15pp', deadline: '2026-10-01',
+    status: 'draft', sector: 'V',
+    description: 'Formal calculus with stratified type levels (L0-L9). Subtyping = lattice embedding. Already drafted at ice-2026-lambda.' },
+
+  // Act III — The Practice
+  { id: 'P6', act: 'III', actName: 'The Practice', title: 'Reticulate + BICA Reborn: Lattice Verification for Session Types',
+    venue: 'TACAS 2027', format: 'LNCS', pages: '15pp', deadline: '2026-10-16',
+    status: 'planned', sector: 'V',
+    description: 'Combined tool paper. Python (182 modules, 10,908 tests) + Java (1,619 tests). 106 benchmarks. Hasse diagrams, test generation, coverage analysis.' },
+  { id: 'P7', act: 'III', actName: 'The Practice', title: 'Bottom-Up Multiparty Session Types via Lattice Composition',
+    venue: 'COORDINATION 2027', format: 'LNCS', pages: '15pp', deadline: '2027-02-01',
+    status: 'draft', sector: 'V',
+    description: 'Compose local session types into global protocols via lattice products. Already drafted. DisCoTec satellite.' },
+
+  // Act IV — The Synthesis
+  { id: 'P8', act: 'IV', actName: 'The Synthesis', title: 'Session Types as Algebraic Reticulates (full theory)',
+    venue: 'POPL 2028 or JLAMP', format: 'ACM/Elsevier', pages: '25-40pp', deadline: '2027-07-01',
+    status: 'planned', sector: 'V',
+    description: 'The magnum opus. Unifies Steps 1-30: lattice theorem, subtyping, duality, morphisms, spectral analysis, algebraic toolkit. Journal or top conference.' },
+  { id: 'P9', act: 'IV', actName: 'The Synthesis', title: 'The First 120 Steps: A Survey of Session Types as Algebraic Reticulates',
+    venue: 'LMCS (journal)', format: 'Open access', pages: '30pp', deadline: '2027-10-01',
+    status: 'draft', sector: 'V',
+    description: 'Survey paper covering the full programme. Open access journal, no page limit. Already drafted.' },
+
+  // Cross-Disciplinary — expose non-PL audiences to session types + lattice theory
+  { id: 'X1', act: 'X', actName: 'Cross-Disciplinary', title: 'Formal Protocol Verification for AI Agent Systems (MCP/A2A)',
+    venue: 'AAMAS 2027', format: 'IFAAMAS', pages: '8pp', deadline: '2026-10-01',
+    status: 'planned', sector: 'E',
+    description: 'AI multi-agent systems venue. Session types for MCP (Anthropic) and A2A (Google) protocols. First-mover advantage — nobody else does this.' },
+  { id: 'X2', act: 'X', actName: 'Cross-Disciplinary', title: 'Lattice-Based Abstract Interpretation of Session Type State Spaces',
+    venue: 'VMCAI 2027', format: 'LNCS', pages: '15pp', deadline: '2026-09-01',
+    status: 'planned', sector: 'E',
+    description: 'Verification / abstract interpretation community. Our lattice results connect directly to Cousot-style abstract domains. POPL co-located.' },
+  { id: 'X3', act: 'X', actName: 'Cross-Disciplinary', title: 'Session Types Meet Static Analysis: Lattice Domains for Protocol Checking',
+    venue: 'SAS 2027', format: 'LNCS', pages: '15pp', deadline: '2027-06-01',
+    status: 'planned', sector: 'E',
+    description: 'Static analysis community. Present session type lattices as a new abstract domain. Connects to dataflow, widening, Galois connections.' },
+  { id: 'X4', act: 'X', actName: 'Cross-Disciplinary', title: 'Algebraic Protocol Structures in Distributed Computing',
+    venue: 'DISC 2027 / OPODIS 2027', format: 'LIPIcs', pages: '15pp', deadline: '2027-05-01',
+    status: 'planned', sector: 'E',
+    description: 'Distributed computing community. Lattice-based reasoning about consensus, replication, fault tolerance protocols (Raft, 2PC, Saga).' },
+  { id: 'X5', act: 'X', actName: 'Cross-Disciplinary', title: 'Game-Theoretic Semantics for Session Type Protocols',
+    venue: 'LICS 2027 / GandALF 2027', format: 'ACM/EPTCS', pages: '12pp', deadline: '2027-01-01',
+    status: 'planned', sector: 'E',
+    description: 'Logic / game theory community. Session type protocols as two-player games, winning strategies as valid implementations.' },
+
+  // Industry — expose practitioners to formal methods via session types
+  { id: 'N1', act: 'N', actName: 'Industry', title: 'Session Type Verification for Microservice Architectures',
+    venue: 'ICSE 2027 / ICSE-SEIP', format: 'ACM', pages: '10pp', deadline: '2026-09-01',
+    status: 'planned', sector: 'P',
+    description: 'Software engineering practice track. Apply session types to real microservice APIs (REST, gRPC, GraphQL). Industrial case studies.' },
+  { id: 'N2', act: 'N', actName: 'Industry', title: 'Automated Protocol Conformance Testing from Session Types',
+    venue: 'ISSTA 2027', format: 'ACM', pages: '12pp', deadline: '2027-02-01',
+    status: 'planned', sector: 'P',
+    description: 'Software testing venue. Our test generation (5,183 generated tests from 34 protocols) is directly applicable. CI/CD integration story.' },
+  { id: 'N3', act: 'N', actName: 'Industry', title: 'Behavioral API Contracts: From OpenAPI to Session Types',
+    venue: 'ASE 2027', format: 'ACM/IEEE', pages: '10pp', deadline: '2027-05-01',
+    status: 'planned', sector: 'P',
+    description: 'Automated software engineering. Bridge between OpenAPI specs and session types. Practical tooling story.' },
+  { id: 'N4', act: 'N', actName: 'Industry', title: 'Formal Methods for Cloud Protocol Design',
+    venue: 'IEEE Cloud / SoCC 2027', format: 'IEEE/ACM', pages: '10pp', deadline: '2027-04-01',
+    status: 'planned', sector: 'P',
+    description: 'Cloud computing venues. Session types for AWS Step Functions, Azure Durable Functions, GCP Workflows. Industry-facing.' },
+  { id: 'N5', act: 'N', actName: 'Industry', title: 'Session Types for IoT Protocol Verification',
+    venue: 'IoTDI 2027 / EWSN 2027', format: 'ACM/IEEE', pages: '10pp', deadline: '2027-01-01',
+    status: 'planned', sector: 'P',
+    description: 'IoT/embedded community. MQTT, CoAP, Zigbee protocols as session types. Safety-critical angle.' },
+];
+
+const middleOrbit = [
+  { id: 'M1', sector: 'V', name: 'ICE 2026', status: 'urgent', deadline: '2026-04-02', description: 'Act I: Research paper (15pp EPTCS) + oral comm (2pp). Portal: ice26.hotcrp.com. TOMORROW!' },
+  { id: 'M2', sector: 'V', name: 'CONCUR 2026', status: 'active', deadline: '2026-04-27', description: 'Act I: Full lattice theorem, 15pp LIPIcs. Abstract Apr 20, paper Apr 27. Single-author.' },
+  { id: 'M3', sector: 'T', name: 'Algebraic Toolkit', status: 'active', description: '31 sub-steps, Tiers 1-5. Complete all Tier 1 (linear algebra) and Tier 2 (polynomial/spectral) steps to A+ grade.' },
+  { id: 'M4', sector: 'T', name: 'Programme Expansion', status: 'active', description: '267 to 300 papers target. Fill gaps in existing steps.' },
+  { id: 'M5', sector: 'I', name: 'Test Suite Health', status: 'green', description: '10,908 tests, all passing. 182 modules.' },
+  { id: 'M6', sector: 'P', name: 'Products', status: 'background', description: 'P101-P104. Art prints, t-shirts, ambient music, modularity analysis.' },
+  { id: 'M7', sector: 'B', name: 'Benchmark Expansion', status: 'active', description: '55 to 65+ protocols. Physics benchmarks planned.' },
+  { id: 'M8', sector: 'W', name: 'Preprint Publication', status: 'blocked', description: 'arXiv endorsement needed. Alternatives: HAL, Zenodo, self-host on bica-tools.org.' },
+  { id: 'M9', sector: 'E', name: 'Cross-Domain Papers', status: 'active', description: 'Philosophy, Physics, Biology, Religion, Law, Cooking, Sports. All to A+ quality.' },
+];
+
+const outerOrbit = [
+  { id: 'O1', sector: 'V', name: 'ICTAC 2026', description: 'Act I fallback if CONCUR rejected. Deadline Jun 15. ~40% acceptance.' },
+  { id: 'O2', sector: 'V', name: 'ECOOP 2027', description: 'Act II: Modularity + OO principles paper. Deadline ~Oct 2026. 25pp LIPIcs.' },
+  { id: 'O3', sector: 'V', name: 'FoSSaCS 2027', description: 'Act II: Safety/security paper. 7 deadlock techniques + 10 properties. Deadline ~Oct 2026.' },
+  { id: 'O4', sector: 'V', name: 'ESOP 2027', description: 'Act II: lambda_S calculus paper. Deadline ~Oct 2026.' },
+  { id: 'O5', sector: 'V', name: 'TACAS 2027', description: 'Act III: Combined tool paper (Reticulate + BICA Reborn). Deadline ~Oct 2026.' },
+  { id: 'O6', sector: 'V', name: 'COORDINATION 2027', description: 'Act III: Composition paper. Deadline ~Feb 2027.' },
+  { id: 'O7', sector: 'V', name: 'POPL 2028 / JLAMP', description: 'Act IV: Magnum opus — full algebraic theory. Deadline Jul 2027.' },
+  { id: 'O8', sector: 'V', name: 'LMCS Survey', description: 'Act IV: First 120 Steps survey. Open access journal.' },
+  { id: 'O9', sector: 'T', name: 'Monograph', description: 'Book-length treatment. 1.4M words already written.' },
+  { id: 'O10', sector: 'T', name: '1000-Paper Programme', description: 'Currently at 267/1000.' },
+  { id: 'O11', sector: 'I', name: 'PyPI Release', description: 'Publish reticulate on PyPI.' },
+  { id: 'O12', sector: 'I', name: 'Lean 4 Expansion', description: '28 modules exist, needs major expansion.' },
+  { id: 'O13', sector: 'P', name: 'Web Platform', description: 'bica-tools.org with interactive demos.' },
+  { id: 'O14', sector: 'E', name: 'PhD Thesis', description: 'Independent submission. Body of work merits it.' },
+  { id: 'O15', sector: 'E', name: 'CS Concepts Backlog', description: '352 concepts catalogued. Each is a potential step.' },
+  { id: 'O16', sector: 'B', name: 'Industry Case Studies', description: 'MCP/A2A agents, OpenAPI contracts.' },
+  { id: 'O17', sector: 'E', name: 'Future Steps Registry', description: '943 proposals across all domains.' },
+  { id: 'O18', sector: 'W', name: 'PhD Thesis Assembly', description: 'Structure exists, needs assembly of chapters.' },
+];
+
+const sectorHealth = [
+  { code: 'T', name: 'Theory', health: 'green', metric: '267 papers', trend: 'up' },
+  { code: 'I', name: 'Tools', health: 'green', metric: '182 modules', trend: 'up' },
+  { code: 'V', name: 'Venues', health: 'red', metric: 'ICE 1d!', trend: 'up' },
+  { code: 'P', name: 'Products', health: 'amber', metric: '4 products', trend: 'flat' },
+  { code: 'B', name: 'Benchmarks', health: 'green', metric: '55 protocols', trend: 'steady' },
+  { code: 'W', name: 'Writing', health: 'green', metric: '1.4M words', trend: 'up' },
+  { code: 'E', name: 'Exploration', health: 'green', metric: '943 proposals', trend: 'up' },
+];
+
+const stats = {
+  papers: 267, modules: 182, tests: 10908,
+  words: '1.43M', proposals: 943, concepts: 352,
+  benchmarks: 55, domains: 17
+};
+
+// ── STATE ────────────────────────────────────────────
+let activeSector = null;
+let selectedItem = null;
+
+function loadDoneState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('orbital-done') || '{}');
+    innerOrbit.forEach(item => {
+      if (saved[item.id] !== undefined) item.done = saved[item.id];
+    });
+  } catch(e) {}
+}
+
+function saveDoneState() {
+  const state = {};
+  innerOrbit.forEach(item => state[item.id] = item.done);
+  localStorage.setItem('orbital-done', JSON.stringify(state));
+}
+
+function resetState() {
+  localStorage.removeItem('orbital-done');
+  innerOrbit.forEach(item => item.done = (item.id === 7));
+  activeSector = null;
+  selectedItem = null;
+  render();
+}
+
+// ── RENDER: SECTOR BAR ──────────────────────────────
+function renderSectorBar() {
+  const bar = document.getElementById('sectorBar');
+  bar.innerHTML = sectorHealth.map(s => {
+    const isActive = activeSector === s.code;
+    const needsPulse = s.health === 'yellow' || s.health === 'amber' || s.health === 'red';
+    const trendIcon = s.trend === 'up' ? '&#9650;' : s.trend === 'steady' ? '&#9654;' : '&#9660;';
+    return `
+      <div class="sector-card ${isActive ? 'active' : ''}" style="--sector-color:${SECTOR_COLORS[s.code]}"
+           onclick="toggleSector('${s.code}')">
+        <div>
+          <span class="sector-indicator ${needsPulse ? 'pulse' : ''}" style="background:${HEALTH_COLORS[s.health]}"></span>
+          <span class="sector-code" style="color:${SECTOR_COLORS[s.code]}">${s.code}</span>
+        </div>
+        <div class="sector-name">${s.name}</div>
+        <div class="sector-metric">${s.metric}</div>
+        <div class="sector-trend ${s.trend}">${trendIcon}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggleSector(code) {
+  activeSector = activeSector === code ? null : code;
+  render();
+}
+
+// ── RENDER: ORBITAL SVG ─────────────────────────────
+function renderOrbital() {
+  const svg = document.getElementById('orbitalSvg');
+  const cx = 350, cy = 350;
+  const rInner = 100, rMiddle = 200, rOuter = 300;
+
+  let html = '';
+
+  // Orbit rings
+  html += `<circle cx="${cx}" cy="${cy}" r="${rInner}" class="orbit-ring orbit-ring-inner"/>`;
+  html += `<circle cx="${cx}" cy="${cy}" r="${rMiddle}" class="orbit-ring orbit-ring-middle"/>`;
+  html += `<circle cx="${cx}" cy="${cy}" r="${rOuter}" class="orbit-ring orbit-ring-outer"/>`;
+
+  // Orbit labels
+  html += `<text x="${cx}" y="${cy - rInner - 8}" text-anchor="middle" class="orbit-label">Inner</text>`;
+  html += `<text x="${cx}" y="${cy - rMiddle - 8}" text-anchor="middle" class="orbit-label">Middle</text>`;
+  html += `<text x="${cx}" y="${cy - rOuter - 8}" text-anchor="middle" class="orbit-label">Outer</text>`;
+
+  // Centre
+  html += `<circle cx="${cx}" cy="${cy}" r="24" fill="${'#252545'}" stroke="${'#3a3a5a'}" stroke-width="1.5"/>`;
+  html += `<text x="${cx}" y="${cy + 1}" text-anchor="middle" dominant-baseline="central" fill="${'#a0a0b8'}" font-size="9" font-weight="600" letter-spacing="1">FOCUS</text>`;
+
+  // Place nodes
+  function placeNodes(items, radius, orbit) {
+    const n = items.length;
+    items.forEach((item, i) => {
+      const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+      const x = cx + radius * Math.cos(angle);
+      const y = cy + radius * Math.sin(angle);
+      const color = SECTOR_COLORS[item.sector];
+      const hidden = activeSector && item.sector !== activeSector;
+      const r = orbit === 'inner' ? 12 : orbit === 'middle' ? 10 : 7;
+      const label = orbit === 'inner' ? item.task.slice(0, 12) :
+                    orbit === 'middle' ? item.name.slice(0, 12) :
+                    item.name.slice(0, 10);
+      const fullLabel = orbit === 'inner' ? item.task :
+                        orbit === 'middle' ? item.name :
+                        item.name;
+      const isDone = orbit === 'inner' && item.done;
+
+      html += `<g class="orbit-node ${hidden ? 'node-hidden' : ''}"
+                  data-orbit="${orbit}" data-id="${item.id}"
+                  onmouseenter="showTooltip(event, '${fullLabel.replace(/'/g, "\\'")} [${item.sector}]')"
+                  onmouseleave="hideTooltip()"
+                  onclick="selectItem('${orbit}','${item.id}')">
+        <circle cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity="${isDone ? 0.35 : 0.85}"
+                stroke="${isDone ? '#666' : color}" stroke-width="2"/>
+        ${isDone ? `<line x1="${x-4}" y1="${y}" x2="${x+4}" y2="${y}" stroke="#fff" stroke-width="2"/>
+                    <line x1="${x}" y1="${y-4}" x2="${x}" y2="${y+4}" stroke="#fff" stroke-width="2" transform="rotate(45,${x},${y})"/>` : ''}
+        <text x="${x}" y="${y + r + 14}" text-anchor="middle" fill="${hidden ? '#333' : '#888'}"
+              font-size="9" font-weight="500">${label}</text>
+      </g>`;
+    });
+  }
+
+  placeNodes(innerOrbit, rInner, 'inner');
+  placeNodes(middleOrbit, rMiddle, 'middle');
+  placeNodes(outerOrbit, rOuter, 'outer');
+
+  svg.innerHTML = html;
+}
+
+// ── RENDER: CHECKLIST ───────────────────────────────
+function renderChecklist() {
+  const el = document.getElementById('checklist');
+  el.innerHTML = innerOrbit.map(item => `
+    <div class="checklist-item ${item.done ? 'done' : ''}" onclick="toggleDone(${item.id})">
+      <div class="checklist-checkbox"></div>
+      <div class="checklist-sector" style="color:${SECTOR_COLORS[item.sector]}">${item.sector}</div>
+      <div class="checklist-text">${item.task}${item.deadline ? ` <span style="color:var(--health-amber)">(${item.deadline})</span>` : ''}</div>
+    </div>
+  `).join('');
+}
+
+function toggleDone(id) {
+  const item = innerOrbit.find(i => i.id === id);
+  if (item) { item.done = !item.done; saveDoneState(); render(); }
+}
+
+// ── RENDER: FOOTER ──────────────────────────────────
+function renderFooter() {
+  const el = document.getElementById('footer');
+  const entries = [
+    [stats.papers, 'Papers'], [stats.modules, 'Modules'], [stats.tests.toLocaleString(), 'Tests'],
+    [stats.words, 'Words'], [stats.proposals, 'Proposals'], [stats.concepts, 'CS Concepts'],
+    [stats.benchmarks, 'Benchmarks'], [stats.domains, 'Domains']
+  ];
+  el.innerHTML = entries.map(([v,l]) => `
+    <div class="stat-item">
+      <div class="stat-value">${v}</div>
+      <div class="stat-label">${l}</div>
+    </div>`).join('');
+}
+
+// ── DETAIL PANEL ────────────────────────────────────
+function selectItem(orbit, id) {
+  hideTooltip();
+  let item;
+  if (orbit === 'inner') item = innerOrbit.find(i => String(i.id) === String(id));
+  else if (orbit === 'middle') item = middleOrbit.find(i => String(i.id) === String(id));
+  else item = outerOrbit.find(i => String(i.id) === String(id));
+  if (!item) return;
+
+  const panel = document.getElementById('detailPanel');
+  const content = document.getElementById('detailContent');
+  const color = SECTOR_COLORS[item.sector];
+  const title = item.task || item.name;
+  let html = `
+    <div class="detail-sector-badge" style="background:${color}30;color:${color}">${item.sector} &mdash; ${sectorHealth.find(s=>s.code===item.sector)?.name || ''}</div>
+    <div class="detail-title">${title}</div>
+    <div class="detail-meta">Orbit: ${orbit.charAt(0).toUpperCase() + orbit.slice(1)} &bull; ID: ${item.id}</div>`;
+  if (item.deadline) html += `<div class="detail-meta" style="color:var(--health-amber)">Deadline: ${item.deadline}</div>`;
+  if (item.status) html += `<div class="detail-meta">Status: ${item.status}</div>`;
+  if (item.description) html += `<div class="detail-description">${item.description}</div>`;
+  if (orbit === 'inner') html += `<div class="detail-meta" style="margin-top:8px">${item.done ? 'Completed' : 'In progress'}</div>`;
+
+  content.innerHTML = html;
+  panel.classList.add('visible');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+// ── TOOLTIP ─────────────────────────────────────────
+function showTooltip(event, text) {
+  const tip = document.getElementById('tooltip');
+  tip.textContent = text;
+  tip.style.display = 'block';
+  tip.style.left = (event.clientX + 12) + 'px';
+  tip.style.top = (event.clientY - 8) + 'px';
+}
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+
+// ── RENDER: PUBLICATION PIPELINE ────────────────────
+function togglePipeline() {
+  const content = document.getElementById('pipelineContent');
+  const toggle = document.getElementById('pipelineToggle');
+  const visible = content.classList.toggle('visible');
+  toggle.classList.toggle('active', visible);
+  toggle.textContent = visible ? 'Hide Pipeline' : 'Show Pipeline';
+  if (visible && !content.innerHTML) renderPipeline();
+}
+
+function renderPipeline() {
+  const content = document.getElementById('pipelineContent');
+  const actColors = { 'I': '#2196F3', 'II': '#4CAF50', 'III': '#FF9800', 'IV': '#9C27B0', 'X': '#00BCD4', 'N': '#E91E63' };
+  const actNames = { 'I': 'Act I \u2014 The Discovery', 'II': 'Act II \u2014 The Consequences', 'III': 'Act III \u2014 The Practice', 'IV': 'Act IV \u2014 The Synthesis', 'X': 'Cross-Disciplinary', 'N': 'Industry' };
+  const acts = ['I', 'II', 'III', 'IV', 'X', 'N'];
+
+  let html = '<div class="pipeline-acts">';
+  acts.forEach(act => {
+    const papers = publicationPipeline.filter(p => p.act === act);
+    if (papers.length === 0) return;
+    html += '<div class="pipeline-act act-' + act + '">' +
+      '<div class="pipeline-act-header" style="background:' + actColors[act] + '22;color:' + actColors[act] + '">' + actNames[act] + '</div>' +
+      '<div class="pipeline-act-body">';
+    papers.forEach(p => {
+      const isUrgent = p.deadline && new Date(p.deadline) < new Date('2026-04-05');
+      const deadlineClass = isUrgent ? 'urgent' : '';
+      html += '<div class="pipeline-paper status-' + p.status + '" onclick="showPipelineDetail(\'' + p.id + '\')">' +
+        '<div class="pipeline-paper-venue">' + p.venue + '</div>' +
+        '<div class="pipeline-paper-title">' + p.title + '</div>' +
+        '<div class="pipeline-paper-meta">' +
+          '<span class="pipeline-paper-status ' + p.status + '">' + p.status + '</span>' +
+          '<span>' + p.pages + '</span>' +
+          (p.deadline ? '<span class="pipeline-paper-deadline ' + deadlineClass + '">' + p.deadline + '</span>' : '') +
+        '</div></div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  // Timeline
+  const timelineMonths = [
+    { label: 'Apr 26', months: 1, color: '#f44336', events: 'ICE submit, CONCUR abs+paper' },
+    { label: 'May-Jun', months: 2, color: '#FF9800', events: 'ICE workshop (Urbino), ICTAC fallback' },
+    { label: 'Jul-Sep', months: 3, color: '#FFC107', events: 'FLOC/LICS (Lisbon), CONCUR (Liverpool)' },
+    { label: 'Oct 26', months: 1, color: '#4CAF50', events: 'ECOOP+FoSSaCS+ESOP+TACAS batch!' },
+    { label: 'Nov-Jan', months: 3, color: '#26a69a', events: 'AAMAS, ICSE, IoT deadlines' },
+    { label: 'Feb-Apr 27', months: 3, color: '#2196F3', events: 'COORDINATION, ETAPS' },
+    { label: 'May-Jul 27', months: 3, color: '#5c6bc0', events: 'POPL 2028 / JLAMP submit' },
+    { label: 'Aug-Dec 27', months: 5, color: '#9C27B0', events: 'LMCS survey, wrap-up' },
+  ];
+  const totalMonths = 21;
+
+  html += '<div style="margin-top:16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px">Timeline (Apr 2026 \u2013 Dec 2027)</div>';
+  html += '<div class="timeline-bar">';
+  timelineMonths.forEach(m => {
+    const widthPct = (m.months / totalMonths * 100).toFixed(1);
+    html += '<div class="timeline-segment" style="width:' + widthPct + '%;background:' + m.color + '" title="' + m.events + '"><span>' + m.label + '</span></div>';
+  });
+  html += '<div class="timeline-now" style="left:4%"></div>';
+  html += '</div>';
+
+  html += '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:10px;color:var(--text-secondary)">' +
+    '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--health-green)"></span>Ready</span>' +
+    '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--health-yellow)"></span>Polishing</span>' +
+    '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--health-amber)"></span>Draft</span>' +
+    '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#8888aa"></span>Planned</span>' +
+    '<span style="margin-left:16px;font-weight:600">Total: ' + publicationPipeline.length + ' submissions \u2022 4 Acts (PL core) + Cross-Disciplinary + Industry</span>' +
+    '</div></div>';
+
+  content.innerHTML = html;
+}
+
+function showPipelineDetail(id) {
+  const paper = publicationPipeline.find(p => p.id === id);
+  if (!paper) return;
+  const panel = document.getElementById('detailPanel');
+  const ct = document.getElementById('detailContent');
+  const actColors = { 'I': '#2196F3', 'II': '#4CAF50', 'III': '#FF9800', 'IV': '#9C27B0', 'X': '#00BCD4', 'N': '#E91E63' };
+  const color = actColors[paper.act] || '#FF9800';
+  let h = '<div class="detail-sector-badge" style="background:' + color + '30;color:' + color + '">Act ' + paper.act + ' \u2014 ' + paper.actName + '</div>' +
+    '<div class="detail-title">' + paper.title + '</div>' +
+    '<div class="detail-meta">Venue: <strong>' + paper.venue + '</strong></div>' +
+    '<div class="detail-meta">Format: ' + paper.format + ' \u2022 ' + paper.pages + '</div>';
+  if (paper.deadline) h += '<div class="detail-meta" style="color:var(--health-amber)">Deadline: ' + paper.deadline + '</div>';
+  if (paper.portal) h += '<div class="detail-meta">Portal: <a href="' + paper.portal + '" style="color:var(--I)" target="_blank">' + paper.portal + '</a></div>';
+  h += '<div class="detail-meta">Status: <span class="pipeline-paper-status ' + paper.status + '">' + paper.status + '</span></div>';
+  h += '<div class="detail-description">' + paper.description + '</div>';
+  ct.innerHTML = h;
+  panel.classList.add('visible');
+}
+
+// ── RENDER ALL ──────────────────────────────────────
+function render() {
+  renderSectorBar();
+  renderOrbital();
+  renderChecklist();
+  renderFooter();
+}
+
+loadDoneState();
+render();
+</script>
+</body>
+</html>

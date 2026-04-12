@@ -230,6 +230,30 @@ export const routes: Routes = [
     title: 'Monitoring — BICA Tools',
   },
   {
+    path: 'papers',
+    loadComponent: () =>
+      import('./pages/papers/paper-list.component').then(
+        (m) => m.PaperListComponent,
+      ),
+    title: 'Research Papers — BICA Tools',
+  },
+  {
+    path: 'papers/:slug',
+    loadComponent: () =>
+      import('./pages/papers/paper-detail.component').then(
+        (m) => m.PaperDetailComponent,
+      ),
+    title: 'Paper — BICA Tools',
+  },
+  {
+    path: 'venue-papers',
+    loadComponent: () =>
+      import('./pages/papers/venue-papers.component').then(
+        (m) => m.VenuePapersComponent,
+      ),
+    title: 'Publications — BICA Tools',
+  },
+  {
     path: 'blog',
     loadComponent: () =>
       import('./pages/blog/blog-list.component').then(
