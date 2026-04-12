@@ -1,0 +1,16 @@
+# m3_canonical.session
+#
+# Java twin of
+# reticulate/tests/benchmarks/modularity/m3_canonical.sessiontype
+#
+# Canonical M3 (diamond) witness — modular-but-not-distributive.
+#
+# Verification:
+#   - isModular() == true (lattice passes the modular identity)
+#   - isDistributive() == false (contains an M3 sublattice)
+#   - certificate == "semantic"
+#
+# Lines starting with `#` are comments. The first non-comment,
+# non-empty line is the session type string.
+
+&{a: &{x: end}, b: &{y: end}, c: &{z: end}}

@@ -1,0 +1,54 @@
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 1MB
+    max-swallow-size: 1MB
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/plain,text/css,application/javascript,image/svg+xml
+
+spring:
+  main:
+    allow-circular-references: true
+  application:
+    name: bica-web
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:file:./data/bica-blog;AUTO_SERVER=TRUE}
+    driver-class-name: ${DATABASE_DRIVER:org.h2.Driver}
+    username: ${DATABASE_USER:sa}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
+  h2:
+    console:
+      enabled: ${H2_CONSOLE:true}
+      path: /h2-console
+  cache:
+    type: ${CACHE_TYPE:simple}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+  codec:
+    max-in-memory-size: 1MB
+
+bica:
+  security:
+    jwt-secret: ${BICA_JWT_SECRET:bica-reticulate-session-types-2026-secret-key-minimum-256-bits-long}
+    admin-username: ${BICA_ADMIN_USER:admin}
+    admin-password: ${BICA_ADMIN_PASSWORD:reticulate}
+    token-expiry-hours: ${BICA_TOKEN_EXPIRY:24}

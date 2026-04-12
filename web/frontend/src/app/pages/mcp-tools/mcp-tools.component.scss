@@ -1,0 +1,182 @@
+/* ================================================================ */
+/* MCP Tools — Subtype, Dual, Trace panels                         */
+/* ================================================================ */
+
+:host { display: block; }
+
+/* -- Header -- */
+.mcp-header {
+  width: 100vw; margin-left: calc(-50vw + 50%); margin-top: -24px;
+  background: linear-gradient(145deg, #1e1b4b, #312e81 60%, #4338ca);
+  color: #fff; padding: 32px 24px 28px; text-align: center;
+
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; }
+}
+
+/* -- Panels container -- */
+.panels {
+  max-width: 1100px; margin: 24px auto; padding: 0 16px;
+  display: flex; flex-direction: column; gap: 32px;
+}
+
+.panel {
+  background: #fff; border-radius: 12px;
+  padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.panel-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 18px; font-weight: 700; margin: 0 0 4px;
+  mat-icon { color: var(--brand-primary, #4338ca); }
+}
+
+.panel-desc {
+  font-size: 13px; color: rgba(0,0,0,0.55); margin: 0 0 16px;
+}
+
+/* -- Inputs -- */
+.two-inputs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+
+.input-field {
+  label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.6px; color: rgba(0,0,0,0.45);
+    margin-bottom: 4px; font-weight: 500;
+  }
+  textarea {
+    width: 100%; height: 56px; padding: 10px 12px;
+    border: 2px solid rgba(0,0,0,0.1); border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: #fff; resize: vertical; box-sizing: border-box;
+    transition: border-color 0.2s;
+    &:focus { outline: none; border-color: var(--brand-primary, #4338ca); }
+  }
+}
+
+/* -- Action row -- */
+.action-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px;
+}
+
+.action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border: none; border-radius: 8px;
+  background: var(--brand-primary, #4338ca); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s;
+  &:hover:not(:disabled) { background: #3730a3; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.examples-mini {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+.ex-chip {
+  padding: 4px 10px; border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 16px; background: #f8f9fa; font-size: 11px;
+  cursor: pointer; transition: all 0.15s;
+  &:hover { background: #e8e5ff; border-color: var(--brand-primary, #4338ca); }
+}
+
+/* -- Results -- */
+.result-card {
+  margin-top: 16px; padding: 16px; border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.06);
+
+  &.success { border-color: #22c55e; background: #f0fdf4; }
+  &.fail { border-color: #ef4444; background: #fef2f2; }
+  &.warn { border-color: #f59e0b; background: #fffbeb; }
+}
+
+.result-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 15px; font-weight: 700; margin-bottom: 10px;
+
+  .success & mat-icon { color: #22c55e; }
+  .fail & mat-icon { color: #ef4444; }
+  .warn & mat-icon { color: #f59e0b; }
+}
+
+.result-detail {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 4px;
+}
+
+.relation {
+  font-size: 12px; color: rgba(0,0,0,0.55); font-style: italic;
+}
+
+.result-meta {
+  font-size: 12px; color: rgba(0,0,0,0.5);
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+
+/* -- Dual detail -- */
+.dual-detail {
+  flex-direction: column; gap: 6px;
+}
+
+.dual-pair {
+  display: flex; align-items: baseline; gap: 8px;
+  .label { font-size: 11px; text-transform: uppercase; color: rgba(0,0,0,0.45); min-width: 60px; }
+}
+
+.badges {
+  margin-top: 8px;
+}
+
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
+  background: #fecaca; color: #991b1b;
+  &.ok { background: #bbf7d0; color: #166534; }
+}
+
+/* -- SVG diagrams -- */
+.svg-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;
+
+  h4 { font-size: 12px; text-transform: uppercase; color: rgba(0,0,0,0.45);
+       margin: 0 0 6px; font-weight: 600; }
+}
+
+.svg-col { min-width: 0; }
+
+.svg-wrap {
+  background: #fafafa; border-radius: 8px; padding: 8px;
+  border: 1px solid rgba(0,0,0,0.06); overflow: auto; max-height: 300px;
+
+  ::ng-deep svg { max-width: 100%; height: auto; }
+}
+
+/* -- Trace path -- */
+.trace-path {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+  margin: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+}
+
+.trace-step {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  padding: 2px 8px; border-radius: 4px;
+
+  &.valid { background: #dcfce7; }
+  &.invalid { background: #fecaca; }
+}
+
+.step-arrow { font-size: 10px; color: rgba(0,0,0,0.4); }
+.step-sep { color: rgba(0,0,0,0.3); font-size: 11px; }
+
+/* -- Responsive -- */
+@media (max-width: 768px) {
+  .two-inputs { grid-template-columns: 1fr; }
+  .svg-row { grid-template-columns: 1fr; }
+}

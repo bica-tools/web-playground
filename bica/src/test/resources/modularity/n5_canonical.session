@@ -1,0 +1,27 @@
+# n5_canonical.session
+#
+# Java twin of
+# reticulate/tests/benchmarks/modularity/n5_canonical.sessiontype
+#
+# Canonical N5 (pentagon) counterexample to modularity. Per
+# `feedback_java_python_parity` the BICA and reticulate copies of
+# this file must stay character-identical in the type string (the
+# single non-comment line at the bottom). Comment headers may
+# differ in tone; the payload must not.
+#
+# Witness (state indices, under the quotient graph):
+#     (top, u, v, w, bottom) = (1, 2, 3, 4, 0)
+#
+# Verification:
+#   - ModularityChecker.check(Parser.parse(<type below>))
+#         .isModular() == false
+#   - certificate == "semantic"
+#
+# The N5 canonical fixture must NEVER be re-classified as modular by
+# either tool. Any future refactor that flips this verdict is a
+# regression in the modularity pipeline.
+#
+# Lines starting with `#` are comments. The first non-comment,
+# non-empty line is the session type string.
+
+&{a: &{x: &{y: end}}, b: &{z: end}}

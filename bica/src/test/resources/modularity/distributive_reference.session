@@ -1,0 +1,21 @@
+# distributive_reference.session
+#
+# Java twin of
+# reticulate/tests/benchmarks/modularity/distributive_reference.sessiontype
+#
+# Distributive reference fixture — the 3×3 grid lattice
+# ∂_3 × ∂_3 (9 states), strictly distributive but not Boolean.
+# Chosen as a 3×3 product to be a *non-trivial* distributive
+# witness, after Task 44 fixed BICA's false-N5 bug on grid
+# lattices.
+#
+# Verification:
+#   - isModular() == true
+#   - isDistributive() == true
+#   - numStates() == 9
+#   - certificate == "syntactic"   (fast path, not semantic search)
+#
+# Lines starting with `#` are comments. The first non-comment,
+# non-empty line is the session type string.
+
+(a . b . end || c . d . end)

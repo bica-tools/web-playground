@@ -1,0 +1,20 @@
+# Build artifacts
+web/backend/target/
+web/frontend/node_modules/
+web/frontend/dist/
+web/frontend/.angular/
+web/frontend/playwright-report/
+bica/target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.h2.db
+data/
