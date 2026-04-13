@@ -31,21 +31,21 @@ public class BlogSeeder {
 
             seed(repo, "what-are-session-types",
                 "What Are Session Types?",
-                "Objects have protocols. Session types make those protocols explicit, checkable, and safe.",
+                "Have you ever called .read() on a file you forgot to open? I have. That frustration led me to something unexpected.",
                 ARC1_POST1, 1, 1,
                 "session-types,introduction,protocols,objects",
                 "Alexandre Zua Caldeira");
 
             seed(repo, "the-grammar",
                 "The Grammar — How to Write a Protocol",
-                "Six constructors, one grammar, infinite protocols. Learn to read and write session types.",
+                "How do you describe a conversation? Not the content — the structure. Six building blocks is all it takes.",
                 ARC1_POST2, 1, 2,
                 "grammar,syntax,branch,select,parallel,recursion",
                 "Alexandre Zua Caldeira");
 
             seed(repo, "parsing-from-text-to-structure",
                 "Parsing — From Text to Structure",
-                "How a string like '&{open: +{OK: end, ERROR: end}}' becomes a tree your tools can reason about.",
+                "Your tools can't work with strings. They need structure. Here's how a flat line of text becomes a tree you can reason about.",
                 ARC1_POST3, 1, 3,
                 "parser,AST,tokenizer,recursive-descent",
                 "Alexandre Zua Caldeira");
@@ -74,402 +74,292 @@ public class BlogSeeder {
     // Arc 1, Post 1: What Are Session Types?
     // -----------------------------------------------------------------------
     private static final String ARC1_POST1 = """
-## The Problem: Objects Used Wrong
+Have you ever called `.read()` on a file you forgot to open?
 
-Every programmer has seen it. You call `.read()` on a file that was never opened. You send data on a socket that's already closed. You call `.next()` on an iterator without checking `.hasNext()` first.
+I have. More than once, actually. The compiler didn't complain. The IDE didn't underline anything in red. Everything looked fine — until runtime, when the whole thing blew up with an exception that could have been caught before I even hit "run."
 
-The object is there. The method exists. The compiler is happy. But at runtime — crash.
+Here's the thing that always bothered me about that: the compiler *knows* what methods exist on my object. It checks the types of my arguments, the return values, even whether I'm handling exceptions. But it has no idea whether I'm calling those methods *in the right order*.
 
-The root cause is always the same: **the object has a protocol**, and you violated it. There's an order in which methods should be called, and you got it wrong.
+And order matters. You can't read before you open. You can't send data on a closed socket. You can't call `.next()` on a Java Iterator without first checking `.hasNext()`.
 
-What if the compiler could catch that?
+Every object has a protocol — a set of rules about which methods you can call, when, and in what sequence. We all learn these protocols by reading documentation, studying examples, or (let's be honest) crashing at runtime and working backwards.
 
-## Types That Describe Behaviour
+What if that protocol were part of the type itself?
 
-A *session type* is a type that describes not what data an object holds, but **what you're allowed to do with it, and in what order**.
+---
 
-Consider a Java `Iterator`. Its protocol is:
+That's exactly what a **session type** is. It's a type that describes not what data an object holds, but what you're *allowed to do with it* — and in what order.
 
-1. Call `hasNext()`
-2. If it returns `TRUE`, you may call `next()` — then go back to step 1
-3. If it returns `FALSE`, you're done
-
-As a session type, this becomes:
+Take that Java Iterator. You know the drill: check `hasNext()`, and if it says yes, call `next()`. Repeat until it says no. We all carry this protocol in our heads. But written as a session type, it looks like this:
 
 ```
 rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}
 ```
 
-Read it like this:
-- `rec X` — "this protocol can repeat" (recursion)
-- `&{hasNext: ...}` — "the object offers the method `hasNext`" (branch)
-- `+{TRUE: ..., FALSE: ...}` — "the object makes a choice" (selection)
-- `end` — "the protocol is finished"
+Don't worry about the syntax yet — we'll unpack it in the next post. What matters right now is what this *does*: it captures the entire lifecycle of an Iterator in a single expression. The looping, the branching, the termination — it's all there.
 
-The session type captures the *entire lifecycle* of the object in one expression.
+And once it's there, a tool can *check* it. Automatically. Before your code runs.
 
-## Why This Matters
+---
 
-With session types, a compiler (or a static checker) can verify:
+I started exploring session types because I was frustrated with a gap in how we think about objects. We have types for data — `int`, `String`, `List<User>`. We have types for functions — input types, output types, checked exceptions. But we have nothing for *behaviour*. Nothing that says "this object goes through these phases, and you must respect them."
 
-- **Completeness**: You handle every method the object offers
-- **Safety**: You never call a method that isn't available in the current state
-- **Termination**: The protocol eventually reaches `end`
-- **Compatibility**: A client's usage matches the object's protocol
+Most session type research focuses on message-passing channels — processes sending data back and forth. That's important work, but it's not how most of us write code day to day. We write code that calls methods on objects. We open files, query databases, iterate over collections, authenticate users.
 
-This isn't hypothetical. Session types have been studied in academia since the 1990s, starting with Honda, Vasconcelos, and Kubo's work on communication protocols. Our project brings them to *objects* — the things you actually program with every day.
+So I asked a different question: what happens when you apply session types to *objects*?
 
-## A Simple Example
+Something unexpected happened. When I built the state space of a session type — the graph of all possible states an object can be in, connected by method-call transitions — it didn't form just any structure. It formed a **lattice**.
 
-Here's a file protocol:
+A lattice is a mathematical structure where every pair of elements has a natural "meet" (greatest lower bound) and "join" (least upper bound). If you've used `git merge`, you've implicitly worked with a lattice — the commit history forms one. If you've ever found the "most specific common supertype" of two Java classes, that's a lattice operation too.
 
-```
-&{open: &{read: end, write: end}}
-```
+But here's what surprised me: this wasn't a coincidence. It wasn't a special property of certain carefully chosen protocols. Every session type I tested — simple ones, complex ones, recursive ones, parallel ones — produced a lattice. Every single one.
 
-This says: "first call `open`, then you may call either `read` or `write`, and then you're done."
+I call these lattice-shaped state spaces **reticulates**, from the Latin *reticulatum* — net-shaped. And it turns out that the lattice structure isn't just mathematically pretty. It's *useful*. It gives you subtyping for free — one protocol fits inside another exactly when one lattice embeds into another. It gives you safe parallel composition — two concurrent protocols on the same object form a product lattice. And it opens the door to algebraic tools — eigenvalues, polynomials, spectral analysis — that can tell you things about your protocol that no amount of testing could reveal.
 
-What you **can't** do:
-- Call `read` before `open` — the method isn't available yet
-- Call both `read` and `write` — you must choose one
-- Call `open` twice — after opening, the protocol moves forward
+This blog is the story of that exploration. I'm going to take you from the basics — what session types are, how to write them, how to parse them — all the way to the deep algebraic structure hiding inside the protocols you already use every day.
 
-The session type makes all of this explicit. No documentation to read and hope you understood correctly. No runtime surprises. The protocol **is** the type.
+We're going to start simple. Next up: the grammar — six small building blocks that can describe any protocol.
 
-## What Makes Our Approach Different
-
-Most session type research focuses on *channels* — communication between processes. We focus on **objects**: Java classes, Python modules, API endpoints. Things with methods, not message channels.
-
-This shift leads to a surprising discovery: when you build the *state space* of a session type (all possible states and transitions), it forms a mathematical structure called a **lattice**.
-
-A lattice is a partially ordered set where every pair of elements has a least upper bound (join) and a greatest lower bound (meet). This structure is not just elegant — it's *useful*. It gives us:
-
-- **Subtyping for free**: One protocol fits inside another when one lattice embeds into another
-- **Parallel composition**: Two concurrent protocols on the same object form a *product lattice*
-- **Algebraic invariants**: Eigenvalues, polynomials, and spectral properties that characterise protocols
-
-We call these lattice-shaped state spaces **reticulates** (from the Latin *reticulatum* — net-shaped). The entire research programme is built on this single insight: **session types form lattices, and lattice theory gives us powerful tools to analyse them**.
-
-## What's Next
-
-In the next post, we'll learn the grammar — the six constructors that let you write any session type. By the end, you'll be reading session types as fluently as you read regular expressions.
-
-*This post is part of Arc 1 — Foundations, a progressive introduction to session types as algebraic reticulates.*
+*Part 1 of Arc 1 — Foundations*
 """;
 
     // -----------------------------------------------------------------------
     // Arc 1, Post 2: The Grammar
     // -----------------------------------------------------------------------
     private static final String ARC1_POST2 = """
-## Six Constructors, Infinite Protocols
+How do you describe a conversation?
 
-Every session type is built from just six constructors. With these six pieces, you can describe any object protocol — from a simple file to a complex multi-phase API.
+Not the content — the *structure*. The fact that first you say hello, then you ask a question, then the other person either answers or says "I don't know," and depending on that, you either follow up or move on.
 
-Let's meet them one by one.
+We do this instinctively when we talk. But when we write code, we lose the structure. We just... call methods and hope for the best.
 
-## 1. End — The Terminal
+Session types give us a way to write down that structure precisely. And it turns out you only need six building blocks to describe any protocol, no matter how complex. Let me walk you through them.
 
-```
-end
-```
+---
 
-The simplest session type. It means "the protocol is finished — there's nothing left to do." Every protocol eventually reaches `end`.
+### The simplest one: `end`
 
-Think of it as the period at the end of a sentence.
+Every conversation eventually stops. In session types, that's `end`. It means "we're done here — nothing left to do." Think of it as hanging up the phone.
 
-## 2. Branch — External Choice (&)
+### The interesting one: `&{...}` — "you choose"
 
-```
-&{method1: S1, method2: S2, ..., methodN: SN}
-```
-
-A branch says: "the object offers these methods. Pick one." The *environment* (the caller, the client) decides which method to call.
-
-Example — a vending machine:
+This is called a **branch**, and it's where things get real. When you write:
 
 ```
-&{insertCoin: &{selectDrink: end}}
+&{read: end, write: end}
 ```
 
-"First insert a coin, then select a drink."
+you're saying: "the object offers two methods — `read` and `write`. The caller picks one." It's like a waiter handing you a menu. *You* decide what to order.
 
-Branches can offer multiple methods at the same level:
-
-```
-&{read: end, write: end, close: end}
-```
-
-"You may read, write, or close — pick one."
-
-## 3. Selection — Internal Choice (+)
+You can chain branches to create sequences. A file protocol might look like:
 
 ```
-+{label1: S1, label2: S2, ..., labelN: SN}
+&{open: &{read: end, write: end}}
 ```
 
-A selection says: "the object makes a decision. You must handle all possible outcomes." The *object itself* decides which path to take.
+First you open, *then* you choose between reading and writing. The ordering is baked right in.
 
-Example — an authentication check:
+### The tricky one: `+{...}` — "the object chooses"
+
+This looks almost identical to branch, but the meaning is completely different:
 
 ```
 +{OK: &{getData: end}, DENIED: end}
 ```
 
-"The server decides: either OK (and you can get data) or DENIED (and you're done)."
+This is a **selection**. The *object* decides the outcome — not you. Maybe you sent a login request, and the server comes back with either OK or DENIED. You don't get to pick. You have to handle both.
 
-The crucial distinction: in `&{...}`, **you** choose. In `+{...}`, **the object** chooses. Getting this wrong is a common source of protocol errors.
+Here's the key distinction that trips people up: with `&{...}`, **you** choose which method to call. With `+{...}`, **the object** chooses what happens next. Mixing these up is one of the most common sources of protocol bugs. It's the difference between "pick a door" and "a door opens for you."
 
-## 4. Parallel — Concurrent Composition (||)
+### The powerful one: `(S1 || S2)` — "both at once"
 
-```
-(S1 || S2)
-```
-
-Parallel says: "two sub-protocols execute concurrently on the same object." Both must complete, but their steps can interleave.
-
-Example — a database connection:
+This is **parallel composition** — two things happening concurrently on the same object:
 
 ```
 (&{read: end} || &{write: end})
 ```
 
-"One thread can read while another writes." The resulting state space is the *product* of the two sub-protocols — every combination of read-progress and write-progress is a valid state.
+One thread reads, another writes, and they interleave freely. This is the constructor I'm most excited about, because it's what forces the mathematical structure I mentioned in the previous post. When you run two protocols in parallel, their combined state space forms a *product* — and the product of two lattices is always a lattice.
 
-This is the constructor that makes lattice structure *necessary*, not just convenient. The product of two lattices is always a lattice.
+But we'll get to that. For now, just know that `||` means "both of these happen, and they don't have to take turns."
 
-## 5. Recursion — Repeating Protocols (rec X . S)
+### The recursive one: `rec X . S`
 
-```
-rec X . S
-```
+Protocols that repeat need recursion. The `rec X` part says "I'm defining a loop called X," and whenever you write `X` inside the body, it means "go back to the start."
 
-Recursion lets protocols repeat. The variable `X` marks the loop point, and using `X` inside `S` means "go back to the start."
-
-The Iterator protocol from the previous post:
+Remember the Iterator from the last post?
 
 ```
 rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}
 ```
 
-Every recursive protocol must have an exit path — a branch that leads to `end` without going through `X`. Otherwise, the protocol would never terminate.
+Read it as a story: "Check if there's a next element. The iterator tells you TRUE or FALSE. If TRUE, grab the element and loop back. If FALSE, you're done."
 
-## 6. Variables — Loop Points (X)
+There's one rule: every loop must have an exit. There has to be a path that reaches `end` without going through `X`. Otherwise, your protocol would run forever — and that's not a protocol, that's a bug.
 
-```
-X
-```
+---
 
-A variable by itself means "jump back to where this variable was bound by `rec`." You'll never write a bare `X` at the top level — it always appears inside a `rec X . ...` body.
+### Putting them together
 
-## Combining Constructors
+Here's where it gets fun. Let me build a real protocol from scratch — SMTP, the email protocol.
 
-The power comes from combining these six pieces. Let's build a real protocol — **SMTP** (simplified):
+At its simplest, sending an email is a sequence of steps:
 
 ```
 &{EHLO: &{MAIL: &{RCPT: &{DATA: end}}}}
 ```
 
-"Connect (EHLO), specify sender (MAIL), specify recipient (RCPT), send data (DATA), done."
+Connect, say who you are, say who you're writing to, send the message, done. Four method calls in order.
 
-A more realistic version with error handling:
+But real SMTP isn't that clean. The server can reject you at every step. So the realistic version interleaves branches with selections:
 
 ```
 &{EHLO: +{250: &{MAIL: +{250: &{RCPT: +{250: &{DATA: end}, 550: end}}, 550: end}}, 500: end}}
 ```
 
-"At each step, the server can accept (250) or reject (5xx). You must handle both outcomes."
+It's dense, I know. But read it like a conversation: "You say EHLO. The server responds with 250 (ok) or 500 (error). If ok, you send MAIL. The server responds 250 or 550." And so on. Every possible path through the conversation is captured, including every possible rejection.
 
-## Reading Session Types
+No documentation needed. No guessing. The protocol *is* the specification.
 
-Here's a cheat sheet for reading session types:
+---
 
-| Symbol | Meaning | Who decides? |
-|--------|---------|-------------|
-| `&{m: S}` | "Offer methods" | The caller chooses |
-| `+{l: S}` | "Make a decision" | The object chooses |
-| `(S1 \\|\\| S2)` | "Run concurrently" | Both happen |
-| `rec X . S` | "This repeats" | Loop structure |
-| `X` | "Go back" | Jump to rec |
-| `end` | "Done" | Protocol finished |
+### The one question that matters
 
-When reading a complex type, start from the outside and work inward. Each constructor tells you one thing about what happens next.
+Whenever you're reading a session type, there's really only one question to ask at each step: **who decides?**
 
-## Try It Yourself
+If you see `&{...}`, you decide. You're the one picking which method to call.
 
-Here are some protocols to practice reading:
+If you see `+{...}`, the object decides. You just have to be ready for any outcome.
 
-**Two-buyer protocol:**
-```
-&{price: +{OK: &{pay: end}, REJECT: end}}
-```
+That's it. That's the whole game. Who decides, and what happens next.
 
-**OAuth 2.0 (simplified):**
+Try reading this one — it's OAuth 2.0:
+
 ```
 &{authorize: +{CODE: &{token: +{ACCESS: end, ERROR: end}}, DENIED: end}}
 ```
 
-**Java Iterator:**
-```
-rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}
-```
+You authorize. The server gives you a code or denies you. If you got a code, you request a token. The server grants access or errors out. At every `&`, you're acting. At every `+`, you're reacting.
 
-Can you trace through each one? At every step, ask: "Who decides?" and "What happens next?"
+In the next post, I'll show you how a parser turns these strings into structured trees — and why that transformation is the first step toward everything else we're going to build.
 
-## What's Next
-
-Now that you can read and write session types, the next post shows how a parser turns these strings into structured trees that tools can analyse. We'll see tokenization, recursive descent, and how the grammar maps to an AST.
-
-*This post is part of Arc 1 — Foundations, a progressive introduction to session types as algebraic reticulates.*
+*Part 2 of Arc 1 — Foundations*
 """;
 
     // -----------------------------------------------------------------------
     // Arc 1, Post 3: Parsing — From Text to Structure
     // -----------------------------------------------------------------------
     private static final String ARC1_POST3 = """
-## From Strings to Trees
+So you can write `&{open: +{OK: end, ERROR: end}}` and you know what it means. But your tools don't. To a computer, that's just a string of characters — twenty-nine bytes with no structure, no meaning, no way to reason about what's inside.
 
-You've learned the grammar. You can read `&{open: +{OK: end, ERROR: end}}` and understand what it means. But a tool can't work with a string — it needs *structure*. That's what a parser does: it transforms text into a tree that algorithms can traverse, analyse, and transform.
+How do you get from a flat string to something you can actually *work with*?
 
-In this post, we'll walk through exactly how our parser works — from raw characters to a fully typed Abstract Syntax Tree (AST).
+That's the parser's job. And it's more interesting than it sounds.
 
-## Step 1: Tokenization
+---
 
-The first pass breaks the input string into *tokens* — the meaningful pieces:
+### Breaking things apart
 
-```
-Input:  &{open: +{OK: end, ERROR: end}}
+The first thing the parser does is **tokenization** — chopping the string into meaningful chunks. Think of it like reading a sentence: you don't process it letter by letter, you recognize words.
 
-Tokens: & { open : + { OK : end , ERROR : end } }
-```
+When the tokenizer sees `&{open: +{OK: end, ERROR: end}}`, it produces a stream of tokens: `&`, `{`, `open`, `:`, `+`, `{`, `OK`, `:`, `end`, `,`, `ERROR`, `:`, `end`, `}`, `}`.
 
-Each token has a type:
-- `&` → BRANCH
-- `+` → SELECT
-- `{` → LBRACE
-- `}` → RBRACE
-- `:` → COLON
-- `,` → COMMA
-- `(` → LPAREN
-- `)` → RPAREN
-- `||` → PAR
-- `.` → DOT
-- `rec` → REC
-- `end` → END
-- anything else → IDENT (a method name, label, or variable)
+Each token carries a type — is this a brace? A colon? A method name? The keyword `end`? The tokenizer doesn't care about what the protocol *means*. It just identifies the pieces.
 
-The tokenizer is simple: skip whitespace, match the longest prefix, emit a token. The only subtle case is `||` — two characters that form a single token.
+There's one small subtlety I like: the `||` operator. When the tokenizer sees a `|`, it has to peek ahead — is the next character also a `|`? If so, it's a single parallel operator, not two separate symbols. It's a tiny decision, but it's the only place where one character of lookahead matters during tokenization.
 
-## Step 2: Recursive Descent
+---
 
-The parser reads tokens left to right and builds the AST using a technique called *recursive descent*. Each grammar rule becomes a function:
+### The trick that makes it easy
 
-```
-parseType()      → parsePrimary(), then check for || or .
-parsePrimary()   → parseAtom()
-parseAtom()      → end | variable | rec X . S | &{...} | +{...} | (S)
-parseBranch()    → &{ m1: S1, m2: S2, ... }
-parseSelect()    → +{ l1: S1, l2: S2, ... }
-```
+Here's something that surprised me when I first built this: session types are *really* easy to parse.
 
-The key insight: **the first token tells you which rule to apply.**
+Most programming languages need complex parsing strategies — backtracking, precedence climbing, operator tables. Session types don't. And the reason is elegant: **the first token always tells you what you're looking at.**
 
-- See `&`? Parse a branch.
-- See `+`? Parse a selection.
-- See `(`? Parse a group (could be parallel).
-- See `rec`? Parse a recursion.
-- See `end`? Return the End node.
-- See an identifier? Return a Variable node.
+See `&`? You're parsing a branch — read the `{`, then pairs of `name: type` separated by commas, then `}`.
 
-This is why session types are easy to parse — the grammar is *LL(1)*, meaning one token of lookahead is always enough to decide what to do.
+See `+`? Same structure, but it's a selection.
 
-## Step 3: The AST
+See `(`? You're in a group that might contain `||` — parse the left side, check for the parallel operator, parse the right side.
 
-The parser produces an Abstract Syntax Tree made of frozen (immutable) dataclasses. Here are the node types:
+See `rec`? Read the variable name, the dot, and the body.
 
-```python
-End()                              # Terminal
-Var(name="X")                      # Variable reference
-Branch(choices={"open": S, ...})   # External choice
-Select(choices={"OK": S, ...})     # Internal choice
-Parallel(left=S1, right=S2)        # Concurrent composition
-Rec(var="X", body=S)               # Recursion binding
-```
+See `end`? You're done. Return a terminal node.
 
-For the input `&{open: +{OK: end, ERROR: end}}`, the AST is:
+See a plain word like `X`? That's a variable — a reference back to some enclosing `rec`.
+
+That's it. One token of lookahead is always enough. In parsing theory, this makes session types an *LL(1)* grammar — the simplest kind to parse, the kind you can write by hand in an afternoon without any parser generators or grammar tools.
+
+I find that satisfying. The grammar is expressive enough to describe any protocol — SMTP, OAuth, database connections, iterators — but simple enough that a parser for it fits in about a hundred lines of code.
+
+---
+
+### What comes out the other side
+
+The parser produces a tree. Not a string, not a flat list — a tree where the structure mirrors the protocol structure exactly.
+
+Take `&{open: +{OK: end, ERROR: end}}`. The parser turns it into:
 
 ```
 Branch
-  └─ "open" → Select
-                ├─ "OK"    → End
-                └─ "ERROR" → End
+ └─ "open" → Select
+               ├─ "OK"    → End
+               └─ "ERROR" → End
 ```
 
-The tree structure mirrors the protocol structure exactly. Every node is a decision point, every leaf is a terminal.
+The outer branch becomes the root. Its single method "open" leads to a select node with two outcomes. Each outcome leads to a terminal.
 
-## A Real Example: The Iterator
+For the Iterator — `rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}` — the tree is deeper:
 
-Let's trace `rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}`:
-
-1. See `rec` → enter parseRec, consume `X`, consume `.`
-2. Parse body → see `&` → enter parseBranch
-3. Parse `hasNext:` → parse continuation → see `+` → enter parseSelect
-4. Parse `TRUE:` → see `&` → parse branch `next:` → see `X` → return Var("X")
-5. Parse `FALSE:` → see `end` → return End
-6. Assemble the tree
-
-Result:
 ```
 Rec(var="X")
-  └─ Branch
-       └─ "hasNext" → Select
-                        ├─ "TRUE"  → Branch
-                        │             └─ "next" → Var("X")
-                        └─ "FALSE" → End
+ └─ Branch
+      └─ "hasNext" → Select
+                       ├─ "TRUE"  → Branch
+                       │             └─ "next" → Var("X")
+                       └─ "FALSE" → End
 ```
 
-The `Var("X")` at the bottom creates a cycle back to the `Rec` node — this is how recursion is represented structurally.
+Notice the `Var("X")` at the bottom. It points back up to the `Rec` at the top — that's how the tree represents a loop. The structure isn't really a tree at all; it's a graph with a cycle. And that cycle is exactly the "check-then-iterate" loop you'd write in Java.
 
-## Error Handling
+---
 
-The parser produces clear error messages when the input is malformed:
+### When things go wrong
 
-- `&{open end}` → "Expected ':' after method name 'open', got 'end'"
-- `&{open: }` → "Expected session type after ':', got '}'"
-- `rec . body` → "Expected variable name after 'rec', got '.'"
+I spent more time on error messages than I'd like to admit. Early on, the parser would just say "parse error at position 23" — completely useless when your protocol is a nested mess of braces and colons.
 
-Good error messages matter. When a protocol is wrong, you need to know *where* and *why*, not just "parse error at position 23."
+Now it tells you what it expected and what it got. If you write `&{open end}`, it says: "Expected ':' after method name 'open', got 'end'." If you write `rec . body`, it says: "Expected variable name after 'rec', got '.'."
 
-## What the Parser Doesn't Do
+These messages matter more than they seem. When you're modelling a complex API and something doesn't parse, the difference between "syntax error" and "I expected a colon after 'authenticate'" is the difference between five seconds of debugging and five minutes of staring at the screen.
 
-The parser only checks *syntax*. It doesn't check whether:
+---
 
-- Recursive types actually terminate (that's the termination checker)
-- Variables are bound (that's a scope check)
-- Parallel compositions are well-formed (that's the WF-Par check)
+### What the parser deliberately ignores
 
-These semantic checks happen in later pipeline stages. The parser's job is narrow and clean: text in, tree out.
+Here's a design decision I'm proud of: the parser does *one thing* and refuses to do anything else.
 
-## The Pretty Printer
+It checks syntax. Period. It doesn't check whether your recursive types actually terminate. It doesn't check whether your variables are bound. It doesn't check whether your parallel compositions are well-formed.
 
-The parser has an inverse: the pretty printer. It takes an AST and produces a canonical string representation. This is useful for:
+All of that happens later, in separate stages of the pipeline — the termination checker, the scope analyzer, the well-formedness validator. Each stage has a single responsibility, and the parser's responsibility is narrow: text in, tree out, nothing more.
 
-- Displaying normalized types (consistent formatting)
-- Round-trip testing (parse → print → parse → check equality)
-- Debugging (seeing exactly what the parser produced)
+This means you can parse a session type that's syntactically valid but semantically broken — like `rec X . X`, which would loop forever, or `&{a: Y}` where `Y` is never defined. The parser accepts both of those. Later stages catch them.
 
-Every AST round-trips cleanly: `parse(print(parse(s))) == parse(s)` for all valid inputs.
+I know some people prefer to catch everything in one pass. But separating concerns made every individual piece easier to test, easier to understand, and easier to change when the language evolved.
 
-## Why This Matters
+---
 
-The parser is the front door of the entire pipeline. Everything downstream — state space construction, lattice checking, subtyping, test generation — starts with the AST the parser produces. Getting the parser right means:
+### A small detail I love
 
-- **Exact grammar support**: Every constructor from the specification is parsed correctly
-- **Immutable output**: The AST can't be accidentally mutated by downstream stages
-- **Deterministic**: The same input always produces the same tree
-- **Fast**: Linear time, single pass, no backtracking
+The parser has an inverse: a pretty printer. You can parse a string into a tree, then print the tree back into a string. And the result is always the same — `parse(print(parse(s))) == parse(s)` for every valid input.
 
-In the next post, we'll see what happens *after* parsing — how the AST becomes a state space, and how that state space reveals the mathematical structure hiding inside every protocol.
+That sounds like a trivial property, but it's actually a powerful testing tool. If the round-trip ever breaks, something fundamental is wrong. I run this check across thousands of generated session types, and it catches bugs that unit tests miss — subtle issues with operator precedence, whitespace handling, or corner cases in how commas are placed inside nested branches.
 
-*This post is part of Arc 1 — Foundations, a progressive introduction to session types as algebraic reticulates.*
+---
+
+In the next post, we leave the world of syntax behind. We're going to take these trees and build something from them — a *state space*, a graph where every node is a possible state of the protocol, and every edge is a method call that moves you forward.
+
+That's where the lattice appears. And honestly? That's where I got hooked.
+
+*Part 3 of Arc 1 — Foundations*
 """;
 }
