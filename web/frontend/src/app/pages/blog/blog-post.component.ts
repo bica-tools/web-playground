@@ -118,23 +118,32 @@ const ARC_NAMES: Record<number, string> = {
       margin: 0 0 16px;
     }
     .post-body :deep(code) {
-      background: rgba(0, 0, 0, 0.05);
-      padding: 2px 6px;
+      background: #f0edf8;
+      color: #5b3dbb;
+      padding: 2px 7px;
       border-radius: 4px;
-      font-size: 14px;
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.88em;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', monospace;
+      font-weight: 500;
+      letter-spacing: -0.02em;
     }
     .post-body :deep(pre) {
-      background: rgba(0, 0, 0, 0.03);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      padding: 16px;
+      background: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      padding: 20px 24px;
       overflow-x: auto;
-      margin: 16px 0;
+      margin: 24px 0;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     }
     .post-body :deep(pre code) {
       background: none;
+      color: #cdd6f4;
       padding: 0;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: 0;
     }
     .post-body :deep(blockquote) {
       border-left: 3px solid var(--brand-primary, #4338ca);
