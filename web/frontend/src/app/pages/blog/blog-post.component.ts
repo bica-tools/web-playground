@@ -21,28 +21,48 @@ const ARC_NAMES: Record<number, string> = {
     @if (loading()) {
       <div class="loading">Loading...</div>
     } @else if (post()) {
-      <article class="blog-post">
-        <a routerLink="/blog" class="back-link">&larr; All Posts</a>
+      <div class="post-layout">
+        <!-- Sticky sidebar TOC -->
+        @if (headings().length > 0) {
+          <aside class="post-sidebar">
+            <nav class="toc-nav">
+              <a class="back-link" routerLink="/blog">&larr; All Posts</a>
+              <h4>{{ post()!.title }}</h4>
+              <ul>
+                @for (h of headings(); track h.id; let i = $index) {
+                  <li [class.active]="activeHeading() === h.id">
+                    <a (click)="scrollToHeading(h.id)">{{ h.text }}</a>
+                  </li>
+                }
+              </ul>
+            </nav>
+          </aside>
+        }
 
-        <div class="post-meta">
-          <span class="arc-badge">{{ arcName(post()!.arc) }}</span>
-          <span class="post-date">{{ formatDate(post()!.publishedAt) }}</span>
-          <span class="post-author">by {{ post()!.author }}</span>
-        </div>
+        <!-- Main content -->
+        <article class="blog-post">
+          <a routerLink="/blog" class="back-link mobile-back">&larr; All Posts</a>
 
-        <h1>{{ post()!.title }}</h1>
-
-        <div class="post-body" [innerHTML]="renderedContent()"></div>
-
-        <div class="post-footer">
-          <div class="post-tags">
-            @for (tag of parseTags(post()!.tags); track tag) {
-              <span class="tag">{{ tag }}</span>
-            }
+          <div class="post-meta">
+            <span class="arc-badge">{{ arcName(post()!.arc) }}</span>
+            <span class="post-date">{{ formatDate(post()!.publishedAt) }}</span>
+            <span class="post-author">by {{ post()!.author }}</span>
           </div>
-          <a routerLink="/blog" class="back-link">&larr; Back to Blog</a>
-        </div>
-      </article>
+
+          <h1>{{ post()!.title }}</h1>
+
+          <div class="post-body" [innerHTML]="renderedContent()"></div>
+
+          <div class="post-footer">
+            <div class="post-tags">
+              @for (tag of parseTags(post()!.tags); track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </div>
+            <a routerLink="/blog" class="back-link">&larr; Back to Blog</a>
+          </div>
+        </article>
+      </div>
     } @else {
       <div class="empty-state">
         <p>Post not found.</p>
@@ -51,10 +71,69 @@ const ARC_NAMES: Record<number, string> = {
     }
   `,
   styles: [`
-    .blog-post {
-      max-width: 720px;
+    .post-layout {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      max-width: 1060px;
       margin: 0 auto;
-      padding: 24px 0 48px;
+      padding-top: 16px;
+    }
+
+    .post-sidebar {
+      position: sticky;
+      top: 80px;
+      width: 240px;
+      flex-shrink: 0;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      display: none;
+    }
+    @media (min-width: 1100px) {
+      .post-sidebar { display: block; }
+      .mobile-back { display: none !important; }
+    }
+
+    .toc-nav h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.8);
+      margin: 0 0 12px;
+      padding: 0 12px;
+      line-height: 1.4;
+    }
+    .toc-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .toc-nav li a {
+      display: block;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.5);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+    .toc-nav li a:hover {
+      color: var(--brand-primary, #4338ca);
+      background: rgba(67, 56, 202, 0.03);
+    }
+    .toc-nav li.active a {
+      color: var(--brand-primary, #4338ca);
+      border-left-color: var(--brand-primary, #4338ca);
+      font-weight: 500;
+      background: rgba(67, 56, 202, 0.05);
+    }
+
+    .blog-post {
+      flex: 1;
+      min-width: 0;
+      max-width: 720px;
+      padding: 0 0 48px;
     }
 
     .back-link {
@@ -243,10 +322,13 @@ export class BlogPostComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
   private sub: Subscription | null = null;
+  private scrollListener: (() => void) | null = null;
 
   post = signal<BlogPost | null>(null);
   loading = signal(false);
   renderedContent = signal('');
+  headings = signal<{ id: string; text: string }[]>([]);
+  activeHeading = signal('');
 
   ngOnInit(): void {
     this.sub = this.route.paramMap.subscribe((params) => {
@@ -259,6 +341,35 @@ export class BlogPostComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    if (this.scrollListener) {
+      window.removeEventListener('scroll', this.scrollListener);
+    }
+  }
+
+  scrollToHeading(id: string): void {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.activeHeading.set(id);
+    }
+  }
+
+  private extractHeadings(html: string): void {
+    const matches = [...html.matchAll(/<h2[^>]*id="([^"]*)"[^>]*>(.*?)<\/h2>/g)];
+    this.headings.set(matches.map(m => ({ id: m[1], text: m[2].replace(/<[^>]+>/g, '') })));
+
+    // Track scroll position to highlight active heading
+    if (this.scrollListener) window.removeEventListener('scroll', this.scrollListener);
+    this.scrollListener = () => {
+      const ids = this.headings().map(h => h.id);
+      let active = '';
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 120) active = id;
+      }
+      if (active) this.activeHeading.set(active);
+    };
+    window.addEventListener('scroll', this.scrollListener, { passive: true });
   }
 
   arcName(arc: number): string {
@@ -282,7 +393,9 @@ export class BlogPostComponent implements OnInit, OnDestroy {
     this.api.getBlogPost(slug).subscribe({
       next: (post) => {
         this.post.set(post);
-        this.renderedContent.set(this.renderMarkdown(post.content));
+        const html = this.renderMarkdown(post.content);
+        this.renderedContent.set(html);
+        this.extractHeadings(html);
         this.loading.set(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
@@ -311,7 +424,10 @@ export class BlogPostComponent implements OnInit, OnDestroy {
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       // Headings
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^## (.+)$/gm, (_, title) => {
+        const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        return `<h2 id="${id}">${title}</h2>`;
+      })
       // Bold and italic
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
