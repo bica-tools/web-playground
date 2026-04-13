@@ -105,7 +105,7 @@ const ARC_NAMES: Record<number, string> = {
     .post-body :deep(h2) {
       font-size: 22px;
       font-weight: 500;
-      margin: 32px 0 12px;
+      margin: 56px 0 16px;
       color: rgba(0, 0, 0, 0.87);
     }
     .post-body :deep(h3) {
