@@ -92,7 +92,7 @@ That's exactly what a **session type** is. It's a type that describes not what d
 
 Take that Java Iterator. You know the drill: check `hasNext()`, and if it says yes, call `next()`. Repeat until it says no. We all carry this protocol in our heads. But written as a session type, it looks like this:
 
-```
+```session-type
 rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}
 ```
 
@@ -145,7 +145,7 @@ Every conversation eventually stops. In session types, that's `end`. It means "w
 
 This is called a **branch**, and it's where things get real. When you write:
 
-```
+```session-type
 &{read: end, write: end}
 ```
 
@@ -153,7 +153,7 @@ you're saying: "the object offers two methods — `read` and `write`. The caller
 
 You can chain branches to create sequences. A file protocol might look like:
 
-```
+```session-type
 &{open: &{read: end, write: end}}
 ```
 
@@ -163,7 +163,7 @@ First you open, *then* you choose between reading and writing. The ordering is b
 
 This looks almost identical to branch, but the meaning is completely different:
 
-```
+```session-type
 +{OK: &{getData: end}, DENIED: end}
 ```
 
@@ -175,7 +175,7 @@ Here's the key distinction that trips people up: with `&{...}`, **you** choose w
 
 This is **parallel composition** — two things happening concurrently on the same object:
 
-```
+```session-type
 (&{read: end} || &{write: end})
 ```
 
@@ -189,7 +189,7 @@ Protocols that repeat need recursion. The `rec X` part says "I'm defining a loop
 
 Remember the Iterator from the last post?
 
-```
+```session-type
 rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}
 ```
 
@@ -205,7 +205,7 @@ Here's where it gets fun. Let me build a real protocol from scratch — SMTP, th
 
 At its simplest, sending an email is a sequence of steps:
 
-```
+```session-type
 &{EHLO: &{MAIL: &{RCPT: &{DATA: end}}}}
 ```
 
@@ -213,7 +213,7 @@ Connect, say who you are, say who you're writing to, send the message, done. Fou
 
 But real SMTP isn't that clean. The server can reject you at every step. So the realistic version interleaves branches with selections:
 
-```
+```session-type
 &{EHLO: +{250: &{MAIL: +{250: &{RCPT: +{250: &{DATA: end}, 550: end}}, 550: end}}, 500: end}}
 ```
 
@@ -235,7 +235,7 @@ That's it. That's the whole game. Who decides, and what happens next.
 
 Try reading this one — it's OAuth 2.0:
 
-```
+```session-type
 &{authorize: +{CODE: &{token: +{ACCESS: end, ERROR: end}}, DENIED: end}}
 ```
 
@@ -300,7 +300,7 @@ The parser produces a tree. Not a string, not a flat list — a tree where the s
 
 Take `&{open: +{OK: end, ERROR: end}}`. The parser turns it into:
 
-```
+```tree
 Branch
  └─ "open" → Select
                ├─ "OK"    → End
@@ -311,7 +311,7 @@ The outer branch becomes the root. Its single method "open" leads to a select no
 
 For the Iterator — `rec X . &{hasNext: +{TRUE: &{next: X}, FALSE: end}}` — the tree is deeper:
 
-```
+```tree
 Rec(var="X")
  └─ Branch
       └─ "hasNext" → Select

@@ -127,6 +127,7 @@ const ARC_NAMES: Record<number, string> = {
       font-weight: 500;
       letter-spacing: -0.02em;
     }
+    /* Default code block — dark editor */
     .post-body :deep(pre) {
       background: #1e1e2e;
       border: none;
@@ -144,6 +145,34 @@ const ARC_NAMES: Record<number, string> = {
       font-weight: 400;
       line-height: 1.7;
       letter-spacing: 0;
+    }
+
+    /* Session type expressions — the hero artifact */
+    .post-body :deep(pre.lang-session-type) {
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede5ff 100%);
+      border-left: 4px solid var(--brand-primary, #4338ca);
+      box-shadow: none;
+      padding: 20px 24px;
+    }
+    .post-body :deep(pre.lang-session-type code) {
+      color: #3b1f8e;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    /* AST tree diagrams — structural, lighter */
+    .post-body :deep(pre.lang-tree) {
+      background: #f8f9fa;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: none;
+      padding: 20px 24px;
+    }
+    .post-body :deep(pre.lang-tree code) {
+      color: #2d3748;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.9;
     }
     .post-body :deep(blockquote) {
       border-left: 3px solid var(--brand-primary, #4338ca);
@@ -166,6 +195,12 @@ const ARC_NAMES: Record<number, string> = {
     }
     .post-body :deep(a:hover) {
       text-decoration: underline;
+    }
+    .post-body :deep(hr) {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(67, 56, 202, 0.2), transparent);
+      margin: 32px 0;
     }
 
     .post-footer {
@@ -265,8 +300,13 @@ export class BlogPostComponent implements OnInit, OnDestroy {
   private renderMarkdown(md: string): string {
     if (!md) return '';
     let html = md
-      // Code blocks (fenced)
-      .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr>')
+      // Code blocks (fenced, with language class)
+      .replace(/```([\w-]*)\n([\s\S]*?)```/g, (_, lang, code) => {
+        const cls = lang ? ` class="lang-${lang}"` : '';
+        return `<pre${cls}><code>${code}</code></pre>`;
+      })
       // Inline code
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       // Headings
